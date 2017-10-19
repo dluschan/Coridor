@@ -14,47 +14,39 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QGraphicsView>
-#include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 
-class Ui_widget
+class Ui_Widget
 {
 public:
-    QGridLayout *gridLayout;
     QGraphicsView *graphicsView;
 
-    void setupUi(QWidget *widget)
+    void setupUi(QWidget *Widget)
     {
-        if (widget->objectName().isEmpty())
-            widget->setObjectName(QStringLiteral("widget"));
-        widget->resize(400, 300);
-        gridLayout = new QGridLayout(widget);
-        gridLayout->setSpacing(6);
-        gridLayout->setContentsMargins(11, 11, 11, 11);
-        gridLayout->setObjectName(QStringLiteral("gridLayout"));
-        graphicsView = new QGraphicsView(widget);
+        if (Widget->objectName().isEmpty())
+            Widget->setObjectName(QStringLiteral("Widget"));
+        Widget->resize(400, 300);
+        graphicsView = new QGraphicsView(Widget);
         graphicsView->setObjectName(QStringLiteral("graphicsView"));
+        graphicsView->setGeometry(QRect(9, 9, 112, 112));
 
-        gridLayout->addWidget(graphicsView, 0, 0, 1, 1);
+        retranslateUi(Widget);
 
-
-        retranslateUi(widget);
-
-        QMetaObject::connectSlotsByName(widget);
+        QMetaObject::connectSlotsByName(Widget);
     } // setupUi
 
-    void retranslateUi(QWidget *widget)
+    void retranslateUi(QWidget *Widget)
     {
-        widget->setWindowTitle(QApplication::translate("widget", "widget", Q_NULLPTR));
+        Widget->setWindowTitle(QApplication::translate("Widget", "widget", Q_NULLPTR));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class Widget: public Ui_widget {};
+    class Widget: public Ui_Widget {};
 } // namespace Ui
 
 QT_END_NAMESPACE
