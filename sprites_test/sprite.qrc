@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>sprite_sheet.png</file>
+        <file>PICTURES/f3_aymarahealer.png</file>
+        <file>battlemap4_background.png</file>
+        <file>PICTURES/battlemap4_background.png</file>
+        <file>PICTURES/f3_nimbus.png</file>
+    </qresource>
+</RCC>
