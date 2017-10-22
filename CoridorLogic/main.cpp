@@ -233,21 +233,21 @@ int main()
                     if (Walls.pos[j][i] && Walls.hor[j][i] || Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
                         cout << "-   ";
                     else
-                        cout << "   ";
+                        cout << "    ";
                 }
                 else if (j == 0)
                 {
                     if (Walls.pos[j][i] && Walls.hor[j][i])
                         cout << "-   ";
                     else
-                        cout << "   ";
+                        cout << "    ";
                 }
                 else
                 {
                     if (Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
                         cout << "-   ";
                     else
-                        cout << "   ";
+                        cout << "    ";
                 }
             }
             cout << "\n";
@@ -405,21 +405,21 @@ int main()
                     if (Walls.pos[j][i] && Walls.hor[j][i] || Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
                         cout << "-   ";
                     else
-                        cout << "   ";
+                        cout << "    ";
                 }
                 else if (j == 0)
                 {
                     if (Walls.pos[j][i] && Walls.hor[j][i])
                         cout << "-   ";
                     else
-                        cout << "   ";
+                        cout << "    ";
                 }
                 else
                 {
                     if (Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
                         cout << "-   ";
                     else
-                        cout << "   ";
+                        cout << "    ";
                 }
             }
             cout << "\n";
