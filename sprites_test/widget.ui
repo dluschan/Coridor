@@ -14,7 +14,7 @@
    <string>widget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+   <item row="1" column="0">
     <widget class="QGraphicsView" name="graphicsView">
      <property name="enabled">
       <bool>true</bool>
@@ -27,6 +27,13 @@
         <blue>0</blue>
        </color>
       </brush>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>TextLabel</string>
      </property>
     </widget>
    </item>
