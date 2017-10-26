@@ -248,13 +248,12 @@ int main()
 
         if (end == 1)
             break; //Если Player1 победил
-
         flag = true;
 
         Output(walls, pole);
 
         // Player2 ходит
-        Turn(pole, y2, y1, x2, x1, wallsAmount1, walls, flag, end, 2);
+        Turn(pole, y2, y1, x2, x1, wallsAmount2, walls, flag, end, 2);
 
         flag = true;
 
