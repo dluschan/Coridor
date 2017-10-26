@@ -1,73 +1,68 @@
-# This file is used to ignore files which are generated
-# ----------------------------------------------------------------------------
+# macos files
+.DS_Store
 
-*~
-*.autosave
-*.a
-*.core
-*.moc
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
 *.o
 *.obj
-*.orig
-*.rej
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
 *.so
-*.so.*
-*_pch.h.cpp
-*_resource.rc
-*.qm
-.#*
-*.*#
-core
-!core/
-tags
-.DS_Store
-.directory
-*.debug
-Makefile*
-*.prl
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
 *.app
+
+# Qt-es
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
 moc_*.cpp
 moc_*.h
-ui_*.h
 qrc_*.cpp
-Thumbs.db
-*.res
-*.rc
-/.qmake.cache
-*.qmake.stash
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*build-*
 
-# qtcreator generated files
-*.pro.user*
+# Qt unit tests
+target_wrapper.*
 
-# xemacs temporary files
-*.flc
+# QtCreator
+*.autosave
 
-# Vim temporary files
-.*.swp
+# QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
 
-# Visual Studio generated files
-*.ib_pdb_index
-*.idb
-*.ilk
-*.pdb
-*.sln
-*.suo
-*.vcproj
-*vcproj.*.*.user
-*.ncb
-*.sdf
-*.opensdf
-*.vcxproj
-*vcxproj.*
-
-# MinGW generated files
-*.Debug
-*.Release
-
-# Python byte code
-*.pyc
-
-# Binaries
-# --------
-*.dll
-*.exe
+# QtCtreator CMake
+CMakeLists.txt.user*
