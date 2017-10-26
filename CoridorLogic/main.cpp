@@ -32,7 +32,7 @@ void jumpUp(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, 
 
 void placeWall(Walls& walls);
 
-void Output(const Walls& walls, int pole[9][9])
+void output(const Walls& walls, int pole[9][9])
 {
     for (int i = 0; i < 9; i++) //Вывод поля
     {
@@ -43,7 +43,7 @@ void Output(const Walls& walls, int pole[9][9])
             {
                 if (i != 0 && i != 8)
                 {
-                    if (walls.pos[j][i] && !walls.hor[j][i] || walls.pos[j][i - 1] && !walls.hor[j][i - 1])
+                    if ((walls.pos[j][i] && !walls.hor[j][i]) || (walls.pos[j][i - 1] && !walls.hor[j][i - 1]))
                         cout << "| ";
                     else
                         cout << "  ";
@@ -69,7 +69,7 @@ void Output(const Walls& walls, int pole[9][9])
         {
             if (j != 0 && j != 8)
             {
-                if (walls.pos[j][i] && walls.hor[j][i] || walls.pos[j - 1][i] && walls.hor[j - 1][i])
+                if ((walls.pos[j][i] && walls.hor[j][i]) || (walls.pos[j - 1][i] && walls.hor[j - 1][i]))
                     cout << "-   ";
                 else
                     cout << "    ";
@@ -93,8 +93,14 @@ void Output(const Walls& walls, int pole[9][9])
     }
 }
 
-void Turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount1, Walls& walls, bool& flag, int& end, int player)
+bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, Walls& walls, int player)
 {
+    if (player == 2)
+    {
+        swap(x1, x2);
+        swap(y1, y2);
+    }
+    bool flag = true;
     while (flag)
     {
         cout << "Turn of Player" << player << ", chose move or place a wall (m/w): ";
@@ -190,10 +196,10 @@ void Turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount1, 
             }
             for (int j = 0; j < 9; j++)
                 if (pole[16 - 8 * player][j] == player)
-                    end = player; //Проверка на победу
+                    return true; //Проверка на победу
             break;
         case 'w':
-            if (wallsAmount1 == 0)
+            if (wallsAmount == 0)
             {
                 cout << "Error: Player" << player << " out of walls!\n";
                 break;
@@ -206,6 +212,7 @@ void Turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount1, 
             break;
         }
     }
+    return false;
 }
 
 int main()
@@ -223,43 +230,32 @@ int main()
     pole[0][4] = 1;
     int x1 = 0;
     int y1 = 4;
+    // int x[2]={0, 8};
+    // int y[2]={4, 8};
     pole[8][4] = 2;
     int x2 = 8;
     int y2 = 4;
 
     //Храним колличество стенок каждого игрока
-    int wallsAmount1 = 10;
-    int wallsAmount2 = 10;
+    int wallsAmount[2] = {10, 10};
 
     //Создём данные хранящие положения стенок
     Walls walls;
 
-    Output(walls, pole);
+    output(walls, pole);
 
     //Храним информации о конце игры
-    int end = 0;
+    bool end = false;
+    int player = 1; // 0 - "первый", 1 - "второй"
 
-    bool flag = true;
-
-    while (end == 0)
+    while (!end)
     {
-        // Player1 ходит
-        Turn(pole, y1, y2, x1, x2, wallsAmount1, walls, flag, end, 1);
-
-        if (end == 1)
-            break; //Если Player1 победил
-        flag = true;
-
-        Output(walls, pole);
-
-        // Player2 ходит
-        Turn(pole, y2, y1, x2, x1, wallsAmount2, walls, flag, end, 2);
-
-        flag = true;
-
-        Output(walls, pole);
+        player = (player + 1) % 2;
+        end = turn(pole, y1, y2, x1, x2, wallsAmount[player], walls, player + 1);
+        output(walls, pole);
     }
-    cout << "Player" << end << " wins!" << endl;
+
+    cout << "Player" << player + 1 << " wins!" << endl;
     return 0;
 }
 
@@ -557,7 +553,7 @@ bool checkWall(bool ver, int c1, int c2, int z, Walls walls)
     {
         if (z != 0 && z != 8)
         {
-            if (walls.pos[c][z - 1] && !walls.hor[c][z - 1] || walls.pos[c][z] && !walls.hor[c][z])
+            if ((walls.pos[c][z - 1] && !walls.hor[c][z - 1]) || (walls.pos[c][z] && !walls.hor[c][z]))
                 return false;
             return true;
         }
@@ -578,7 +574,7 @@ bool checkWall(bool ver, int c1, int c2, int z, Walls walls)
     {
         if (z != 0 && z != 8)
         {
-            if (walls.pos[z - 1][c] && walls.hor[z - 1][c] || walls.pos[z][c] && walls.hor[z][c])
+            if ((walls.pos[z - 1][c] && walls.hor[z - 1][c]) || (walls.pos[z][c] && walls.hor[z][c]))
                 return false;
             return true;
         }
