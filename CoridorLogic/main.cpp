@@ -1,14 +1,12 @@
-//#include <QCoreApplication>
 #include <iostream>
-//#include <clocale>
 
 using namespace std;
 
-struct walls
+struct Walls
 {
     bool pos[8][8];
     bool hor[8][8];
-    walls()
+    Walls()
     {
         for (int i = 0; i < 9; i++)
         {
@@ -20,19 +18,195 @@ struct walls
     }
 };
 
-bool checkWall(bool ver, int c1, int c2, int z, walls Walls);
+bool checkWall(bool ver, int c1, int c2, int z, Walls walls);
 
-bool checkPlaceWall(bool ver, int x, int y, walls Walls);
+bool checkPlaceWall(bool ver, int x, int y, Walls walls);
 
-void jumpLeft(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p);
+void jumpLeft(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p);
 
-void jumpRight(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p);
+void jumpRight(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p);
 
-void jumpDown(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p);
+void jumpDown(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p);
 
-void jumpUp(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p);
+void jumpUp(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p);
 
-void placeWall(walls& Walls);
+void placeWall(Walls& walls);
+
+void Output(const Walls& walls, int pole[9][9])
+{
+    for (int i = 0; i < 9; i++) //Вывод поля
+    {
+        for (int j = 0; j < 9; j++)
+        {
+            cout << pole[j][i] << " ";
+            if (j != 8)
+            {
+                if (i != 0 && i != 8)
+                {
+                    if (walls.pos[j][i] && !walls.hor[j][i] || walls.pos[j][i - 1] && !walls.hor[j][i - 1])
+                        cout << "| ";
+                    else
+                        cout << "  ";
+                }
+                else if (i == 0)
+                {
+                    if (walls.pos[j][i] && !walls.hor[j][i])
+                        cout << "| ";
+                    else
+                        cout << "  ";
+                }
+                else
+                {
+                    if (walls.pos[j][i - 1] && !walls.hor[j][i - 1])
+                        cout << "| ";
+                    else
+                        cout << "  ";
+                }
+            }
+        }
+        cout << "\n";
+        for (int j = 0; j < 8; j++)
+        {
+            if (j != 0 && j != 8)
+            {
+                if (walls.pos[j][i] && walls.hor[j][i] || walls.pos[j - 1][i] && walls.hor[j - 1][i])
+                    cout << "-   ";
+                else
+                    cout << "    ";
+            }
+            else if (j == 0)
+            {
+                if (walls.pos[j][i] && walls.hor[j][i])
+                    cout << "-   ";
+                else
+                    cout << "    ";
+            }
+            else
+            {
+                if (walls.pos[j - 1][i] && walls.hor[j - 1][i])
+                    cout << "-   ";
+                else
+                    cout << "    ";
+            }
+        }
+        cout << "\n";
+    }
+}
+
+void Turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount1, Walls& walls, bool& flag, int& end, int player)
+{
+    while (flag)
+    {
+        cout << "Turn of Player" << player << ", chose move or place a wall (m/w): ";
+        char ans;
+        cin >> ans;
+        cout << '\n';
+        switch (ans)
+        {
+        case 'm':
+            while (flag)
+            {
+                cout << "Chose direction - left, right, down or up (l/r/d/u): ";
+                cin >> ans;
+                cout << '\n';
+                switch (ans)
+                {
+                case 'l':
+                    if (x1 - 1 != x2 || y1 != y2)
+                    {
+                        if (x1 != 0 && checkWall(false, x1, x1 - 1, y1, walls))
+                        {
+                            pole[x1 - 1][y1] = player;
+                            pole[x1][y1] = 0;
+                            x1--;
+                            flag = false;
+                        }
+                        else
+                            cout << "Error: you cant move left!\n";
+                    }
+                    else if (checkWall(false, x1, x1 - 1, y1, walls))
+                        jumpLeft(x1, y1, walls, ans, pole, flag, player);
+                    else
+                        cout << "Error: you cant move left!\n";
+                    break;
+                case 'r':
+                    if (x1 + 1 != x2 || y1 != y2)
+                    {
+                        if (x1 != 8 && checkWall(false, x1, x1 + 1, y1, walls))
+                        {
+                            pole[x1 + 1][y1] = player;
+                            pole[x1][y1] = 0;
+                            x1++;
+                            flag = false;
+                        }
+                        else
+                            cout << "Error: you cant move right!\n";
+                    }
+                    else if (checkWall(false, x1, x1 + 1, y1, walls))
+                        jumpRight(x1, y1, walls, ans, pole, flag, player);
+                    else
+                        cout << "Error: you cant move right!\n";
+                    break;
+                case 'd':
+                    if (y1 + 1 != y2 || x1 != x2)
+                    {
+                        if (y1 != 8 && checkWall(true, y1, y1 + 1, x1, walls))
+                        {
+                            pole[x1][y1 + 1] = player;
+                            pole[x1][y1] = 0;
+                            y1++;
+                            flag = false;
+                        }
+                        else
+                            cout << "Error: you cant move down!\n";
+                    }
+                    else if (checkWall(true, y1, y1 + 1, x1, walls))
+                        jumpDown(x1, y1, walls, ans, pole, flag, player);
+                    else
+                        cout << "Error: you cant move down!\n";
+                    break;
+                case 'u':
+                    if (y1 - 1 != y2 || x1 != x2)
+                    {
+                        if (y1 != 0 && checkWall(true, y1, y1 - 1, x1, walls))
+                        {
+                            pole[x1][y1 - 1] = player;
+                            pole[x1][y1] = 0;
+                            y1--;
+                            flag = false;
+                        }
+                        else
+                            cout << "Error: you cant move up!\n";
+                    }
+                    else if (checkWall(true, y1, y1 - 1, x1, walls))
+                        jumpUp(x1, y1, walls, ans, pole, flag, player);
+                    else
+                        cout << "Error: you cant move up!\n";
+                    break;
+                default:
+                    cout << "Error: wrong char!\n";
+                    break;
+                }
+            }
+            for (int j = 0; j < 9; j++)
+                if (pole[16 - 8 * player][j] == player)
+                    end = player; //Проверка на победу
+            break;
+        case 'w':
+            if (wallsAmount1 == 0)
+            {
+                cout << "Error: Player" << player << " out of walls!\n";
+                break;
+            }
+            placeWall(walls);
+            flag = false;
+            break;
+        default:
+            cout << "Error: wrong char!\n";
+            break;
+        }
+    }
+}
 
 int main()
 {
@@ -56,20 +230,11 @@ int main()
     //Храним колличество стенок каждого игрока
     int wallsAmount1 = 10;
     int wallsAmount2 = 10;
-    char tmp = '0';
 
     //Создём данные хранящие положения стенок
-    walls Walls;
+    Walls walls;
 
-    //Вывод поля
-    for (int i = 0; i < 9; i++)
-    {
-        for (int j = 0; j < 9; j++)
-        {
-            cout << pole[j][i] << "   ";
-        }
-        cout << "\n\n";
-    }
+    Output(walls, pole);
 
     //Храним информации о конце игры
     int end = 0;
@@ -79,366 +244,34 @@ int main()
     while (end == 0)
     {
         // Player1 ходит
-        while (flag)
-        {
-            cout << "Turn of Player1, chose move or place a wall (m/w): ";
-            cin >> tmp;
-            cout << '\n';
-            switch (tmp)
-            {
-            case 'm':
-                while (flag)
-                {
-                    cout << "Chose direction - left, right, down or up (l/r/d/u): ";
-                    cin >> tmp;
-                    cout << '\n';
-                    switch (tmp)
-                    {
-                    case 'l':
-                        if (x1 - 1 != x2 || y1 != y2)
-                        {
-                            if (x1 != 0 && checkWall(false, x1, x1 - 1, y1, Walls))
-                            {
-                                pole[x1 - 1][y1] = 1;
-                                pole[x1][y1] = 0;
-                                x1--;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move left!\n";
-                        }
-                        else if (checkWall(false, x1, x1 - 1, y1, Walls))
-                            jumpLeft(x1, y1, Walls, tmp, pole, flag, 1);
-                        else
-                            cout << "Error: you cant move left!\n";
-                        break;
-                    case 'r':
-                        if (x1 + 1 != x2 || y1 != y2)
-                        {
-                            if (x1 != 8 && checkWall(false, x1, x1 + 1, y1, Walls))
-                            {
-                                pole[x1 + 1][y1] = 1;
-                                pole[x1][y1] = 0;
-                                x1++;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move right!\n";
-                        }
-                        else if (checkWall(false, x1, x1 + 1, y1, Walls))
-                            jumpRight(x1, y1, Walls, tmp, pole, flag, 1);
-                        else
-                            cout << "Error: you cant move right!\n";
-                        break;
-                    case 'd':
-                        if (y1 + 1 != y2 || x1 != x2)
-                        {
-                            if (y1 != 8 && checkWall(true, y1, y1 + 1, x1, Walls))
-                            {
-                                pole[x1][y1 + 1] = 1;
-                                pole[x1][y1] = 0;
-                                y1++;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move down!\n";
-                        }
-                        else if (checkWall(true, y1, y1 + 1, x1, Walls))
-                            jumpDown(x1, y1, Walls, tmp, pole, flag, 1);
-                        else
-                            cout << "Error: you cant move down!\n";
-                        break;
-                    case 'u':
-                        if (y1 - 1 != y2 || x1 != x2)
-                        {
-                            if (y1 != 0 && checkWall(true, y1, y1 - 1, x1, Walls))
-                            {
-                                pole[x1][y1 - 1] = 1;
-                                pole[x1][y1] = 0;
-                                y1--;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move up!\n";
-                        }
-                        else if (checkWall(true, y1, y1 - 1, x1, Walls))
-                            jumpUp(x1, y1, Walls, tmp, pole, flag, 1);
-                        else
-                            cout << "Error: you cant move up!\n";
-                        break;
-                    default:
-                        cout << "Error: wrong char!\n";
-                        break;
-                    }
-                }
-                for (int j = 0; j < 9; j++)
-                    if (pole[8][j] == 1)
-                        end = 1; //Проверка на победу
-                break;
-            case 'w':
-                if (wallsAmount1 == 0)
-                {
-                    cout << "Error: Player1 out of walls!\n";
-                    break;
-                }
-                placeWall(Walls);
-                flag = false;
-                break;
-            default:
-                cout << "Error: wrong char!\n";
-                break;
-            }
-        }
+        Turn(pole, y1, y2, x1, x2, wallsAmount1, walls, flag, end, 1);
 
         if (end == 1)
             break; //Если Player1 победил
 
         flag = true;
 
-        for (int i = 0; i < 9; i++) //Вывод поля
-        {
-            for (int j = 0; j < 9; j++)
-            {
-                cout << pole[j][i] << " ";
-                if (j != 8)
-                {
-                    if (i != 0 && i != 8)
-                    {
-                        if (Walls.pos[j][i] && !Walls.hor[j][i] || Walls.pos[j][i - 1] && !Walls.hor[j][i - 1])
-                            cout << "| ";
-                        else
-                            cout << "  ";
-                    }
-                    else if (i == 0)
-                    {
-                        if (Walls.pos[j][i] && !Walls.hor[j][i])
-                            cout << "| ";
-                        else
-                            cout << "  ";
-                    }
-                    else
-                    {
-                        if (Walls.pos[j][i - 1] && !Walls.hor[j][i - 1])
-                            cout << "| ";
-                        else
-                            cout << "  ";
-                    }
-                }
-            }
-            cout << "\n";
-            for (int j = 0; j < 8; j++)
-            {
-                if (j != 0 && j != 8)
-                {
-                    if (Walls.pos[j][i] && Walls.hor[j][i] || Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
-                        cout << "-   ";
-                    else
-                        cout << "    ";
-                }
-                else if (j == 0)
-                {
-                    if (Walls.pos[j][i] && Walls.hor[j][i])
-                        cout << "-   ";
-                    else
-                        cout << "    ";
-                }
-                else
-                {
-                    if (Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
-                        cout << "-   ";
-                    else
-                        cout << "    ";
-                }
-            }
-            cout << "\n";
-        }
+        Output(walls, pole);
 
         // Player2 ходит
-        while (flag)
-        {
-            cout << "Turn of Player2, chose move or place a wall (m/w): ";
-            cin >> tmp;
-            cout << '\n';
-            switch (tmp)
-            {
-            case 'm':
-                while (flag)
-                {
-                    cout << "Chose direction - left, right, down or up (l/r/d/u): ";
-                    cin >> tmp;
-                    cout << '\n';
-                    switch (tmp)
-                    {
-                    case 'l':
-                        if (x2 - 1 != x1 || y1 != y2)
-                        {
-                            if (x2 != 0 && checkWall(false, x2, x2 - 1, y2, Walls))
-                            {
-                                pole[x2 - 1][y2] = 2;
-                                pole[x2][y2] = 0;
-                                x2--;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move left!\n";
-                        }
-                        else if (checkWall(false, x2, x2 - 1, y2, Walls))
-                            jumpLeft(x2, y2, Walls, tmp, pole, flag, 2);
-                        else
-                            cout << "Error: you cant move left!\n";
-                        break;
-                    case 'r':
-                        if (x2 + 1 != x1 || y1 != y2)
-                        {
-                            if (x2 != 8 && checkWall(false, x2, x2 + 1, y2, Walls))
-                            {
-                                pole[x2 + 1][y2] = 2;
-                                pole[x2][y2] = 0;
-                                x2++;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move right!\n";
-                        }
-                        else if (checkWall(false, x2, x2 + 1, y2, Walls))
-                            jumpRight(x2, y2, Walls, tmp, pole, flag, 2);
-                        else
-                            cout << "Error: you cant move right!\n";
-                        break;
-                    case 'd':
-                        if (y2 + 1 != y1 || x1 != x2)
-                        {
-                            if (y2 != 8 && checkWall(true, y2, y2 + 1, x2, Walls))
-                            {
-                                pole[x2][y2 + 1] = 2;
-                                pole[x2][y2] = 0;
-                                y2++;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move down!\n";
-                        }
-                        else if (checkWall(true, y2, y2 + 1, x2, Walls))
-                            jumpDown(x2, y2, Walls, tmp, pole, flag, 2);
-                        else
-                            cout << "Error: you cant move down!\n";
-                        break;
-                    case 'u':
-                        if (y2 - 1 != y1 || x1 != x2)
-                        {
-                            if (y2 != 0 && checkWall(true, y2, y2 - 1, x2, Walls))
-                            {
-                                pole[x2][y2 - 1] = 2;
-                                pole[x2][y2] = 0;
-                                y2--;
-                                flag = false;
-                            }
-                            else
-                                cout << "Error: you cant move up!\n";
-                        }
-                        else if (checkWall(true, y2, y2 - 1, x2, Walls))
-                            jumpUp(x2, y2, Walls, tmp, pole, flag, 2);
-                        else
-                            cout << "Error: you cant move up!\n";
-                        break;
-                    default:
-                        cout << "Error: wrong char!\n";
-                        break;
-                    }
-                }
-                for (int j = 0; j < 9; j++)
-                    if (pole[0][j] == 2)
-                        end = 2; //Проверка на победу
-                break;
-            case 'w':
-                if (wallsAmount2 == 0)
-                {
-                    cout << "Error: Player2 out of walls!\n";
-                    break;
-                }
-                placeWall(Walls);
-                flag = false;
-                break;
-            default:
-                cout << "Error: wrong char!\n";
-                break;
-            }
-        }
+        Turn(pole, y2, y1, x2, x1, wallsAmount1, walls, flag, end, 2);
 
         flag = true;
 
-        for (int i = 0; i < 9; i++) //Вывод поля
-        {
-            for (int j = 0; j < 9; j++)
-            {
-                cout << pole[j][i] << " ";
-                if (j != 8)
-                {
-                    if (i != 0 && i != 8)
-                    {
-                        if (Walls.pos[j][i] && !Walls.hor[j][i] || Walls.pos[j][i - 1] && !Walls.hor[j][i - 1])
-                            cout << "| ";
-                        else
-                            cout << "  ";
-                    }
-                    else if (i == 0)
-                    {
-                        if (Walls.pos[j][i] && !Walls.hor[j][i])
-                            cout << "| ";
-                        else
-                            cout << "  ";
-                    }
-                    else
-                    {
-                        if (Walls.pos[j][i - 1] && !Walls.hor[j][i - 1])
-                            cout << "| ";
-                        else
-                            cout << "  ";
-                    }
-                }
-            }
-            cout << "\n";
-            for (int j = 0; j < 8; j++)
-            {
-                if (j != 0 && j != 8)
-                {
-                    if (Walls.pos[j][i] && Walls.hor[j][i] || Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
-                        cout << "-   ";
-                    else
-                        cout << "    ";
-                }
-                else if (j == 0)
-                {
-                    if (Walls.pos[j][i] && Walls.hor[j][i])
-                        cout << "-   ";
-                    else
-                        cout << "    ";
-                }
-                else
-                {
-                    if (Walls.pos[j - 1][i] && Walls.hor[j - 1][i])
-                        cout << "-   ";
-                    else
-                        cout << "    ";
-                }
-            }
-            cout << "\n";
-        }
+        Output(walls, pole);
     }
-
     cout << "Player" << end << " wins!" << endl;
-
     return 0;
 }
 
-void jumpLeft(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p)
+void jumpLeft(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p)
 {
-    if ((x == 1 || !checkWall(false, x - 1, x - 2, y, Walls)) && (y == 8 || !checkWall(true, y, y + 1, x - 1, Walls)) && (y == 0 || !checkWall(true, y, y - 1, x - 1, Walls)))
+    if ((x == 1 || !checkWall(false, x - 1, x - 2, y, walls)) && (y == 8 || !checkWall(true, y, y + 1, x - 1, walls)) && (y == 0 || !checkWall(true, y, y - 1, x - 1, walls)))
     {
         cout << "Error: you cant jump left!\n";
         return;
     }
-    if (x != 1 && checkWall(false, x - 1, x - 2, y, Walls))
+    if (x != 1 && checkWall(false, x - 1, x - 2, y, walls))
     {
         pole[x - 2][y] = p;
         pole[x][y] = 0;
@@ -455,9 +288,9 @@ void jumpLeft(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag
             switch (tmp)
             {
             case 'd':
-                if (y != 8 && checkWall(true, y, y + 1, x - 1, Walls))
+                if (y != 8 && checkWall(true, y, y + 1, x - 1, walls))
                 {
-                    pole[x-1][y + 1] = p;
+                    pole[x - 1][y + 1] = p;
                     pole[x][y] = 0;
                     x--;
                     y++;
@@ -467,9 +300,9 @@ void jumpLeft(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag
                     cout << "Error: you cant jump down!\n";
                 break;
             case 'u':
-                if (y != 0 && checkWall(true, y, y - 1, x - 1, Walls))
+                if (y != 0 && checkWall(true, y, y - 1, x - 1, walls))
                 {
-                    pole[x-1][y - 1] = p;
+                    pole[x - 1][y - 1] = p;
                     pole[x][y] = 0;
                     x--;
                     y--;
@@ -486,14 +319,14 @@ void jumpLeft(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag
     }
 }
 
-void jumpRight(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p)
+void jumpRight(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p)
 {
-    if ((x == 7 || !checkWall(false, x + 1, x + 2, y, Walls)) && (y == 8 || !checkWall(true, y, y + 1, x + 1, Walls)) && (y == 0 || !checkWall(true, y, y - 1, x + 1, Walls)))
+    if ((x == 7 || !checkWall(false, x + 1, x + 2, y, walls)) && (y == 8 || !checkWall(true, y, y + 1, x + 1, walls)) && (y == 0 || !checkWall(true, y, y - 1, x + 1, walls)))
     {
         cout << "Error: you cant jump left!\n";
         return;
     }
-    if (x != 7 && checkWall(false, x + 1, x + 2, y, Walls))
+    if (x != 7 && checkWall(false, x + 1, x + 2, y, walls))
     {
         pole[x + 2][y] = p;
         pole[x][y] = 0;
@@ -510,7 +343,7 @@ void jumpRight(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& fla
             switch (tmp)
             {
             case 'd':
-                if (y != 8 && checkWall(true, y, y + 1, x + 1, Walls))
+                if (y != 8 && checkWall(true, y, y + 1, x + 1, walls))
                 {
                     pole[x + 1][y + 1] = p;
                     pole[x][y] = 0;
@@ -522,7 +355,7 @@ void jumpRight(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& fla
                     cout << "Error: you cant jump down!\n";
                 break;
             case 'u':
-                if (y != 0 && checkWall(true, y, y - 1, x + 1, Walls))
+                if (y != 0 && checkWall(true, y, y - 1, x + 1, walls))
                 {
                     pole[x + 1][y - 1] = p;
                     pole[x][y] = 0;
@@ -541,14 +374,14 @@ void jumpRight(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& fla
     }
 }
 
-void jumpDown(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p)
+void jumpDown(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p)
 {
-    if ((y == 7 || !checkWall(true, y + 1, y + 2, x, Walls)) && (x == 8 || !checkWall(false, x, x + 1, y + 1, Walls)) && (y == 0 || !checkWall(false, x, x + 1, y + 1, Walls)))
+    if ((y == 7 || !checkWall(true, y + 1, y + 2, x, walls)) && (x == 8 || !checkWall(false, x, x + 1, y + 1, walls)) && (y == 0 || !checkWall(false, x, x + 1, y + 1, walls)))
     {
         cout << "Error: you cant jump left!\n";
         return;
     }
-    if (y != 7 && checkWall(true, y + 1, y + 2, x, Walls))
+    if (y != 7 && checkWall(true, y + 1, y + 2, x, walls))
     {
         pole[x][y + 2] = p;
         pole[x][y] = 0;
@@ -565,9 +398,9 @@ void jumpDown(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag
             switch (tmp)
             {
             case 'r':
-                if (x != 8 || checkWall(false, x, x + 1, y + 1, Walls))
+                if (x != 8 || checkWall(false, x, x + 1, y + 1, walls))
                 {
-                    pole[x+1][y + 1] = p;
+                    pole[x + 1][y + 1] = p;
                     pole[x][y] = 0;
                     x++;
                     y++;
@@ -577,9 +410,9 @@ void jumpDown(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag
                     cout << "Error: you cant jump down!\n";
                 break;
             case 'l':
-                if (y != 0 || checkWall(false, x, x + 1, y + 1, Walls))
+                if (y != 0 || checkWall(false, x, x + 1, y + 1, walls))
                 {
-                    pole[x-1][y + 1] = p;
+                    pole[x - 1][y + 1] = p;
                     pole[x][y] = 0;
                     x--;
                     y++;
@@ -596,14 +429,14 @@ void jumpDown(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag
     }
 }
 
-void jumpUp(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, int p)
+void jumpUp(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, int p)
 {
-    if ((y == 1 || !checkWall(true, y - 1, y - 2, x, Walls)) && (x == 8 || !checkWall(false, x, x + 1, y - 1, Walls)) && (y == 0 || !checkWall(false, x, x + 1, y - 1, Walls)))
+    if ((y == 1 || !checkWall(true, y - 1, y - 2, x, walls)) && (x == 8 || !checkWall(false, x, x + 1, y - 1, walls)) && (y == 0 || !checkWall(false, x, x + 1, y - 1, walls)))
     {
         cout << "Error: you cant jump left!\n";
         return;
     }
-    if (y != 7 && checkWall(true, y + 1, y + 2, x, Walls))
+    if (y != 7 && checkWall(true, y + 1, y + 2, x, walls))
     {
         pole[x][y - 2] = p;
         pole[x][y] = 0;
@@ -620,9 +453,9 @@ void jumpUp(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, 
             switch (tmp)
             {
             case 'r':
-                if (x != 8 || checkWall(false, x, x + 1, y - 1, Walls))
+                if (x != 8 || checkWall(false, x, x + 1, y - 1, walls))
                 {
-                    pole[x+1][y - 1] = p;
+                    pole[x + 1][y - 1] = p;
                     pole[x][y] = 0;
                     x++;
                     y--;
@@ -632,9 +465,9 @@ void jumpUp(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, 
                     cout << "Error: you cant jump down!\n";
                 break;
             case 'l':
-                if (y != 0 || checkWall(false, x, x + 1, y - 1, Walls))
+                if (y != 0 || checkWall(false, x, x + 1, y - 1, walls))
                 {
-                    pole[x-1][y - 1] = p;
+                    pole[x - 1][y - 1] = p;
                     pole[x][y] = 0;
                     x--;
                     y--;
@@ -651,17 +484,17 @@ void jumpUp(int& x, int& y, walls Walls, char& tmp, int pole[9][9], bool& flag, 
     }
 }
 
-void placeWall(walls& Walls)
+void placeWall(Walls& walls)
 {
     int x, y;
     cout << "Chose x and y to place a wall (x y): ";
     cin >> x >> y;
     cout << '\n';
 
-    if (Walls.pos[x][y] == true || x < 0 || x > 7 || y < 0 || y > 7)
+    if (walls.pos[x][y] == true || x < 0 || x > 7 || y < 0 || y > 7)
     {
         cout << "Error: wrong x or/and y!\n\n";
-        placeWall(Walls);
+        placeWall(walls);
         return;
     }
 
@@ -676,18 +509,18 @@ void placeWall(walls& Walls)
         switch (dir)
         {
         case 'v':
-            if (!checkPlaceWall(true, x, y, Walls))
+            if (!checkPlaceWall(true, x, y, walls))
             {
                 cout << "Error: you can't place wall like that!\n";
-                placeWall(Walls);
+                placeWall(walls);
                 return;
             }
             break;
         case 'h':
-            if (!checkPlaceWall(false, x, y, Walls))
+            if (!checkPlaceWall(false, x, y, walls))
             {
                 cout << "Error: you can't place wall like that!\n";
-                placeWall(Walls);
+                placeWall(walls);
                 return;
             }
             break;
@@ -698,12 +531,12 @@ void placeWall(walls& Walls)
         switch (dir)
         {
         case 'v':
-            Walls.pos[x][y] = true;
-            Walls.hor[x][y] = false;
+            walls.pos[x][y] = true;
+            walls.hor[x][y] = false;
             break;
         case 'h':
-            Walls.pos[x][y] = true;
-            Walls.hor[x][y] = true;
+            walls.pos[x][y] = true;
+            walls.hor[x][y] = true;
             break;
         default:
             cout << "Error: wrong char!\n";
@@ -714,7 +547,7 @@ void placeWall(walls& Walls)
     }
 }
 
-bool checkWall(bool ver, int c1, int c2, int z, walls Walls)
+bool checkWall(bool ver, int c1, int c2, int z, Walls walls)
 {
     int c = 0;
     if (c1 < c2)
@@ -725,19 +558,19 @@ bool checkWall(bool ver, int c1, int c2, int z, walls Walls)
     {
         if (z != 0 && z != 8)
         {
-            if (Walls.pos[c][z - 1] && !Walls.hor[c][z - 1] || Walls.pos[c][z] && !Walls.hor[c][z])
+            if (walls.pos[c][z - 1] && !walls.hor[c][z - 1] || walls.pos[c][z] && !walls.hor[c][z])
                 return false;
             return true;
         }
         else if (z == 0)
         {
-            if (Walls.pos[c][z] && !Walls.hor[c][z])
+            if (walls.pos[c][z] && !walls.hor[c][z])
                 return false;
             return true;
         }
         else
         {
-            if (Walls.pos[c][z - 1] && !Walls.hor[c][z - 1])
+            if (walls.pos[c][z - 1] && !walls.hor[c][z - 1])
                 return false;
             return true;
         }
@@ -746,43 +579,43 @@ bool checkWall(bool ver, int c1, int c2, int z, walls Walls)
     {
         if (z != 0 && z != 8)
         {
-            if (Walls.pos[z - 1][c] && Walls.hor[z - 1][c] || Walls.pos[z][c] && Walls.hor[z][c])
+            if (walls.pos[z - 1][c] && walls.hor[z - 1][c] || walls.pos[z][c] && walls.hor[z][c])
                 return false;
             return true;
         }
         else if (z == 0)
         {
-            if (Walls.pos[z][c] && Walls.hor[z][c])
+            if (walls.pos[z][c] && walls.hor[z][c])
                 return false;
             return true;
         }
         else
         {
-            if (Walls.pos[z - 1][c] && Walls.hor[z - 1][c])
+            if (walls.pos[z - 1][c] && walls.hor[z - 1][c])
                 return false;
             return true;
         }
     }
 }
 
-bool checkPlaceWall(bool ver, int x, int y, walls Walls)
+bool checkPlaceWall(bool ver, int x, int y, Walls walls)
 {
     if (!ver)
     {
         if (x != 0)
-            if (Walls.pos[x - 1][y] == true && Walls.hor[x - 1][y])
+            if (walls.pos[x - 1][y] == true && walls.hor[x - 1][y])
                 return false;
         if (x != 7)
-            if (Walls.pos[x + 1][y] == true && Walls.hor[x + 1][y])
+            if (walls.pos[x + 1][y] == true && walls.hor[x + 1][y])
                 return false;
     }
     else
     {
         if (y != 0)
-            if (Walls.pos[x][y - 1] == true && !Walls.hor[x][y - 1])
+            if (walls.pos[x][y - 1] == true && !walls.hor[x][y - 1])
                 return false;
         if (y != 7)
-            if (Walls.pos[x][y + 1] == true && !Walls.hor[x][y + 1])
+            if (walls.pos[x][y + 1] == true && !walls.hor[x][y + 1])
                 return false;
     }
     return true;
