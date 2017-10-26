@@ -1,5 +1,5 @@
-#include <iostream>
 #include <assert.h>
+#include <iostream>
 #include <map>
 
 using namespace std;
@@ -19,9 +19,9 @@ struct Walls
         }
     }
 };
-typedef void (*funptr) (int&, int&, Walls, char&, int [9][9], bool&, int);
+typedef void (*funptr)(int&, int&, Walls, char&, int[9][9], bool&, int);
 
-std::map<char, funptr> jumps = std::map<char, funptr>();
+// std::map<char, funptr> jumps = std::map<char, funptr>();
 
 bool checkWall(int x0, int x1, int y0, int y1, Walls walls);
 
@@ -70,8 +70,10 @@ void output(const Walls& walls, int pole[9][9])
             }
         }
         cout << "\n";
-        for (int j = 0; j < 8; j++)
+        for (int j = 0; j < 9; j++)
         {
+            if (i == 8)
+                break;
             if (j != 0 && j != 8)
             {
                 if ((walls.pos[j][i] && walls.hor[j][i]) || (walls.pos[j - 1][i] && walls.hor[j - 1][i]))
@@ -116,7 +118,7 @@ std::pair<int, int> step(int x, int y, char ch)
     }
 }
 
-bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, Walls& walls, int player)
+bool turn(int pole[9][9], int& y1, int& y2, int& x1, int& x2, int& wallsAmount, Walls& walls, int player, std::map<char, funptr> jumps)
 {
     if (player == 2)
     {
@@ -140,7 +142,10 @@ bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, W
                 cout << '\n';
                 switch (ans)
                 {
-                case 'l': case 'r': case 'd': case 'u':
+                case 'l':
+                case 'r':
+                case 'd':
+                case 'u':
                 {
                     std::pair<int, int> coords = step(x1, y1, ans);
                     int new_x = coords.first;
@@ -171,7 +176,14 @@ bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, W
             }
             for (int j = 0; j < 9; j++)
                 if (pole[16 - 8 * player][j] == player)
+                {
+                    if (player == 2)
+                    {
+                        swap(x1, x2);
+                        swap(y1, y2);
+                    }
                     return true; //Проверка на победу
+                }
             break;
         case 'w':
             if (wallsAmount == 0)
@@ -186,6 +198,11 @@ bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, W
             cout << "Error: wrong char!\n";
             break;
         }
+    }
+    if (player == 2)
+    {
+        swap(x1, x2);
+        swap(y1, y2);
     }
     return false;
 }
@@ -232,7 +249,7 @@ int main()
     while (!end)
     {
         player = (player + 1) % 2;
-        end = turn(pole, y1, y2, x1, x2, wallsAmount[player], walls, player + 1);
+        end = turn(pole, y1, y2, x1, x2, wallsAmount[player], walls, player + 1, jumps);
         output(walls, pole);
     }
 
@@ -412,7 +429,7 @@ void jumpUp(int& x, int& y, Walls walls, char& tmp, int pole[9][9], bool& flag, 
         cout << "Error: you cant jump left!\n";
         return;
     }
-    if (y != 7 && checkWall(true, y + 1, y + 2, x, walls))
+    if (y != 1 && checkWall(true, y + 1, y + 2, x, walls))
     {
         pole[x][y - 2] = p;
         pole[x][y] = 0;
