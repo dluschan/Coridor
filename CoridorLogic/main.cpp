@@ -1,4 +1,6 @@
 #include <iostream>
+#include <assert.h>
+#include <map>
 
 using namespace std;
 
@@ -17,8 +19,11 @@ struct Walls
         }
     }
 };
+typedef void (*funptr) (int&, int&, Walls, char&, int [9][9], bool&, int);
 
-bool checkWall(bool ver, int c1, int c2, int z, Walls walls);
+std::map<char, funptr> jumps = std::map<char, funptr>();
+
+bool checkWall(int x0, int x1, int y0, int y1, Walls walls);
 
 bool checkPlaceWall(bool ver, int x, int y, Walls walls);
 
@@ -93,6 +98,24 @@ void output(const Walls& walls, int pole[9][9])
     }
 }
 
+std::pair<int, int> step(int x, int y, char ch)
+{
+    switch (ch)
+    {
+    case 'l':
+        return make_pair(x - 1, y);
+    case 'r':
+        return make_pair(x + 1, y);
+    case 'd':
+        return make_pair(x, y + 1);
+    case 'u':
+        return make_pair(x, y - 1);
+    default:
+        assert(false);
+        return make_pair(0, 0);
+    }
+}
+
 bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, Walls& walls, int player)
 {
     if (player == 2)
@@ -117,78 +140,30 @@ bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, W
                 cout << '\n';
                 switch (ans)
                 {
-                case 'l':
-                    if (x1 - 1 != x2 || y1 != y2)
+                case 'l': case 'r': case 'd': case 'u':
+                {
+                    std::pair<int, int> coords = step(x1, y1, ans);
+                    int new_x = coords.first;
+                    int new_y = coords.second;
+                    if (!(new_x >= 0 && new_x <= 8 && new_y >= 0 && new_y <= 8) || !checkWall(x1, y1, new_x, new_y, walls))
                     {
-                        if (x1 != 0 && checkWall(false, x1, x1 - 1, y1, walls))
-                        {
-                            pole[x1 - 1][y1] = player;
-                            pole[x1][y1] = 0;
-                            x1--;
-                            flag = false;
-                        }
-                        else
-                            cout << "Error: you cant move left!\n";
+                        cout << "Error: you cant move here" << endl;
+                        break;
                     }
-                    else if (checkWall(false, x1, x1 - 1, y1, walls))
-                        jumpLeft(x1, y1, walls, ans, pole, flag, player);
-                    else
-                        cout << "Error: you cant move left!\n";
-                    break;
-                case 'r':
-                    if (x1 + 1 != x2 || y1 != y2)
+                    if (new_x != x2 || new_y != y2)
                     {
-                        if (x1 != 8 && checkWall(false, x1, x1 + 1, y1, walls))
-                        {
-                            pole[x1 + 1][y1] = player;
-                            pole[x1][y1] = 0;
-                            x1++;
-                            flag = false;
-                        }
-                        else
-                            cout << "Error: you cant move right!\n";
+                        pole[new_x][new_y] = player;
+                        pole[x1][y1] = 0;
+                        x1 = new_x;
+                        y1 = new_y;
+                        flag = false;
                     }
-                    else if (checkWall(false, x1, x1 + 1, y1, walls))
-                        jumpRight(x1, y1, walls, ans, pole, flag, player);
                     else
-                        cout << "Error: you cant move right!\n";
-                    break;
-                case 'd':
-                    if (y1 + 1 != y2 || x1 != x2)
                     {
-                        if (y1 != 8 && checkWall(true, y1, y1 + 1, x1, walls))
-                        {
-                            pole[x1][y1 + 1] = player;
-                            pole[x1][y1] = 0;
-                            y1++;
-                            flag = false;
-                        }
-                        else
-                            cout << "Error: you cant move down!\n";
+                        jumps[ans](x1, y1, walls, ans, pole, flag, player);
                     }
-                    else if (checkWall(true, y1, y1 + 1, x1, walls))
-                        jumpDown(x1, y1, walls, ans, pole, flag, player);
-                    else
-                        cout << "Error: you cant move down!\n";
                     break;
-                case 'u':
-                    if (y1 - 1 != y2 || x1 != x2)
-                    {
-                        if (y1 != 0 && checkWall(true, y1, y1 - 1, x1, walls))
-                        {
-                            pole[x1][y1 - 1] = player;
-                            pole[x1][y1] = 0;
-                            y1--;
-                            flag = false;
-                        }
-                        else
-                            cout << "Error: you cant move up!\n";
-                    }
-                    else if (checkWall(true, y1, y1 - 1, x1, walls))
-                        jumpUp(x1, y1, walls, ans, pole, flag, player);
-                    else
-                        cout << "Error: you cant move up!\n";
-                    break;
+                }
                 default:
                     cout << "Error: wrong char!\n";
                     break;
@@ -217,6 +192,12 @@ bool turn(int pole[9][9], int& y1, int& y2, int& x1, int x2, int& wallsAmount, W
 
 int main()
 {
+    std::map<char, funptr> jumps = std::map<char, funptr>();
+    jumps['l'] = jumpLeft;
+    jumps['r'] = jumpRight;
+    jumps['d'] = jumpDown;
+    jumps['u'] = jumpUp;
+
     int pole[9][9];				//Создаём поле
     for (int i = 0; i < 9; i++) //Заполняем нулями
     {
@@ -542,13 +523,11 @@ void placeWall(Walls& walls)
     }
 }
 
-bool checkWall(bool ver, int c1, int c2, int z, Walls walls)
+bool checkWall(int x0, int y0, int x1, int y1, Walls walls)
 {
-    int c = 0;
-    if (c1 < c2)
-        c = c1;
-    else
-        c = c2;
+    bool ver = x0 - x1 == 0;
+    int c = (ver) ? min(y0, y1) : min(x0, x1);
+    int z = (ver) ? x0 : y0;
     if (!ver)
     {
         if (z != 0 && z != 8)
