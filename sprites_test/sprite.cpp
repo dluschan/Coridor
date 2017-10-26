@@ -1,4 +1,6 @@
 #include "sprite.h"
+#include <QMouseEvent>
+#include <qDebug>
 
 Sprite::Sprite(QObject* parent)
     : QObject(parent)
@@ -14,19 +16,36 @@ Sprite::Sprite(QObject* parent)
     u = 101;
     time = 7.5;
 
-    timer = new QTimer(); // Создаём таймер для анимации спрайта
-    timer2 = new QTimer();
+    setFlag(ItemIsSelectable);
+
+    // timer = new QTimer(); // Создаём таймер для анимации спрайта
+    // timer2 = new QTimer();
     // Подключаем сигнал от таймера к слоту перелистывания кадров спрайта
-    connect(timer, &QTimer::timeout, this, &Sprite::nextFrame);
-    connect(timer2, SIGNAL(timeout()), this, SLOT(move()));
-    timer->start(75); // Запускаем спрайт на генерацию сигнала с периодичность 25 мс
-    timer2->start(0.001);
+    // connect(timer, &QTimer::timeout, this, &Sprite::nextFrame);
+    // connect(timer2, SIGNAL(timeout()), this, SLOT(move()));
+    // timer->start(75); // Запускаем спрайт на генерацию сигнала с периодичность 25 мс
+    // timer2->start(0.001);
 }
 
 QRectF Sprite::boundingRect() const
 {
     //(-190, -140, 380, 280) (-2,-2,+4,+4)
     return QRectF(0, 0, 101, 101);
+}
+
+void Sprite::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    selected = true;
+    update();
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void Sprite::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    emit released(event->pos());
+    selected = false;
+    update();
+    QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void Sprite::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -75,5 +94,15 @@ void Sprite::move()
         dvig = false;
         // sprite.setPosition(550 + x * 64 + 31 - w * 0.75, 275 + y * 64 + 31 - h);
         setPos(x, y);
+    }
+}
+
+void Sprite::select(QPointF p)
+{
+    if (!dvig)
+    {
+        t = p.x();
+        u = p.y();
+        dvig = true;
     }
 }

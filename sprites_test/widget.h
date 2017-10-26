@@ -21,14 +21,21 @@ class Widget : public QWidget
 public:
     explicit Widget(QWidget* parent = 0);
     ~Widget();
+    qreal x, y;
+    Sprite* sprite;
 
 private:
     Ui::Widget* ui;
     QGraphicsScene* scene; // Объявляем графическую сцену
     QTimer* timer;
+    QTimer* timer2;
+    // QCursor::pos();
 
 private slots:
     void slotUpdateCurPos();
+
+protected:
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };
 
 #endif // WIDGET_H
