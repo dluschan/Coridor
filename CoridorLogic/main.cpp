@@ -264,17 +264,16 @@ int main()
 
     //Храним информации о конце игры
     bool end = false;
-    int player = 1; // 0 - "первый", 1 - "второй"
+    int player = 2; // 1 - "первый", 2 - "второй"
 
     while (!end)
     {
-        player = (player + 1) % 2+1;
+        player = player % 2 + 1;
         end = turn(pole, y1, y2, x1, x2, wallsAmount[player], walls, player, jumps);
-        player--;
         output(walls, pole);
     }
 
-    cout << "Player" << player + 1 << " wins!" << endl;
+    cout << "Player" << player << " wins!" << endl;
     return 0;
 }
 
