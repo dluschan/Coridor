@@ -34,7 +34,6 @@ Widget::Widget(QWidget* parent)
     timer2 = new QTimer();
     QObject::connect(timer, SIGNAL(timeout()), SLOT(slotUpdateCurPos()));
     QObject::connect(timer, SIGNAL(timeout()), sprite, SLOT(nextFrame()));
-    QObject::connect(sprite, SIGNAL(released(QPointF p)), sprite, SLOT(select(p)));
     QObject::connect(timer2, SIGNAL(timeout()), sprite, SLOT(move()));
     timer->start(75);
     timer2->start(0.001);
@@ -51,8 +50,7 @@ void Widget::slotUpdateCurPos()
 {
     // ui->label->setText(QTime::currentTime().toString());
     // ui->label->setText(tr("x = %1, y = %2").arg(cursor().pos().x()).arg(cursor().pos().y()));
-    ui->label->setText(
-        tr("x = %1, y = %2").arg(this->mapFromGlobal(QCursor::pos()).x()).arg(this->mapFromGlobal(QCursor::pos()).y()));
+    ui->label->setText(tr("x = %1, y = %2").arg(this->mapFromGlobal(QCursor::pos()).x()).arg(this->mapFromGlobal(QCursor::pos()).y()));
     x = this->mapFromGlobal(QCursor::pos()).x();
     y = this->mapFromGlobal(QCursor::pos()).y();
 }
