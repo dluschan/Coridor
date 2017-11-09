@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>PICTURES/f3_aymarahealer.png</file>
+        <file>PICTURES/f3_nimbus.png</file>
+    </qresource>
+</RCC>
