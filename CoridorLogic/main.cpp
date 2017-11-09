@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <exception>
 #include <iostream>
 #include <map>
 #include <queue>
@@ -11,9 +12,7 @@ const int w = 5;
 
 bool isWall(int x0, int x1, int y0, int y1, int pole[17][17]);
 
-bool jump(int& x, int& y, int pole[17][17], int p, char ans);
-
-void placeWall(int pole[17][17], int p, int t, int u);
+void jump(int& x, int& y, int pole[17][17], char ans);
 
 bool aZvezda(int x, int y, int pole[17][17], int p);
 
@@ -44,32 +43,33 @@ void output(int pole[17][17])
 	cout << endl;
 }
 
-pair<int, int> step(int x, int y, char ch, int shag)
-{
-	switch (ch)
-	{
-	case 'l':
-		return make_pair(x - shag, y);
-	case 'r':
-		return make_pair(x + shag, y);
-	case 'd':
-		return make_pair(x, y + shag);
-	case 'u':
-		return make_pair(x, y - shag);
-	default:
-		assert(false);
-		return make_pair(0, 0);
-	}
-}
-
 bool inPole(int x, int y)
 {
 	return x >= 0 && x < realSize && y >= 0 && y < realSize;
 }
 
-bool outPole(int x, int y)
+pair<int, int> inPole(pair<int, int> p)
 {
-	return !inPole(x, y);
+	if (!inPole(p.first, p.second))
+		throw runtime_error("Can't move here");
+	return p;
+}
+
+pair<int, int> step(int x, int y, char ch, int shag)
+{
+	switch (ch)
+	{
+	case 'l':
+		return inPole(make_pair(x - shag, y));
+	case 'r':
+		return inPole(make_pair(x + shag, y));
+	case 'd':
+		return inPole(make_pair(x, y + shag));
+	case 'u':
+		return inPole(make_pair(x, y - shag));
+	default:
+		return inPole(make_pair(-1, -1));
+	}
 }
 
 bool isPlayer(int new_x, int new_y, int coords[3][2])
@@ -82,11 +82,114 @@ bool isPlayer(int new_x, int new_y, int coords[3][2])
 	return false;
 }
 
+int move(int pole[17][17], int coords[3][2], int player_id)
+{
+	cout << "Chose direction - left, right, down or up (l/r/d/u): ";
+	char ans;
+	cin >> ans;
+	cout << endl;
+	if (ans != 'l' && ans != 'r' && ans != 'd' && ans != 'u')
+		throw runtime_error("Error: wrong char!");
+
+	pair<int, int> new_coords = step(coords[0][player_id], coords[1][player_id], ans, 2);
+	int new_x = new_coords.first;
+	int new_y = new_coords.second;
+
+	if (isWall(coords[0][player_id], coords[1][player_id], new_x, new_y, pole))
+		throw runtime_error("Error: you cant move here (walls)");
+
+	if (!isPlayer(new_x, new_y, coords))
+	{
+		swap(pole[new_x][new_y], pole[coords[0][player_id]][coords[1][player_id]]);
+		coords[0][player_id] = new_x;
+		coords[1][player_id] = new_y;
+	}
+	else
+	{
+		jump(coords[0][player_id], coords[1][player_id], pole, ans);
+	}
+
+	if (coords[0][player_id] == 16 - player_id * 16)
+		return 1; //Проверка на победу
+	else
+		return 0;
+}
+
+int placeWall(int pole[17][17], int coords[3][2], int player_id)
+{
+	if (coords[2][player_id] == 0)
+		throw runtime_error("Error: Player out of walls!");
+
+	int t = coords[0][1 - player_id];
+	int u = coords[1][1 - player_id];
+
+	int x, y;
+	char dir;
+	cout << "Chose x, y and direction of the wall (x, y, v/h): ";
+	cin >> x >> y >> dir;
+	cout << endl;
+
+	x = 2 * x + 1;
+	y = 2 * y + 1;
+
+	if (!inPole(x, y))
+		throw runtime_error("Error: wrong x or/and y!");
+
+	int wall[3][2];
+
+	switch (dir)
+	{
+	case 'h':
+		for (int i = 0; i < 3; ++i)
+		{
+			wall[i][0] = x + i - 1;
+			wall[i][1] = y;
+		}
+		break;
+	case 'v':
+		for (int i = 0; i < 3; ++i)
+		{
+			wall[i][0] = x;
+			wall[i][1] = y + i - 1;
+		}
+		break;
+	default:
+		throw runtime_error("Error: wrong char!");
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (isWall(wall[i][0], wall[i][1], wall[i][0], wall[i][1], pole))
+			throw runtime_error("Error: wrong x/y/dir!");
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		pole[wall[i][0]][wall[i][1]] = w;
+	}
+
+	if (!aZvezda(t, u, pole, 1 - player_id))
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			pole[wall[i][0]][wall[i][1]] = -1;
+		}
+		throw runtime_error("Error: you can't place wall like that (you are blocking the way)!");
+	}
+
+	--coords[2][player_id];
+	if (!aZvezda(coords[0][player_id], coords[1][player_id], pole, player_id))
+	{
+		return 2;
+	}
+	return 0;
+}
+
 int turn(int pole[17][17], int coords[3][2], int player_id)
 {
 	int number = player_id + 1;
-	bool flag = true;
-	while (flag)
+
+	try
 	{
 		cout << "Turn of Player" << number << ", chose move or place a wall (m/w): ";
 		char ans;
@@ -95,78 +198,20 @@ int turn(int pole[17][17], int coords[3][2], int player_id)
 		switch (ans)
 		{
 		case 'm':
-			while (flag)
-			{
-				cout << "Chose direction - left, right, down or up (l/r/d/u): ";
-				cin >> ans;
-				cout << endl;
-				switch (ans)
-				{
-				case 'l':
-				case 'r':
-				case 'd':
-				case 'u':
-				{
-					pair<int, int> new_coords = step(coords[0][player_id], coords[1][player_id], ans, 2);
-					int new_x = new_coords.first;
-					int new_y = new_coords.second;
-					if (outPole(new_x, new_y))
-					{
-						cout << "Error: you cant move here (outFiled)" << endl;
-						break;
-					}
-					if (isWall(coords[0][player_id], coords[1][player_id], new_x, new_y, pole))
-					{
-						cout << "Error: you cant move here (walls)" << endl;
-						break;
-					}
-					if (!isPlayer(new_x, new_y, coords))
-					{
-						pole[new_x][new_y] = player_id;
-						pole[coords[0][player_id]][coords[1][player_id]] = -1;
-						coords[0][player_id] = new_x;
-						coords[1][player_id] = new_y;
-						flag = false;
-					}
-					else
-					{
-						if (jump(coords[0][player_id], coords[1][player_id], pole, player_id, ans))
-							flag = false;
-					}
-					break;
-				}
-				default:
-					cout << "Error: wrong char!" << endl;
-					break;
-				}
-			}
-			if (coords[0][player_id] == 16 - player_id * 16)
-				return 1; //Проверка на победу
-			break;
+			return move(pole, coords, player_id);
 		case 'w':
-			if (coords[2][player_id] == 0)
-			{
-				cout << "Error: Player" << number << " out of walls!" << endl;
-				break;
-			}
-			placeWall(pole, 1 - player_id, coords[0][1 - player_id], coords[1][1 - player_id]);
-			coords[2][player_id]--;
-			if (!aZvezda(coords[0][player_id], coords[1][player_id], pole, player_id))
-			{
-				cout << "Ops, Player" << number << " closed himself!" << endl;
-				return 2;
-			}
-			flag = false;
-			break;
+			return placeWall(pole, coords, player_id);
 		case 'p':
-			flag = false;
-			break;
+			return 0;
 		default:
-			cout << "Error: wrong char!" << endl;
-			break;
+			throw runtime_error("Error: wrong char!");
 		}
 	}
-	return 0;
+	catch (const exception& e)
+	{
+		cout << e.what() << endl;
+		return turn(pole, coords, player_id);
+	}
 }
 
 int main()
@@ -206,7 +251,17 @@ int main()
 		output(pole);
 	}
 
-	cout << "Player" << winner + 1 << " wins!" << endl;
+	switch (end)
+	{
+	case 1:
+		cout << "Player" << winner + 1 << " wins!" << endl;
+		break;
+	case 2:
+		cout << "Player" << winner + 1 << " wins!" << endl;
+		// cout << "Ops, Player" << number << " closed himself!" << endl;
+		break;
+	}
+
 	return 0;
 }
 
@@ -215,127 +270,39 @@ bool different_dir(char a, char b)
 	return (((a == 'l' || a == 'r') && (b == 'u' || b == 'd')) || ((a == 'u' || a == 'd') && (b == 'l' || b == 'r')));
 }
 
-bool jump(int& x, int& y, int pole[17][17], int p, char dir)
+void jump(int& x, int& y, int pole[17][17], char dir)
 {
 	pair<int, int> coords = step(x, y, dir, 2);
 	int other_x = coords.first;
 	int other_y = coords.second;
+
 	coords = step(other_x, other_y, dir, 2);
 	int new_x = coords.first;
 	int new_y = coords.second;
-	if (inPole(new_x, new_y) && !isWall(other_x, other_y, new_x, new_y, pole))
+	if (!isWall(other_x, other_y, new_x, new_y, pole))
 	{
 		swap(pole[new_x][new_y], pole[x][y]);
 		x = new_x;
 		y = new_y;
-		return true;
-	}
-	if ((other_y > 15 || isWall(other_x, other_y, other_x, other_y + 2, pole)) && (other_y < 2 || isWall(other_x, other_y, other_x, other_y - 2, pole)))
-	{
-		cout << "Error: you cant jump here (" << dir << ")!" << endl;
-		return false;
+		return;
 	}
 
-	while (true)
-	{
-		const char* choise_dir = (dir == 'l' || dir == 'r') ? "down or up (d/u)" : "left or right (l/r)";
-		cout << "Chose direction - " << choise_dir << ": ";
-		char ans;
-		cin >> ans;
-		cout << endl;
-		if (!different_dir(dir, ans))
-		{
-			cout << "Error: wrong char!" << endl;
-			continue;
-		}
+	const char* choise_dir = (dir == 'l' || dir == 'r') ? "down or up (d/u)" : "left or right (l/r)";
+	cout << "Chose direction - " << choise_dir << ": ";
+	char ans;
+	cin >> ans;
+	cout << endl;
+	if (!different_dir(dir, ans))
+		throw runtime_error("Error: wrong char!");
 
-		coords = step(other_x, other_y, ans, 2);
-		new_x = coords.first;
-		new_y = coords.second;
-		if (outPole(new_x, new_y) || isWall(other_x, other_y, new_x, new_y, pole))
-		{
-			cout << "Error: you cant jump here (" << dir << ")!" << endl;
-			continue;
-		}
+	coords = step(other_x, other_y, ans, 2);
+	new_x = coords.first;
+	new_y = coords.second;
+	if (!isWall(other_x, other_y, new_x, new_y, pole))
+	{
 		swap(pole[new_x][new_y], pole[x][y]);
 		x = new_x;
 		y = new_y;
-		return true;
-	}
-}
-
-void placeWall(int pole[17][17], int p, int t, int u)
-{
-	while (true)
-	{
-		int x, y;
-		char dir;
-		cout << "Chose x, y and direction of the wall (x, y, v/h): ";
-		cin >> x >> y >> dir;
-		cout << endl;
-
-		x = 2 * x + 1;
-		y = 2 * y + 1;
-
-		if (outPole(x, y))
-		{
-			cout << "Error: wrong x or/and y!" << endl;
-			continue;
-		}
-
-		int wall[3][2];
-
-		switch (dir)
-		{
-		case 'h':
-			for (int i = 0; i < 3; i++)
-			{
-				wall[i][0] = x + i - 1;
-				wall[i][1] = y;
-			}
-			break;
-		case 'v':
-			for (int i = 0; i < 3; i++)
-			{
-				wall[i][0] = x;
-				wall[i][1] = y + i - 1;
-			}
-			break;
-		default:
-			cout << "Error: wrong char!" << endl;
-			continue;
-		}
-
-		bool flag = false;
-		for (int i = 0; i < 3; i++)
-		{
-			if (isWall(wall[i][0], wall[i][1], wall[i][0], wall[i][1], pole))
-			{
-				cout << "Error: wrong x/y/dir!" << endl;
-				flag = true;
-			}
-		}
-		if (flag)
-			continue;
-
-		for (int i = 0; i < 3; i++)
-		{
-			pole[wall[i][0]][wall[i][1]] = 5;
-		}
-
-		if (!aZvezda(t, u, pole, p))
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				pole[wall[i][0]][wall[i][1]] = -1;
-			}
-			cout << "Error: you can't place wall like that (you are blocking the way)!" << endl;
-			placeWall(pole, p, t, u);
-			return;
-		}
-
-		if (dir == 'v' || dir == 'h')
-			break;
 	}
 }
 
