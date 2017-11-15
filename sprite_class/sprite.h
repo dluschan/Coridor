@@ -18,9 +18,9 @@ private:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
     QRectF boundingRect() const;
 
-    qreal x, y, t, u, time;
+    qreal x, y, t, u, time, mx, my;
     bool dvig, selected;
-    QTimer* timer;						  // Таймер для пролистывания изображения в QPixmap
+    QTimer *timer, *timer2;				  // Таймер для пролистывания изображения в QPixmap
     int currentFrame, size, framesNumber; // Координата X, с которой начинает очередной кадр спрайта
     QPixmap* spriteImage;				  // В данный объект QPixamp будет помещён спрайт
 
@@ -31,6 +31,7 @@ public slots:
     void nextFrame(); // Слот для пролистывания изображения в QPixmap
     void move();
     void select(qreal i, qreal j);
+    void updateCurPos(qreal x, qreal y);
 
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event);

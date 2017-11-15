@@ -23,6 +23,16 @@ public:
 private:
     Ui::Widget* ui;
     QGraphicsScene* scene;
+    QTimer* timer;
+
+private slots:
+    void slotUpdateCurPos();
+
+signals:
+    pos(qreal x, qreal y);
+
+protected:
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };
 
 #endif // WIDGET_H

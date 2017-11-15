@@ -10,11 +10,15 @@ Sprite::Sprite(QString PN, qreal X, qreal Y, int S, int FN, QObject* parent)
     , framesNumber(FN)
     , time(7.5)
     , timer(new QTimer)
+    , timer2(new QTimer)
 {
     setFlag(ItemIsSelectable);
 
-    connect(timer, SIGNAL(timeout()), this, SLOT(nextFrame())); // code 255
+    connect(timer, SIGNAL(timeout()), this, SLOT(nextFrame()));
+    connect(timer2, SIGNAL(timeout()), this, SLOT(move()));
+    connect(this, SIGNAL(released(qreal, qreal)), this, SLOT(select(qreal, qreal)));
     timer->start(75);
+    timer2->start(18);
 }
 
 QRectF Sprite::boundingRect() const
@@ -33,7 +37,10 @@ void Sprite::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void Sprite::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (selected)
-        emit released(50, 50);
+    {
+        dvig = true;
+        emit released(mx, my);
+    }
     selected = false;
     update();
     QGraphicsItem::mouseReleaseEvent(event);
@@ -64,6 +71,7 @@ void Sprite::nextFrame()
     currentFrame += size;
     if (currentFrame >= size * framesNumber)
         currentFrame = 0;
+    setPos(x, y);
     this->update(); // и перерисовываем графический объект с новым кадром спрайта
 }
 
@@ -71,7 +79,7 @@ void Sprite::move()
 {
     if (dvig)
     {
-        qreal distance = sqrt((t - x) * (t - x) + (u - y) * (u - y)) * 64;
+        qreal distance = sqrt((t - x) * (t - x) + (u - y) * (u - y));
         x += 0.2 * time * (t - x) / distance;
         y += 0.2 * time * (u - y) / distance;
     }
@@ -88,4 +96,12 @@ void Sprite::move()
 void Sprite::select(qreal i, qreal j)
 {
     qDebug() << "HERE";
+    t = i;
+    u = j;
+}
+
+void Sprite::updateCurPos(qreal x, qreal y)
+{
+    mx = x;
+    my = y;
 }
