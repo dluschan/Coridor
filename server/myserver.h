@@ -3,24 +3,24 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <iostream>
+#include <list>
 
-class MyServer: public QTcpServer
-{
-    Q_OBJECT
+class MyServer : public QTcpServer {
+  Q_OBJECT
 
 public:
-    MyServer();
-    ~MyServer();
+  MyServer();
+  ~MyServer();
 
-    QTcpSocket* pSocket;
-    QByteArray Data;
+  std::list<QTcpSocket *> pSocket;
+  QByteArray Data;
 
 public slots:
-    void startServer();
-    void incomingConnection(int socketDescriptor);
-    void sockReady();
-    void sockDisc();
-
+  void startServer();
+  void incomingConnection(int socketDescriptor);
+  void sockReady();
+  void sockDisc();
 };
 
 #endif // MYSERVER_H
