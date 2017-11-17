@@ -1,33 +1,26 @@
 #include "myserver.h"
 
-MyServer::MyServer() {}
+MyServer::MyServer(QObject *parent) : QTcpServer(parent)
+{
 
-MyServer::~MyServer() {}
-
-void MyServer::startServer() {
-  if (this->listen(QHostAddress::Any, 5555)) {
-    qDebug() << "Listening";
-  } else {
-    qDebug() << "Not listening";
-  }
 }
 
-void MyServer::incomingConnection(int socketDescriptor) {
-  pSocket.push_back(new QTcpSocket(this));
-  pSocket.back()->setSocketDescriptor(socketDescriptor);
-
-  connect(pSocket.back(), SIGNAL(readyRead()), this, SLOT(sockReady()));
-  connect(pSocket.back(), SIGNAL(disconnected()), this, SLOT(sockDisc()));
-
-  qDebug() << socketDescriptor << "Client connected";
-
-  pSocket.back()->write("You are connect");
-  qDebug() << "Send client connect status - YES";
+void MyServer::StartServer()
+{
+    if(!this->listen(QHostAddress::Any,5555))
+    {
+        qDebug() << "Couldn't start the server";
+    }
+    else
+    {
+        qDebug() << "Listening...";
+    }
 }
 
-void MyServer::sockReady() {}
-
-void MyServer::sockDisc() {
-  qDebug() << "Disconnect";
-  pSocket.back()->deleteLater();
+void MyServer::incomingConnection(int socketDescriptor)
+{
+    qDebug() << socketDescriptor << "Connecting...";
+    MyThread *thread = new MyThread(socketDescriptor, this);
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
 }

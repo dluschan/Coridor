@@ -2,25 +2,22 @@
 #define MYSERVER_H
 
 #include <QTcpServer>
-#include <QTcpSocket>
-#include <iostream>
-#include <list>
+#include <QDebug>
+#include "mythread.h"
 
-class MyServer : public QTcpServer {
+class MyServer : public QTcpServer
+{
   Q_OBJECT
-
 public:
-  MyServer();
-  ~MyServer();
+    explicit MyServer(QObject *parent = 0);
+    void StartServer();
 
-  std::list<QTcpSocket *> pSocket;
-  QByteArray Data;
+signals:
 
 public slots:
-  void startServer();
-  void incomingConnection(int socketDescriptor);
-  void sockReady();
-  void sockDisc();
+
+protected:
+    void incomingConnection(int socketDescriptor);
 };
 
 #endif // MYSERVER_H
