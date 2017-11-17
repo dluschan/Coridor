@@ -1,13 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QTcpSocket>
-#include <QMessageBox>
 #include <QDebug>
+#include <QMainWindow>
+#include <QMessageBox>
+#include <QTcpSocket>
+#include <QTime>
 
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -15,7 +17,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
     QTcpSocket* socket;
@@ -27,9 +29,14 @@ public slots:
 
 private slots:
     void on_pushButton_clicked();
+    void slotLabelUpdate();
+    void sendMessage();
+
+signals:
+    void signalLabelUpdate();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
 };
 
 #endif // MAINWINDOW_H
