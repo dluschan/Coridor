@@ -1,38 +1,42 @@
 #include "mythread.h"
 
-MyThread::MyThread(int ID, QObject *parent) : QThread(parent) {
-  this->socketDescriptor = ID;
+MyThread::MyThread(/*QTcpSocket* _pSocket,*/ int ID, QObject* parent)
+    : QThread(parent)
+//, pSocket(_pSocket)
+{
+    this->socketDescriptor = ID;
 }
 
-void MyThread::run() {
-  qDebug() << socketDescriptor << "Starting thread";
-  socket = new QTcpSocket();
-  if (!socket->setSocketDescriptor(this->socketDescriptor)) {
-    emit error(socket->error());
-    return;
-  }
+void MyThread::run()
+{
+    qDebug() << socketDescriptor << "Starting thread";
+    pSocket = new QTcpSocket();
+    if (!pSocket->setSocketDescriptor(this->socketDescriptor))
+    {
+        emit error(pSocket->error());
+        return;
+    }
 
-  connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
-  connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()), Qt::DirectConnection);
+    connect(pSocket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+    connect(pSocket, SIGNAL(disconnected()), this, SLOT(disconnected()), Qt::DirectConnection);
 
-  qDebug() << socketDescriptor << "Client Connected";
+    qDebug() << socketDescriptor << "Client Connected";
 
-  exec();
+    exec();
 }
 
 void MyThread::readyRead()
 {
-    QByteArray Data = socket->readAll();
+    QByteArray Data = pSocket->readAll();
 
     qDebug() << socketDescriptor << "Data in:" << Data;
 
-    socket->write(Data);
+    pSocket->write(Data);
 }
 
 void MyThread::disconnected()
 {
     qDebug() << socketDescriptor << "Client Disconnected";
-    socket->deleteLater();
+    pSocket->deleteLater();
     exit(0);
 }
-

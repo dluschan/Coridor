@@ -1,13 +1,13 @@
 #include "myserver.h"
 
-MyServer::MyServer(QObject *parent) : QTcpServer(parent)
+MyServer::MyServer(QObject* parent)
+    : QTcpServer(parent)
 {
-
 }
 
 void MyServer::StartServer()
 {
-    if(!this->listen(QHostAddress::Any,5555))
+    if (!this->listen(QHostAddress::Any, 5555))
     {
         qDebug() << "Couldn't start the server";
     }
@@ -20,7 +20,14 @@ void MyServer::StartServer()
 void MyServer::incomingConnection(int socketDescriptor)
 {
     qDebug() << socketDescriptor << "Connecting...";
-    MyThread *thread = new MyThread(socketDescriptor, this);
+    // pSocket.push_back(new QTcpSocket());
+    MyThread* thread = new MyThread(/*pSocket.back(),*/ socketDescriptor, this);
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     thread->start();
+
+    /*QString login(pSocket.back()->readAll());
+    players.push_back(new Player(login, socketDescriptor));
+    const char* log = players.back()->name.toStdString().c_str();
+    pSocket.back()->write("Hello, ");
+    pSocket.back()->write(log);*/
 }
