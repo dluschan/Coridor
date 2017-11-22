@@ -14,8 +14,7 @@ public:
     void StartServer();
 
 private:
-    std::list<Player*> players;
-    std::list<QTcpSocket*> pSocket;
+    std::list<MyThread*> players;
 
 signals:
 

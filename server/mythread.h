@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QTcpSocket>
 #include <QThread>
+#include <QtNetwork>
 
 class MyThread : public QThread
 {

@@ -20,8 +20,8 @@ public:
     MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
-    QTcpSocket* socket;
-    QByteArray Data;
+    QTcpSocket* pSocket;
+    QByteArray data;
 
 public slots:
     void sockReady();
