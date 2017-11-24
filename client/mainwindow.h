@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QTcpSocket>
 #include <QTime>
 
@@ -28,7 +29,7 @@ public slots:
     void sockDisc();
 
 private slots:
-    void on_pushButton_clicked();
+    void connectToTheServer();
     void slotLabelUpdate();
     void sendMessage();
 

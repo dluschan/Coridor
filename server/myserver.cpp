@@ -20,14 +20,11 @@ void MyServer::StartServer()
 void MyServer::incomingConnection(int socketDescriptor)
 {
     qDebug() << socketDescriptor << "Connecting...";
-    // pSocket.push_back(new QTcpSocket());
-    MyThread* thread = new MyThread(/*pSocket.back(),*/ socketDescriptor, this);
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    thread->start();
+    players.push_back(new MyThread(socketDescriptor, this));
+    connect(players.back(), SIGNAL(finished()), players.back(), SLOT(deleteLater()));
+    players.back()->start();
 
-    /*QString login(pSocket.back()->readAll());
-    players.push_back(new Player(login, socketDescriptor));
-    const char* log = players.back()->name.toStdString().c_str();
-    pSocket.back()->write("Hello, ");
-    pSocket.back()->write(log);*/
+    /* MyThread* thread = new MyThread(socketDescriptor, this);
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start(); */
 }

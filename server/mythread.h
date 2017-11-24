@@ -6,12 +6,22 @@
 #include <QTcpSocket>
 #include <QThread>
 #include <QtNetwork>
+#include <iostream>
+#include <string>
+
+enum command
+{
+    AskLogin,
+    Help,
+    AskPlayers,
+    WrongCommand
+};
 
 class MyThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit MyThread(/*QTcpSocket* _pSocket,*/ int ID, QObject* parent = 0);
+    explicit MyThread(int ID, QObject* parent = 0);
     void run();
 
 signals:
@@ -25,6 +35,12 @@ private:
     QTcpSocket* pSocket;
     int socketDescriptor;
     Player* player;
+    command c;
+
+    void login(QString login);
+    void help();
+    void playerList(/*std::list<Player*> players*/);
+    void sendString(QString message);
 };
 
 #endif // MYTHREAD_H

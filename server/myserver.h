@@ -12,10 +12,9 @@ class MyServer : public QTcpServer
 public:
     explicit MyServer(QObject* parent = 0);
     void StartServer();
-
-private:
     std::list<MyThread*> players;
 
+private:
 signals:
 
 public slots:

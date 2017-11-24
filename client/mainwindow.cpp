@@ -6,12 +6,13 @@ MainWindow::MainWindow(QWidget* parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    // ui->Enter->setDefault(true);
     pSocket = new QTcpSocket(this);
     connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
     connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
     connect(this, SIGNAL(signalLabelUpdate()), this, SLOT(slotLabelUpdate()));
-    connect(ui->Enter, SIGNAL(released()), this, SLOT(sendMessage()));
+    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
+    connect(ui->Enter, SIGNAL(clicked()), this, SLOT(sendMessage()));
 }
 
 MainWindow::~MainWindow()
@@ -19,7 +20,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::connectToTheServer()
 {
     pSocket->connectToHost("127.0.0.1", 5555);
 }
