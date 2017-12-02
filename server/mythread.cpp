@@ -66,7 +66,7 @@ void MyThread::readyRead()
         help();
         break;
     case AskPlayers:
-        playerList();
+        emit sendPlayerList(pSocket);
         break;
     case WrongCommand:
         break;
@@ -86,12 +86,13 @@ void MyThread::help()
     sendString("-player list: ask for player list");
 }
 
-void MyThread::playerList()
+/*void MyThread::playerList()
 {
-    /*while (!players.empty())
-        sendString(players.back()->name + '/n');*/
+    while (!players.empty())
+        sendString(players.back()->name + '/n');
+    players.pop_back();
     sendString("only uuuuuuuuuuuuuuuuu");
-}
+}*/
 
 void MyThread::disconnected()
 {

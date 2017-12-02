@@ -1,6 +1,7 @@
 #ifndef MYTHREAD_H
 #define MYTHREAD_H
 
+#include "lobby.h"
 #include "player.h"
 #include <QDebug>
 #include <QTcpSocket>
@@ -22,10 +23,14 @@ class MyThread : public QThread
     Q_OBJECT
 public:
     explicit MyThread(int ID, QObject* parent = 0);
+    // QTcpSocket* pSocket;
+    // int socketDescriptor;
+    Player* player;
     void run();
 
 signals:
     void error(QTcpSocket::SocketError socketError);
+    void sendPlayerList(QTcpSocket* socket);
 
 public slots:
     void readyRead();
@@ -34,12 +39,12 @@ public slots:
 private:
     QTcpSocket* pSocket;
     int socketDescriptor;
-    Player* player;
+    // Player* player;
     command c;
 
     void login(QString login);
     void help();
-    void playerList(/*std::list<Player*> players*/);
+    void playerList();
     void sendString(QString message);
 };
 

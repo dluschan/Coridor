@@ -1,6 +1,7 @@
 #include "lobby.h"
 
-Lobby::Lobby()
+Lobby::Lobby(QString _name)
+    : name(_name)
 {
-
+    //...
 }

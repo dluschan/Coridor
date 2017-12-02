@@ -18,9 +18,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     myserver.cpp \
     mythread.cpp \
-    player.cpp
+    player.cpp \
+    lobby.cpp
 
 HEADERS += \
     myserver.h \
     mythread.h \
-    player.h
+    player.h \
+    lobby.h
