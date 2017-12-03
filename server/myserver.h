@@ -8,23 +8,23 @@
 
 class MyServer : public QTcpServer
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit MyServer(QObject* parent = 0);
-    void StartServer();
-    std::list<MyThread*> players;
-    std::list<Lobby*> lobbies;
+	explicit MyServer(QObject* parent = 0);
+	void StartServer();
+	std::list<MyThread*> players;
+	std::list<Lobby*> lobbies;
 
 private:
-    void sendString(QString message, QTcpSocket* socket);
+	void sendString(QString message, QTcpSocket* socket);
 
 signals:
 
 public slots:
-    void playerList(QTcpSocket* socket);
+	void playerList(QTcpSocket* socket);
 
 protected:
-    void incomingConnection(int socketDescriptor);
+	void incomingConnection(qintptr socketDescriptor);
 };
 
 #endif // MYSERVER_H
