@@ -38,7 +38,7 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	qDebug() << socketDescriptor << "Connecting...";
 	players.push_back(new MyThread(socketDescriptor, this));
 	connect(players.back(), SIGNAL(finished()), players.back(), SLOT(deleteLater()));
-	connect(players.back(), SIGNAL(sendPlayerList(QTcpSocket*)), this, SLOT(playerList(QTcpSocket*)));
+	connect(players.back(), SIGNAL(sendPlayerList(QTcpSocket*)), this, SLOT(playerList(QTcpSocket*)), Qt::DirectConnection);
 	players.back()->start();
 
 	/* MyThread* thread = new MyThread(socketDescriptor, this);
