@@ -4,7 +4,7 @@
 #include "mythread.h"
 #include <QDebug>
 #include <QTcpServer>
-#include <list>
+//#include <list>
 
 class MyServer : public QTcpServer
 {
@@ -16,12 +16,14 @@ public:
     std::list<Lobby*> lobbies;
 
 private:
-    void sendString(QString message, QTcpSocket* socket);
+    void sendString(QString message, MyThread* thread);
 
 signals:
 
 public slots:
-    void playerList(QTcpSocket* socket);
+    void playerList(MyThread* thread);
+    void createLobby(MyThread* thread, QString lobbyName);
+    void lobbyList(MyThread* thread);
 
 protected:
     void incomingConnection(int socketDescriptor);

@@ -8,7 +8,7 @@ class Player
 public:
     Player(QString login, int socketDescriptor);
 
-    QString name;
+    QString playerName;
     int ID, wins, loses;
 };
 

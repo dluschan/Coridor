@@ -1,6 +1,7 @@
 #include "game.h"
 
-Game::Game()
+Game::Game(GameType type)
+    : game(type)
 {
-
+    //...
 }
