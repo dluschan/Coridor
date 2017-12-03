@@ -8,31 +8,31 @@
 
 namespace Ui
 {
-    class Widget;
+	class Widget;
 }
 
 class Widget : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit Widget(QWidget* parent = 0);
-    ~Widget();
-    // Sprite* sprite;
+	explicit Widget(QWidget* parent = 0);
+	~Widget();
+	// Sprite* sprite;
 
 private:
-    Ui::Widget* ui;
-    QGraphicsScene* scene;
-    QTimer* timer;
+	Ui::Widget* ui;
+	QGraphicsScene* scene;
+	QTimer* timer;
 
 private slots:
-    void slotUpdateCurPos();
+	void slotUpdateCurPos();
 
 signals:
-    pos(qreal x, qreal y);
+	void pos(qreal x, qreal y);
 
 protected:
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };
 
 #endif // WIDGET_H
