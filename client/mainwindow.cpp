@@ -65,7 +65,7 @@ void MainWindow::sendCommand()
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_4_0);
-	command = new Command(list.at(ui->lineEdit->text()), ui->lineEdit->text());
+	command = new Command(list.at(ui->lineEdit->text()));
 	out << command;
 	pSocket->write(arrBlock);
 	pSocket->waitForBytesWritten();

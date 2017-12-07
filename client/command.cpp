@@ -1,11 +1,12 @@
 #include "command.h"
 
-Command::Command(int _type, QString text) // throw(logic_error)
+Command::Command(CommandType type) // throw(logic_error)
 {
-	switch (_type)
+	switch (type)
 	{
 	case AskLogin:
 		mLetter = new Login;
+		// stream >> *mLetter;
 		break;
 
 	case AskHelp:
@@ -19,7 +20,19 @@ Command::Command(int _type, QString text) // throw(logic_error)
 	}
 
 	// virtual call in constructor!
-	cast(text);
+	execute();
+}
+
+QDataStream& operator>>(QDataStream& stream, CommandType& type)
+{
+	stream >> type;
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const CommandType& type)
+{
+	stream << type;
+	return stream;
 }
 
 /*istream& operator>>(istream& in, Command& c)

@@ -1,4 +1,5 @@
 #include "mythread.h"
+#include "../client/command.h"
 
 MyThread::MyThread(int ID, QObject* parent)
 	: QThread(parent)
@@ -20,7 +21,6 @@ void MyThread::run()
 	connect(pSocket, SIGNAL(disconnected()), this, SLOT(disconnected()), Qt::DirectConnection);
 
 	sendString("Please, enter your name.");
-	c = Command::AskLogin;
 
 	qDebug() << socketDescriptor << "Client Connected";
 
@@ -29,87 +29,26 @@ void MyThread::run()
 
 void MyThread::readyRead()
 {
-	QString data;
-	QStringList myOptions;
-	myOptions << "-help"
-			  << "-players list"
-			  << "-create lobby"
-			  << "-lobbies list";
-
+	CommandType type;
 	QDataStream in(pSocket);
 	in.setVersion(QDataStream::Qt_4_0);
-	in >> data;
-	// data.execute();
-
-	QString lobbyName = "ErrorLobbyName";
-	if (data.contains("-create lobby"))
-	{
-		lobbyName = data;
-		lobbyName.remove(0, 14);
-		data = "-create lobby";
-		qDebug() << lobbyName;
-	}
-
-	qDebug() << data;
-
-	if (c != Command::AskLogin)
-	{
-		switch (myOptions.indexOf(data))
-		{
-		case 0:
-			c = Command::Help;
-			break;
-		case 1:
-			c = Command::AskPlayers;
-			break;
-		case 2:
-			c = Command::CreateLobby;
-			break;
-		case 3:
-			c = Command::AskLobbies;
-			break;
-		default:
-			c = Command::WrongCommand;
-			sendString("Wrong command '" + data + "'.");
-			break;
-		}
-	}
-
-	switch (c)
-	{
-	case AskLogin:
-		login(data);
-		break;
-	case Help:
-		help();
-		break;
-	case AskPlayers:
-		emit sendPlayerList(this);
-		break;
-	case CreateLobby:
-		emit createLobby(this, lobbyName);
-		break;
-	case AskLobbies:
-		emit sendLobbiesList(this);
-		break;
-	case WrongCommand:
-		break;
-	}
+	in >> type;
 }
 
+/*
 void MyThread::login(QString login)
 {
 	player = new Player(login, socketDescriptor);
-	sendString("Hello, " + login + "! Type -help to ask for available commands");
-	c = Command::Help;
+	sendString("Hello, " + login + "! Type -help to ask for available CommandTypes");
+	c = CommandType::Help;
 }
 
 void MyThread::help()
 {
-	sendString("-help: ask for available commands\n-players list: ask for player list\n-create lobby 'LobbyName': ask for creating a lobby\n-lobbies list: ask for lobbies list\n");
+	sendString("-help: ask for available CommandTypes\n-players list: ask for player list\n-create lobby 'LobbyName': ask for creating a lobby\n-lobbies list: ask for lobbies list\n");
 }
 
-/*void MyThread::playerList()
+void MyThread::playerList()
 {
 	while (!players.empty())
 		sendString(players.back()->name + '/n');

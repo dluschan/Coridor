@@ -10,48 +10,37 @@
 #include <iostream>
 #include <string>
 
-enum Command
-{
-    AskLogin,
-    Help,
-    AskPlayers,
-    CreateLobby,
-    AskLobbies,
-    WrongCommand
-};
-
 class MyThread : public QThread
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit MyThread(int ID, QObject* parent = 0);
-    QTcpSocket* pSocket;
-    // int socketDescriptor;
-    Player* player;
-    Lobby* lobby;
-    void run();
-    void sendString(QString message);
+	explicit MyThread(int ID, QObject* parent = 0);
+	QTcpSocket* pSocket;
+	// int socketDescriptor;
+	Player* player;
+	Lobby* lobby;
+	void run();
+	void sendString(QString message);
 
 signals:
-    void error(QTcpSocket::SocketError socketError);
-    void sendPlayerList(MyThread* thread);
-    void createLobby(MyThread* thread, QString lobbyName);
-    void sendLobbiesList(MyThread* socket);
+	void error(QTcpSocket::SocketError socketError);
+	void sendPlayerList(MyThread* thread);
+	void createLobby(MyThread* thread, QString lobbyName);
+	void sendLobbiesList(MyThread* socket);
 
 public slots:
-    void readyRead();
-    void disconnected();
+	void readyRead();
+	void disconnected();
 
 private:
-    // QTcpSocket* pSocket;
-    int socketDescriptor;
-    // Player* player;
-    Command c;
+	// QTcpSocket* pSocket;
+	int socketDescriptor;
+	// Player* player;
 
-    void login(QString login);
-    void help();
-    // void playerList();
-    // void sendString(QString message);
+	void login(QString login);
+	void help();
+	// void playerList();
+	// void sendString(QString message);
 };
 
 #endif // MYTHREAD_H

@@ -22,7 +22,7 @@ enum CommandType
 class Command
 {
 public:
-	Command(int _type, QString text);
+	Command(CommandType type);
 
 	QString name;
 
@@ -31,20 +31,15 @@ public:
 		if (mLetter)
 		{
 			// virtual call in destructor!
-			erase();
 		}
 
 		delete mLetter; // delete Letter for Envelope
 						// delete 0      for Letter
 	}
 
-	virtual void cast(QString name) const
+	virtual void execute() const
 	{
-		mLetter->cast(name);
-	}
-	virtual void erase()
-	{
-		mLetter->erase();
+		mLetter->execute();
 	}
 
 protected:
@@ -64,15 +59,13 @@ private:
 class Login : public Command
 {
 public:
-	QString login;
 	~Login()
 	{
 		// cout << "~Login()" << endl;
 	}
-	virtual void cast(QString text) const
+	virtual void execute() const
 	{
 		// cout << "Katon!" << endl;
-		// login = text;
 	}
 	virtual void erase()
 	{
@@ -86,17 +79,17 @@ private:
 	}
 	Login(const Login&);
 	Login& operator=(Login&);
+	QString login;
 };
 
 class Help : public Command
 {
 public:
-	QString message = "-help: ask for available commands\n-players list: ask for player list\n-create lobby 'LobbyName': ask for creating a lobby\n-lobbies list: ask for lobbies list\n";
 	~Help()
 	{
 		// cout << "~Help()" << endl;
 	}
-	virtual void cast(QString text) const
+	virtual void execute() const
 	{
 		// cout << "Mokuton!" << endl;
 	}
