@@ -4,12 +4,12 @@ Command::Command(CommandType type) // throw(logic_error)
 {
 	switch (type)
 	{
-	case AskLogin:
+	case CommandType::AskLogin:
 		mLetter = new Login;
 		// stream >> *mLetter;
 		break;
 
-	case AskHelp:
+	case CommandType::AskHelp:
 		mLetter = new Help;
 		break;
 

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-enum CommandType
+enum class CommandType
 {
 	AskLogin,
 	AskHelp,
@@ -18,6 +18,9 @@ enum CommandType
 	AskLobbies,
 	WrongCommand
 };
+
+QDataStream& operator>>(QDataStream& stream, CommandType& type);
+QDataStream& operator<<(QDataStream& stream, const CommandType& type);
 
 class Command
 {

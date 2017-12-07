@@ -20,11 +20,13 @@ SOURCES += main.cpp \
     mythread.cpp \
     player.cpp \
     lobby.cpp \
-    game.cpp
+    game.cpp \
+    ../common/command.cpp
 
 HEADERS += \
     myserver.h \
     mythread.h \
     player.h \
     lobby.h \
-    game.h
+    game.h \
+    ../common/command.h

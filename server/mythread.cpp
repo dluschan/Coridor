@@ -1,5 +1,5 @@
 #include "mythread.h"
-#include "../client/command.h"
+#include "../common/command.h"
 
 MyThread::MyThread(int ID, QObject* parent)
 	: QThread(parent)

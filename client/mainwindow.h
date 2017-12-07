@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "command.h"
 #include <QDebug>
 #include <QMainWindow>
 #include <QMessageBox>
@@ -40,8 +39,7 @@ signals:
 
 private:
 	Ui::MainWindow* ui;
-	Command* command;
-	map<QString, CommandType> list = {{"-login", AskLogin}, {"-help", AskHelp}, {"-players list", AskPlayers}, {"-create lobby", CreateLobby}, {"-lobbies list", AskLobbies}};
+	// map<QString, CommandType> list = {{"-login", AskLogin}, {"-help", AskHelp}, {"-players list", AskPlayers}, {"-create lobby", CreateLobby}, {"-lobbies list", AskLobbies}};
 };
 
 #endif // MAINWINDOW_H
