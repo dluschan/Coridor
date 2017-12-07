@@ -39,6 +39,7 @@ void MyThread::readyRead()
 	QDataStream in(pSocket);
 	in.setVersion(QDataStream::Qt_4_0);
 	in >> data;
+	// data.execute();
 
 	QString lobbyName = "ErrorLobbyName";
 	if (data.contains("-create lobby"))
@@ -65,7 +66,7 @@ void MyThread::readyRead()
 			c = Command::CreateLobby;
 			break;
 		case 3:
-			c = Command::AskLobby;
+			c = Command::AskLobbies;
 			break;
 		default:
 			c = Command::WrongCommand;
