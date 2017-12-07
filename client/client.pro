@@ -14,8 +14,10 @@ TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    command.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    command.h
 
 FORMS    += mainwindow.ui
