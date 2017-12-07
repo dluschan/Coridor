@@ -6,7 +6,6 @@ Command::Command(CommandType type) // throw(logic_error)
 	{
 	case CommandType::AskLogin:
 		mLetter = new Login;
-		// stream >> *mLetter;
 		break;
 
 	case CommandType::AskHelp:
@@ -18,9 +17,6 @@ Command::Command(CommandType type) // throw(logic_error)
 	default:
 		throw std::logic_error("Incorrect type of command");
 	}
-
-	// virtual call in constructor!
-	execute();
 }
 
 QDataStream& operator>>(QDataStream& stream, CommandType& type)
@@ -35,26 +31,22 @@ QDataStream& operator<<(QDataStream& stream, const CommandType& type)
 	return stream;
 }
 
-/*istream& operator>>(istream& in, Command& c)
+QDataStream& operator>>(QDataStream& stream, Command& command)
 {
-	in >> c.name;
-	return in;
+	stream >> command;
+	return stream;
 }
 
-ostream& operator<<(ostream& out, const Command& c)
+QDataStream& operator<<(QDataStream& stream, const Command& command)
 {
-	out << c.name << endl;
-	return out;
+	stream << command;
+	return stream;
 }
 
-istream& operator>>(istream& in, Login& l)
+Command* CommandFactory::create(QDataStream& stream)
 {
-	in >> l.login;
-	return in;
+	stream >> type;
+	Command* command = new Command(type);
+	stream >> *command;
+	return command;
 }
-
-ostream& operator<<(ostream& out, const Login& l)
-{
-	out << l.login << endl;
-	return out;
-}*/

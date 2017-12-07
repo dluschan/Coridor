@@ -29,10 +29,11 @@ void MyThread::run()
 
 void MyThread::readyRead()
 {
-	CommandType type;
+	CommandFactory factory;
 	QDataStream in(pSocket);
 	in.setVersion(QDataStream::Qt_4_0);
-	in >> type;
+	Command* pCommand = factory.create(in);
+	pCommand->execute();
 }
 
 /*

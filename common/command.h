@@ -59,6 +59,15 @@ private:
 	Command* mLetter; // pointer to letter
 };
 
+class CommandFactory
+{
+public:
+	Command* create(QDataStream& stream);
+
+private:
+	CommandType type;
+};
+
 class Login : public Command
 {
 public:
