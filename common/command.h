@@ -1,180 +1,64 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <QDataStream>
 #include <QString>
-#include <cstdlib>
-#include <iostream>
-#include <map>
-#include <stdexcept>
 
 using namespace std;
 
-enum class CommandType
+struct CommandType
 {
-	AskLogin,
-	AskHelp,
-	AskPlayers,
-	CreateLobby,
-	AskLobbies,
-	WrongCommand
+	int type;
+	/*
+	AskLogin = 0,
+	AskHelp = 1,
+	AskPlayers = 2,
+	CreateLobby = 3,
+	AskLobbies = 4,
+	WrongCommand = 5
+	*/
 };
 
 QDataStream& operator>>(QDataStream& stream, CommandType& type);
 QDataStream& operator<<(QDataStream& stream, const CommandType& type);
 
-class Command
-{
-public:
-	Command(CommandType type);
-
-	QString name;
-
-	virtual ~Command()
-	{
-		if (mLetter)
-		{
-			// virtual call in destructor!
-		}
-
-		delete mLetter; // delete Letter for Envelope
-						// delete 0      for Letter
-	}
-
-	virtual void execute() const
-	{
-		mLetter->execute();
-	}
-
-protected:
-	// letter constructor
-	Command()
-		: mLetter(NULL)
-	{
-	}
-
-private:
-	Command(const Command&);
-	Command& operator=(Command&);
-
-	Command* mLetter; // pointer to letter
-};
+class Command;
 
 class CommandFactory
 {
 public:
-	Command* create(QDataStream& stream);
+	Command* create(QDataStream& stream) throw(std::logic_error);
+};
 
-private:
-	CommandType type;
+class Command
+{
+public:
+	virtual void execute() = 0;
+	virtual QDataStream& operator>>(QDataStream& stream) = 0;
+	virtual QDataStream& operator<<(QDataStream& stream) const = 0;
 };
 
 class Login : public Command
 {
 public:
-	~Login()
-	{
-		// cout << "~Login()" << endl;
-	}
-	virtual void execute() const
-	{
-		// cout << "Katon!" << endl;
-	}
-	virtual void erase()
-	{
-		// cout << "Login:erase()" << endl;
-	}
+	Login(QString _login = QString());
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
 
 private:
-	friend class Command;
-	Login()
-	{
-	}
-	Login(const Login&);
-	Login& operator=(Login&);
 	QString login;
 };
 
 class Help : public Command
 {
 public:
-	~Help()
-	{
-		// cout << "~Help()" << endl;
-	}
-	virtual void execute() const
-	{
-		// cout << "Mokuton!" << endl;
-	}
-	virtual void erase()
-	{
-		// cout << "Help::erase()" << endl;
-	}
+	Help();
 
-private:
-	friend class Command;
-	Help()
-	{
-	}
-	Help(const Help&);
-	Help& operator=(Help&);
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
-
-/*class PlayersList : public Command
-{
-public:
-	~PlayersList()
-	{
-		// cout << "~Login()" << endl;
-	}
-	virtual void cast(QString name) const
-	{
-		// cout << "Katon!" << endl;
-	}
-	virtual void show() const
-	{
-		// cout << "Login::show()" << endl;
-	}
-	virtual void erase()
-	{
-		// cout << "Login:erase()" << endl;
-	}
-
-private:
-	friend class Command;
-	PlayersList()
-	{
-	}
-	PlayersList(const Login&);
-	PlayersList& operator=(Login&);
-};
-
-class Lobby : public Command
-{
-public:
-	~Lobby()
-	{
-		// cout << "~Help()" << endl;
-	}
-	virtual void cast(QString name) const
-	{
-		// cout << "Mokuton!" << endl;
-	}
-	virtual void show() const
-	{
-		// cout << "Help::show()" << endl;
-	}
-	virtual void erase()
-	{
-		// cout << "Help::erase()" << endl;
-	}
-
-private:
-	friend class Command;
-	Lobby()
-	{
-	}
-	Lobby(const Help&);
-	Lobby& operator=(Help&);
-};*/
 
 #endif // COMMAND_H

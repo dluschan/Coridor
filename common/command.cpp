@@ -1,52 +1,84 @@
 #include "command.h"
+#include <QDebug>
 
-Command::Command(CommandType type) // throw(logic_error)
+QDataStream& operator>>(QDataStream& stream, CommandType& commandType)
 {
-	switch (type)
+	stream >> commandType.type;
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const CommandType& commandType)
+{
+	stream << commandType.type;
+	return stream;
+}
+
+Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
+{
+	CommandType commandType;
+	stream >> commandType;
+	Command* command;
+	switch (commandType.type)
 	{
-	case CommandType::AskLogin:
-		mLetter = new Login;
+	case 0: // CommandType::AskLogin
+		command = new Login();
 		break;
 
-	case CommandType::AskHelp:
-		mLetter = new Help;
+	case 1: // CommandType::AskHelp
+		command = new Help();
 		break;
-
-		// ...
 
 	default:
 		throw std::logic_error("Incorrect type of command");
 	}
-}
 
-QDataStream& operator>>(QDataStream& stream, CommandType& type)
-{
-	stream >> type;
-	return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const CommandType& type)
-{
-	stream << type;
-	return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Command& command)
-{
-	stream >> command;
-	return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Command& command)
-{
-	stream << command;
-	return stream;
-}
-
-Command* CommandFactory::create(QDataStream& stream)
-{
-	stream >> type;
-	Command* command = new Command(type);
-	stream >> *command;
+	command->operator>>(stream);
 	return command;
+}
+
+Login::Login(QString _login)
+	: login(_login)
+{
+	qDebug() << "Login command created" << login;
+}
+
+void Login::execute()
+{
+	qDebug() << "Login is" << login;
+}
+
+QDataStream& Login::operator>>(QDataStream& stream)
+{
+	std::string s;
+	QString q;
+	stream >> q;
+	login = QString::fromStdString(s);
+	return stream;
+}
+
+QDataStream& Login::operator<<(QDataStream& stream) const
+{
+	std::string s = login.toStdString();
+	QString q;
+	stream << q;
+	return stream;
+}
+
+Help::Help()
+{
+	qDebug() << "Help command created";
+}
+
+void Help::execute()
+{
+}
+
+QDataStream& Help::operator>>(QDataStream& stream)
+{
+	return stream;
+}
+
+QDataStream& Help::operator<<(QDataStream& stream) const
+{
+	return stream;
 }
