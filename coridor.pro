@@ -5,4 +5,5 @@ SUBDIRS += \
     client \
     server \
     sprite_class \
-    sprites_test
+    sprites_test \
+    CoridorGraphics
