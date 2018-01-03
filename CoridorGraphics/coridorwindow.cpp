@@ -36,12 +36,7 @@ void Walls::mouseMoved(QPoint pos, QPoint point)
 	{
 		double cfx = 1.0 * 36 * 18 / 17.0;
 		double cfy = 1.0 * 36 * 18 / 17.0;
-		if (hSelected)
-		{
-			pos.setX(point.x() * cfx + 18);
-			pos.setY(point.y() * cfy + 18);
-		}
-		if (vSelected)
+		if (hSelected || vSelected)
 		{
 			pos.setX(point.x() * cfx + 18);
 			pos.setY(point.y() * cfy + 18);
@@ -72,7 +67,7 @@ CoridorWindow::CoridorWindow(QWidget* parent)
 	pictures->load();
 
 	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
-	game = new GameLogic();
+	game = new CoridorLogic();
 
 	field->redraw(game->pole);
 }
@@ -92,25 +87,6 @@ void CoridorWindow::paintEvent(QPaintEvent* pEvent)
 	painter.drawImage(walls.vX, walls.vY, walls.verWall);
 }
 
-/*void CoridorWindow::SelectPlayer(QPoint point)
-{
-	if (point.x() >= 0 && point.x() <= 16 && point.y() >= 0 && point.y() <= 16)
-	{
-		try
-		{
-			if (game->pole[point.x()][point.y()] == 0)
-				pl1Sel = true;
-			if (game->pole[point.x()][point.y()] == 1)
-				pl2Sel = true;
-		}
-		catch (const exception& e)
-		{
-			cout << e.what() << endl;
-			// return turn(pole, coords, player_id);
-		}
-	}
-}*/
-
 void CoridorWindow::PlaceWall(QPoint point)
 {
 	if (point.x() >= 0 && point.x() <= 16 && point.y() >= 0 && point.y() <= 16)
@@ -119,7 +95,10 @@ void CoridorWindow::PlaceWall(QPoint point)
 		{
 			try
 			{
-				nextTurn(game->placeWall(game->pole, game->player, (point.x() - 1) / 2, (point.y() - 1) / 2, 'h'));
+				if (game->nextTurn(game->placeWall(game->player, (point.x() - 1) / 2, (point.y() - 1) / 2, 'h')) != 0)
+					status = "Player" + QString::number(game->winner + 1) + " wins!";
+				else
+					status = "Move or place a wall";
 			}
 			catch (const exception& e)
 			{
@@ -131,7 +110,10 @@ void CoridorWindow::PlaceWall(QPoint point)
 		{
 			try
 			{
-				nextTurn(game->placeWall(game->pole, game->player, (point.x() - 1) / 2, (point.y() - 1) / 2, 'v'));
+				if (game->nextTurn(game->placeWall(game->player, (point.x() - 1) / 2, (point.y() - 1) / 2, 'v')) != 0)
+					status = "Player" + QString::number(game->winner + 1) + " wins!";
+				else
+					status = "Move or place a wall";
 			}
 			catch (const exception& e)
 			{
@@ -149,7 +131,10 @@ void CoridorWindow::MovePlayer(QPoint point)
 		try
 		{
 			// qDebug() << point.x() << " " << point.y();
-			nextTurn(game->move(game->pole, game->player, point.x(), point.y()));
+			if (game->nextTurn(game->move(game->pole, game->player, point.x(), point.y())) != 0)
+				status = "Player" + QString::number(game->winner + 1) + " wins!";
+			else
+				status = "Move or place a wall";
 		}
 		catch (const exception& e)
 		{
@@ -159,7 +144,7 @@ void CoridorWindow::MovePlayer(QPoint point)
 	}
 }
 
-void CoridorWindow::nextTurn(int res)
+/*void CoridorWindow::nextTurn(int res)
 {
 	game->end = res;
 	status = "Move or place a wall";
@@ -172,12 +157,12 @@ void CoridorWindow::nextTurn(int res)
 
 	if (game->end != 0)
 		end();
-}
+}*/
 
-void CoridorWindow::end()
+/*void CoridorWindow::end()
 {
 	status = "Player" + QString::number(game->winner + 1) + " wins!";
-	switch (game->end)
+	switch (game->endValue)
 	{
 	case 1:
 		cout << "Player" << game->winner + 1 << " wins!" << endl;
@@ -187,38 +172,37 @@ void CoridorWindow::end()
 		// cout << "Ops, Player" << number << " closed himself!" << endl;
 		break;
 	}
-}
+}*/
 
 void CoridorWindow::mousePressEvent(QMouseEvent* mEvent)
 {
-	if (game->end == 0)
+	if (game->endValue == 0)
 	{
 		QPoint pos = mEvent->pos();
-		QPoint point = field->getCoord(pos.x(), pos.y());
+		// QPoint point = field->getCoord(pos.x(), pos.y());
 		walls.mousePressed(pos);
 
 		// SelectPlayer(point);
-
-		field->redraw(game->pole);
-		this->update();
 	}
+	field->redraw(game->pole);
+	this->update();
 }
 
 void CoridorWindow::mouseMoveEvent(QMouseEvent* mEvent)
 {
-	if (game->end == 0)
+	if (game->endValue == 0)
 	{
 		QPoint pos = mEvent->pos();
 		QPoint point = field->getCoord(pos.x(), pos.y());
 		walls.mouseMoved(pos, point);
-		field->redraw(game->pole);
-		this->update();
 	}
+	field->redraw(game->pole);
+	this->update();
 }
 
 void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 {
-	if (game->end == 0)
+	if (game->endValue == 0)
 	{
 		QPoint pos = mEvent->pos();
 		QPoint point = field->getCoord(pos.x(), pos.y());
@@ -230,10 +214,9 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		}
 		else
 			MovePlayer(point);
-
-		field->redraw(game->pole);
-		this->update();
 	}
+	field->redraw(game->pole);
+	this->update();
 }
 
 void CoridorWindow::on_pushButton_clicked()
@@ -245,7 +228,7 @@ void CoridorWindow::on_pushButton_clicked()
 void CoridorWindow::start_pushButton_clicked()
 {
 	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
+	game = new CoridorLogic();
 	field->redraw(game->pole);
 	this->update();
-	game = new GameLogic();
 }

@@ -29,15 +29,20 @@ SOURCES += \
     coridorwindow.cpp \
     images.cpp \
     field.cpp \
-    player.cpp
+    quartowindow.cpp \
+    coridorlogic.cpp \
+    quartologic.cpp
 
 HEADERS += \
         mainwindow.h \
     coridorwindow.h \
     images.h \
     field.h \
-    player.h
+    quartowindow.h \
+    coridorlogic.h \
+    quartologic.h
 
 FORMS += \
         mainwindow.ui \
-    coridorwindow.ui
+    coridorwindow.ui \
+    quartowindow.ui

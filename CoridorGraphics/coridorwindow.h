@@ -1,16 +1,11 @@
 #ifndef CORIDORWINDOW_H
 #define CORIDORWINDOW_H
 
+#include "coridorlogic.h"
 #include "field.h"
 #include "images.h"
-#include "player.h"
-#include <QGraphicsItem>
-#include <QGraphicsScene>
-#include <QImage>
 #include <QObject>
 #include <QPainter>
-#include <QPixmap>
-#include <QString>
 #include <QWidget>
 
 namespace Ui
@@ -54,21 +49,17 @@ private slots:
 
 private:
 	Ui::CoridorWindow* ui;
-	// QPixmap *spriteImage;
 	Images* pictures;
 	QImage* image;
 	Field* field;
-	QGraphicsScene* scene;
 	Walls walls;
-	GameLogic* game;
+	CoridorLogic* game;
 	QString status = "Move or place a wall";
-	// bool pl1Sel, pl2Sel;
 
-	// void SelectPlayer(QPoint point);
 	void PlaceWall(QPoint point);
 	void MovePlayer(QPoint point);
-	void nextTurn(int res);
-	void end();
+	// void nextTurn(int res);
+	// void end();
 };
 
 #endif // CORIDORWINDOW_H
