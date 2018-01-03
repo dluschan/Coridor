@@ -31,6 +31,7 @@ void MainWindow::sockDisc()
 {
 	pSocket->deleteLater();
 }
+
 void MainWindow::sockReady()
 {
 	if (pSocket->waitForConnected(500))
@@ -51,7 +52,7 @@ void MainWindow::sendMessage()
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_4_0);
+	out.setVersion(QDataStream::Qt_5_10);
 	out << ui->lineEdit->text();
 	pSocket->write(arrBlock);
 	pSocket->waitForBytesWritten();
@@ -65,12 +66,13 @@ void MainWindow::sendCommand()
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_4_0);
+	out.setVersion(QDataStream::Qt_5_10);
 
 	CommandType commandType = {0};
 	Command* pCommand = new Login(ui->lineEdit->text());
 
-	out << commandType << pCommand;
+	out << commandType;
+	pCommand->operator<<(out);
 	pSocket->write(arrBlock);
 	pSocket->waitForBytesWritten();
 

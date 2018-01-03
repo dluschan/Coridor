@@ -29,12 +29,9 @@ void MyThread::run()
 
 void MyThread::readyRead()
 {
-	QByteArray arrBlock = pSocket->readAll();
-	qDebug() << arrBlock;
-	QDataStream in(&arrBlock, QIODevice::ReadOnly);
-	in.setVersion(QDataStream::Qt_4_0);
-
 	CommandFactory factory;
+	QDataStream in(pSocket);
+	in.setVersion(QDataStream::Qt_5_10);
 	Command* pCommand = factory.create(in);
 	pCommand->execute();
 }

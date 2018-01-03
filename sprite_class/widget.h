@@ -32,6 +32,7 @@ signals:
 	void pos(qreal x, qreal y);
 
 protected:
+	using QWidget::mouseReleaseEvent;
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 };
 

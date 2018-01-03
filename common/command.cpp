@@ -17,23 +17,23 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 {
 	CommandType commandType;
 	stream >> commandType;
-	Command* command;
+	Command* pCommand;
 	switch (commandType.type)
 	{
 	case 0: // CommandType::AskLogin
-		command = new Login();
+		pCommand = new Login();
 		break;
 
 	case 1: // CommandType::AskHelp
-		command = new Help();
+		pCommand = new Help();
 		break;
 
 	default:
 		throw std::logic_error("Incorrect type of command");
 	}
 
-	command->operator>>(stream);
-	return command;
+	pCommand->operator>>(stream);
+	return pCommand;
 }
 
 Login::Login(QString _login)
@@ -49,12 +49,14 @@ void Login::execute()
 
 QDataStream& Login::operator>>(QDataStream& stream)
 {
+	qDebug() << "login read";
 	stream >> login;
 	return stream;
 }
 
 QDataStream& Login::operator<<(QDataStream& stream) const
 {
+	qDebug() << "login written";
 	stream << login;
 	return stream;
 }
