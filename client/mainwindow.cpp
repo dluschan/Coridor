@@ -31,6 +31,7 @@ void MainWindow::sockDisc()
 {
 	pSocket->deleteLater();
 }
+
 void MainWindow::sockReady()
 {
 	if (pSocket->waitForConnected(500))
@@ -70,7 +71,8 @@ void MainWindow::sendCommand()
 	CommandType commandType = {0};
 	Command* pCommand = new Login(ui->lineEdit->text());
 
-	out << commandType << pCommand;
+	out << commandType;
+	pCommand->operator<<(out);
 	pSocket->write(arrBlock);
 	pSocket->waitForBytesWritten();
 

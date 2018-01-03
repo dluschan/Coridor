@@ -49,18 +49,15 @@ void Login::execute()
 
 QDataStream& Login::operator>>(QDataStream& stream)
 {
-	std::string s;
-	QString q;
-	stream >> q;
-	login = QString::fromStdString(s);
+	qDebug() << "login read";
+	stream >> login;
 	return stream;
 }
 
 QDataStream& Login::operator<<(QDataStream& stream) const
 {
-	std::string s = login.toStdString();
-	QString q;
-	stream << q;
+	qDebug() << "login written";
+	stream << login;
 	return stream;
 }
 
