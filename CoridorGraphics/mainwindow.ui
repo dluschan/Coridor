@@ -17,14 +17,27 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>80</x>
+      <x>90</x>
       <y>40</y>
-      <width>211</width>
-      <height>151</height>
+      <width>221</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="text">
      <string>StartTheGame</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>140</y>
+      <width>221</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quarto</string>
     </property>
    </widget>
   </widget>

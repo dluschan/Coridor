@@ -14,7 +14,9 @@ public:
 	~Field();
 	const QImage& getImage() const;
 	void redraw(int pole[17][17]);
+	void redraw2(int pole[4][4]);
 	QPoint getCoord(int x, int y);
+	QPoint getCoord2(int x, int y);
 	int getX();
 	int getY();
 

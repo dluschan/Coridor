@@ -9,6 +9,7 @@ class Images
 {
 public:
 	void load();
+	void load2();
 	QImage& getImage(const int& imgNumber);
 
 private:

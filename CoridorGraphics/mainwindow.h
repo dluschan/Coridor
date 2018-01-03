@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <coridorwindow.h>
+#include <quartowindow.h>
 
 namespace Ui
 {
@@ -21,10 +22,13 @@ private slots:
 	// Слоты от кнопок главного окна
 	void on_pushButton_clicked();
 
+	void on_pushButton_2_clicked();
+
 private:
 	Ui::MainWindow* ui;
 	// второе и третье окна
 	CoridorWindow* sWindow;
+	QuartoWindow* tWindow;
 };
 
 #endif // MAINWINDOW_H

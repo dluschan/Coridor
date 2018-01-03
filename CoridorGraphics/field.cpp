@@ -9,16 +9,6 @@ Field::Field(Images* images, int _left, int _top, int _width, int _height)
 	, width(_width)
 	, height(_height)
 {
-	/*for (int i = 0; i < 17; i++) //Заполняем -1
-		for (int j = 0; j < 17; j++)
-		{
-			if (j % 2 == 1 || i % 2 == 1)
-				pole[i][j] = -2;
-			else
-				pole[i][j] = -1;
-		}
-	pole[0][8] = 0;
-	pole[16][8] = 1;*/
 	image = new QImage(width, height, QImage::Format_ARGB32);
 }
 
@@ -46,6 +36,19 @@ void Field::redraw(int pole[17][17])
 	// 57:50
 }
 
+void Field::redraw2(int pole[4][4])
+{
+	image->fill(0);
+	QPainter painter(image);
+	double cfx = 1.0 * width / 4.0;
+	double cfy = 1.0 * height / 4.0;
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+		{
+			painter.drawImage(i * cfx, j * cfy, pictures->getImage(pole[i][j]));
+		}
+}
+
 QPoint Field::getCoord(int x, int y)
 {
 	QPoint res;
@@ -55,6 +58,20 @@ QPoint Field::getCoord(int x, int y)
 		return res;
 	double cfx = 1.0 * width / 17.0;
 	double cfy = 1.0 * height / 17.0;
+	res.setX(1.0 * (x - left) / cfx);
+	res.setY(1.0 * (y - top) / cfy);
+	return res;
+}
+
+QPoint Field::getCoord2(int x, int y)
+{
+	QPoint res;
+	res.setX(-1);
+	res.setY(-1);
+	if (x < left || x > (left + width) || y < top || y > (top + height))
+		return res;
+	double cfx = 1.0 * width / 4.0;
+	double cfy = 1.0 * height / 4.0;
 	res.setX(1.0 * (x - left) / cfx);
 	res.setY(1.0 * (y - top) / cfy);
 	return res;

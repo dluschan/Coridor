@@ -9,6 +9,14 @@ void Images::load()
 	images.insert(5, QImage("PICTURES/wall_tile.png"));
 }
 
+void Images::load2()
+{
+	images.insert(-1, QImage("PICTURES/empty_tile2.png"));
+	for (int i = 0; i < 16; i++)
+		images.insert(i, QImage("PICTURES/figure" + QString::number(i) + ".png"));
+	images.insert(0, QImage("PICTURES/figure0.png"));
+}
+
 QImage& Images::getImage(const int& imgNumber)
 {
 	QMap<int, QImage>::iterator i = images.find(imgNumber);
