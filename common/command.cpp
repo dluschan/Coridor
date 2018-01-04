@@ -84,3 +84,8 @@ QDataStream& CreateLobby::operator<<(QDataStream& stream) const
 	stream << lobbyName << hostLogin << gameType;
 	return stream;
 }
+
+void CreateLobby::execute()
+{
+	qDebug() << "execute CreateLobby command";
+}
