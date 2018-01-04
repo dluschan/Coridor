@@ -32,7 +32,7 @@ void MyServer::playerList(MyThread* thread)
 
 void MyServer::createLobby(MyThread* thread, QString lobbyName)
 {
-	lobbies.push_back(new Lobby(lobbyName, thread->player));
+	lobbies.push_back(new Lobby(lobbyName, thread->player, 1));
 	thread->lobby = lobbies.back();
 	sendString("Lobby created!", thread);
 }

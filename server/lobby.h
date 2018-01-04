@@ -8,7 +8,7 @@
 class Lobby
 {
 public:
-	Lobby(QString _name, Player* player);
+	Lobby(QString _name, Player* player, int _lobbyType);
 	QString lobbyName;
 	Player* host;
 	std::list<Player*> connectedPlayers;
