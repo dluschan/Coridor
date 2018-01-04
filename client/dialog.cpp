@@ -1,14 +1,32 @@
 #include "dialog.h"
-#include "ui_dialog.h"
 
-Dialog::Dialog(QWidget *parent) :
-	QDialog(parent),
-	ui(new Ui::Dialog)
+CreateLobbyDialog::CreateLobbyDialog(QWidget* parent)
+	: QDialog(parent)
 {
-	ui->setupUi(this);
+	mainLayout = new QVBoxLayout();
+	setLayout(mainLayout);
+
+	lobbyNameEdit = new QLineEdit();
+	hostLoginEdit = new QLineEdit();
+	gameTypeEdit = new QComboBox;
+	gameTypeEdit->addItem(tr("Coridor"), 1);
+	gameTypeEdit->addItem(tr("Quarto"), 2);
+	createLobbyBtn = new QPushButton("Create lobby");
+	connect(createLobbyBtn, SIGNAL(clicked()), this, SLOT(createLobby()));
+
+	mainLayout->addWidget(lobbyNameEdit);
+	mainLayout->addWidget(hostLoginEdit);
+	mainLayout->addWidget(gameTypeEdit);
+
+	this->show();
 }
 
-Dialog::~Dialog()
+CreateLobbyDialog::~CreateLobbyDialog()
 {
-	delete ui;
+	//
+}
+
+CreateLobbyDialog::createLobby()
+{
+	this->hide();
 }

@@ -1,22 +1,30 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
+#include <QComboBox>
 #include <QDialog>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QVBoxLayout>
 
-namespace Ui {
-	class Dialog;
-}
-
-class Dialog : public QDialog
+class CreateLobbyDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit Dialog(QWidget *parent = 0);
-	~Dialog();
+	explicit CreateLobbyDialog(QWidget* parent = 0);
+	~CreateLobbyDialog();
+
+public slots:
+	createLobby();
 
 private:
-	Ui::Dialog *ui;
+	QVBoxLayout* mainLayout;
+	QLineEdit* lobbyNameEdit;
+	QLineEdit* hostLoginEdit;
+	QComboBox* gameTypeEdit;
+	QPushButton* createLobbyBtn;
 };
 
 #endif // DIALOG_H
