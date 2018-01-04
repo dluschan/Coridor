@@ -52,14 +52,19 @@ private:
 	QString login;
 };
 
-class Help : public Command
+class CreateLobby : public Command
 {
 public:
-	Help();
+	CreateLobby(QString _lobbyName = QString("Lobby Name"), QString _hostLogin = QString(), int _gameType = 1);
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
+
+private:
+	QString lobbyName;
+	QString hostLogin;
+	int gameType;
 };
 
 #endif // COMMAND_H

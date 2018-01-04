@@ -27,7 +27,7 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 		break;
 
 	case CommandType::Type::AskHelp: // CommandType::AskHelp
-		pCommand = new Help();
+		// pCommand = new Help();
 		break;
 
 	default:
@@ -63,21 +63,24 @@ QDataStream& Login::operator<<(QDataStream& stream) const
 	return stream;
 }
 
-Help::Help()
+CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin, int _gameType)
+	: lobbyName(_lobbyName)
+	, hostLogin(_hostLogin)
+	, gameType(_gameType)
 {
-	qDebug() << "Help command created";
+	qDebug() << "CreateLobby command created" << _lobbyName;
 }
 
-void Help::execute()
+QDataStream& CreateLobby::operator>>(QDataStream& stream)
 {
-}
-
-QDataStream& Help::operator>>(QDataStream& stream)
-{
+	qDebug() << "CreateLobby read";
+	stream >> lobbyName >> hostLogin >> gameType;
 	return stream;
 }
 
-QDataStream& Help::operator<<(QDataStream& stream) const
+QDataStream& CreateLobby::operator<<(QDataStream& stream) const
 {
+	qDebug() << "CreateLobby written";
+	stream << lobbyName << hostLogin << gameType;
 	return stream;
 }

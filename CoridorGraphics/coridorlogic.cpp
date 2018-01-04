@@ -1,7 +1,6 @@
 #include "coridorlogic.h"
 
 #include <QDebug>
-#include <conio.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
