@@ -1,8 +1,10 @@
 #include "dialog.h"
+#include <QDebug>
 
 CreateLobbyDialog::CreateLobbyDialog(QWidget* parent)
 	: QDialog(parent)
 {
+	this->setWindowTitle("Create lobby");
 	mainLayout = new QVBoxLayout();
 	setLayout(mainLayout);
 
@@ -17,16 +19,18 @@ CreateLobbyDialog::CreateLobbyDialog(QWidget* parent)
 	mainLayout->addWidget(lobbyNameEdit);
 	mainLayout->addWidget(hostLoginEdit);
 	mainLayout->addWidget(gameTypeEdit);
+	mainLayout->addWidget(createLobbyBtn);
 
 	this->show();
 }
 
 CreateLobbyDialog::~CreateLobbyDialog()
 {
-	//
+	// Nothing
 }
 
 CreateLobbyDialog::createLobby()
 {
+	emit clicked2(lobbyNameEdit->text(), hostLoginEdit->text(), gameTypeEdit->currentIndex());
 	this->hide();
 }

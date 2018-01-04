@@ -16,15 +16,19 @@ public:
 	explicit CreateLobbyDialog(QWidget* parent = 0);
 	~CreateLobbyDialog();
 
-public slots:
-	createLobby();
-
-private:
-	QVBoxLayout* mainLayout;
+	QPushButton* createLobbyBtn;
 	QLineEdit* lobbyNameEdit;
 	QLineEdit* hostLoginEdit;
 	QComboBox* gameTypeEdit;
-	QPushButton* createLobbyBtn;
+
+public slots:
+	createLobby();
+
+signals:
+	clicked2(QString ln, QString hl, int gt);
+
+private:
+	QVBoxLayout* mainLayout;
 };
 
 #endif // DIALOG_H
