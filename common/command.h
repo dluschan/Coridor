@@ -8,15 +8,16 @@ using namespace std;
 
 struct CommandType
 {
-	int type;
-	/*
-	AskLogin = 0,
-	AskHelp = 1,
-	AskPlayers = 2,
-	CreateLobby = 3,
-	AskLobbies = 4,
-	WrongCommand = 5
-	*/
+	enum class Type : unsigned int
+	{
+		AskLogin = 0,
+		AskHelp = 1,
+		AskPlayers = 2,
+		CreateLobby = 3,
+		AskLobbies = 4,
+		WrongCommand = 5
+	};
+	Type type;
 };
 
 QDataStream& operator>>(QDataStream& stream, CommandType& type);

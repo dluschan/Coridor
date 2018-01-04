@@ -68,7 +68,7 @@ void MainWindow::sendCommand()
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_10);
 
-	CommandType commandType = {0};
+	CommandType commandType = {CommandType::Type::AskLogin};
 	Command* pCommand = new Login(ui->lineEdit->text());
 
 	out << commandType;

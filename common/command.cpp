@@ -3,13 +3,15 @@
 
 QDataStream& operator>>(QDataStream& stream, CommandType& commandType)
 {
-	stream >> commandType.type;
+	unsigned int type;
+	stream >> type;
+	commandType.type = CommandType::Type(type);
 	return stream;
 }
 
 QDataStream& operator<<(QDataStream& stream, const CommandType& commandType)
 {
-	stream << commandType.type;
+	stream << unsigned(commandType.type);
 	return stream;
 }
 
@@ -20,11 +22,11 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	Command* pCommand;
 	switch (commandType.type)
 	{
-	case 0: // CommandType::AskLogin
+	case CommandType::Type::AskLogin: // CommandType::AskLogin
 		pCommand = new Login();
 		break;
 
-	case 1: // CommandType::AskHelp
+	case CommandType::Type::AskHelp: // CommandType::AskHelp
 		pCommand = new Help();
 		break;
 
