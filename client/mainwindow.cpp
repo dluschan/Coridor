@@ -53,8 +53,9 @@ void MainWindow::connectToTheServer()
 
 void MainWindow::createLobbyDialog()
 {
-	CreateLobbyDialog dialog();
-	qDebug() << "obey";
+	CreateLobbyDialog* dialog = new CreateLobbyDialog();
+	connect(dialog, SIGNAL(clicked2(QString, QString, int)), this, SLOT(createLobby(QString, QString, int)));
+	// (dialog->lobbyNameEdit->text(), dialog->hostLoginEdit->text(), dialog->gameTypeEdit->currentIndex())
 }
 
 void MainWindow::switchToLoginIn()
@@ -92,6 +93,21 @@ void MainWindow::sockDisc()
 {
 	pSocket->deleteLater();
 	switchToLoginIn();
+}
+
+void MainWindow::createLobby(QString _lobbyName, QString _hostLogin, int _gameType)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {1};
+	Command* pCommand = new CreateLobby(_lobbyName, _hostLogin, _gameType);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
 }
 
 void MainWindow::sockReady()

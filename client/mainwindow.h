@@ -23,6 +23,7 @@ public:
 public slots:
 	void sockReady();
 	void sockDisc();
+	void createLobby(QString _lobbyName, QString _hostLogin, int _gameType);
 
 private slots:
 	void connectToTheServer();
