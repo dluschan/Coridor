@@ -6,15 +6,15 @@
 
 enum GameType
 {
-    Coridor,
-    WrongType
+	Coridor,
+	WrongType
 };
 
 class Game
 {
 public:
-    Game(GameType type);
-    GameType game;
+	Game(GameType type);
+	GameType game;
 };
 
 #endif // GAME_H
