@@ -38,7 +38,7 @@ void MainWindow::connectToTheServer()
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {0};
+	CommandType commandType = {CommandType::Type::AskLogin};
 	Command* pCommand = new Login(loginEdit->text());
 
 	out << commandType;
@@ -101,7 +101,7 @@ void MainWindow::createLobby(QString _lobbyName, QString _hostLogin, int _gameTy
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {1};
+	CommandType commandType = {CommandType::Type::CreateLobby};
 	Command* pCommand = new CreateLobby(_lobbyName, _hostLogin, _gameType);
 
 	out << commandType;
