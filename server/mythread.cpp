@@ -31,7 +31,7 @@ void MyThread::readyRead()
 {
 	CommandFactory factory;
 	QDataStream in(pSocket);
-	in.setVersion(QDataStream::Qt_5_10);
+	in.setVersion(QDataStream::Qt_5_9);
 	Command* pCommand = factory.create(in);
 	pCommand->execute();
 }
