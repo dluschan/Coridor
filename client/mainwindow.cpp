@@ -41,6 +41,8 @@ void MainWindow::connectToTheServer()
 	CommandType commandType = {CommandType::Type::AskLogin};
 	Command* pCommand = new Login(loginEdit->text());
 
+	player = new Player(loginEdit->text());
+
 	out << commandType;
 	pCommand->operator<<(out);
 	pSocket->write(arrBlock);
@@ -53,8 +55,8 @@ void MainWindow::connectToTheServer()
 
 void MainWindow::createLobbyDialog()
 {
-	CreateLobbyDialog* dialog = new CreateLobbyDialog();
-	connect(dialog, SIGNAL(clicked2(QString, QString, int)), this, SLOT(createLobby(QString, QString, int)));
+	CreateLobbyDialog* dialog = new CreateLobbyDialog(player->playerName);
+	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(createLobby(QString, QString, int)));
 	// (dialog->lobbyNameEdit->text(), dialog->hostLoginEdit->text(), dialog->gameTypeEdit->currentIndex())
 }
 

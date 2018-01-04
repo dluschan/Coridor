@@ -32,6 +32,8 @@ private slots:
 signals:
 
 private:
+	Player* player;
+
 	QWidget* centralWidget;
 	QWidget* centralWidget2;
 	QVBoxLayout* connectLayout;
