@@ -11,11 +11,11 @@ struct CommandType
 	int type;
 	/*
 	AskLogin = 0,
-	AskHelp = 1,
-	AskPlayers = 2,
-	CreateLobby = 3,
-	AskLobbies = 4,
-	WrongCommand = 5
+	//AskHelp = 1,
+	//AskPlayers = 2,
+	CreateLobby = 1,
+	AskLobbies = 2,
+	WrongCommand = 3
 	*/
 };
 
@@ -54,7 +54,7 @@ private:
 class CreateLobby : public Command
 {
 public:
-	CreateLobby(QString _lobbyName = "Lobby Name", QString _hostLogin = QString());
+	CreateLobby(QString _lobbyName = QString("Lobby Name"), QString _hostLogin = QString(), int _gameType = 1);
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

@@ -61,12 +61,13 @@ QDataStream& Login::operator<<(QDataStream& stream) const
 	return stream;
 }
 
-/*CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin)
+CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin, int _gameType)
 	: lobbyName(_lobbyName)
 	, hostLogin(_hostLogin)
+	, gameType(_gameType)
 {
 	qDebug() << "CreateLobby command created" << _lobbyName;
-}*/
+}
 
 QDataStream& CreateLobby::operator>>(QDataStream& stream)
 {
