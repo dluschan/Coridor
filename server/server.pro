@@ -18,15 +18,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     myserver.cpp \
     mythread.cpp \
-    player.cpp \
-    lobby.cpp \
-    game.cpp \
+    ../common/player.cpp \
+    ../common/lobby.cpp \
+    ../common/game.cpp \
     ../common/command.cpp
 
 HEADERS += \
     myserver.h \
     mythread.h \
-    player.h \
-    lobby.h \
-    game.h \
+    ../common/player.h \
+    ../common/lobby.h \
+    ../common/game.h \
     ../common/command.h

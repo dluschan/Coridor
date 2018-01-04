@@ -16,8 +16,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
         ../common/command.cpp \
+        ../common/lobby.cpp \
+        ../common/game.cpp \
+        ../common/player.cpp \
         dialog.cpp
 
 HEADERS  += mainwindow.h \
         ../common/command.h \
+        ../common/lobby.h \
+        ../common/game.h \
+        ../common/player.h \
         dialog.h
