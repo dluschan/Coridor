@@ -22,10 +22,10 @@ public:
 	QComboBox* gameTypeEdit;
 
 public slots:
-	createLobby();
+	void createLobby();
 
 signals:
-	clicked2(QString ln, QString hl, int gt);
+	void clicked(QString ln, QString hl, int gt);
 
 private:
 	QVBoxLayout* mainLayout;

@@ -29,8 +29,8 @@ CreateLobbyDialog::~CreateLobbyDialog()
 	// Nothing
 }
 
-CreateLobbyDialog::createLobby()
+void CreateLobbyDialog::createLobby()
 {
-	emit clicked2(lobbyNameEdit->text(), hostLoginEdit->text(), gameTypeEdit->currentIndex());
+	emit clicked(lobbyNameEdit->text(), hostLoginEdit->text(), gameTypeEdit->currentIndex());
 	this->hide();
 }
