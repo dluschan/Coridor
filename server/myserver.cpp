@@ -32,7 +32,7 @@ void MyServer::playerList(MyThread* thread)
 
 void MyServer::createLobby(MyThread* thread, QString lobbyName)
 {
-	lobbies.push_back(new Lobby(lobbyName, thread->player, 1));
+	lobbies.push_back(thread->createLobby(lobbyName, 1));
 	thread->lobby = lobbies.back();
 	sendString("Lobby created!", thread);
 }
@@ -54,7 +54,7 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	players.push_back(new MyThread(socketDescriptor, this));
 	connect(players.back(), SIGNAL(finished()), players.back(), SLOT(deleteLater()));
 	connect(players.back(), SIGNAL(sendPlayerList(MyThread*)), this, SLOT(playerList(MyThread*)), Qt::DirectConnection);
-	connect(players.back(), SIGNAL(createLobby(MyThread*, QString)), this, SLOT(createLobby(MyThread*, QString)));
+	connect(players.back(), SIGNAL(createLobbySignal(MyThread*, QString)), this, SLOT(createLobby(MyThread*, QString)));
 	connect(players.back(), SIGNAL(sendLobbiesList(MyThread*)), this, SLOT(lobbyList(MyThread*)));
 	players.back()->start();
 

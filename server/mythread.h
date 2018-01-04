@@ -1,8 +1,8 @@
 #ifndef MYTHREAD_H
 #define MYTHREAD_H
 
-#include "lobby.h"
-//#include "player.h"
+#include "../common/command.h"
+#include "../common/lobby.h"
 #include <QDebug>
 #include <QTcpSocket>
 #include <QThread>
@@ -21,11 +21,13 @@ public:
 	Lobby* lobby;
 	void run();
 	void sendString(QString message);
+	Lobby* createLobby(QString lobbyName, int gameType);
+	Player* createPlayer(QString playerName);
 
 signals:
 	void error(QTcpSocket::SocketError socketError);
 	void sendPlayerList(MyThread* thread);
-	void createLobby(MyThread* thread, QString lobbyName);
+	void createLobbySignal(MyThread* thread, QString lobbyName);
 	void sendLobbiesList(MyThread* socket);
 
 public slots:
@@ -35,6 +37,7 @@ public slots:
 private:
 	// QTcpSocket* pSocket;
 	int socketDescriptor;
+	Command* pCommand;
 	// Player* player;
 
 	void login(QString login);

@@ -1,5 +1,4 @@
 #include "mythread.h"
-#include "../common/command.h"
 
 MyThread::MyThread(int ID, QObject* parent)
 	: QThread(parent)
@@ -32,7 +31,7 @@ void MyThread::readyRead()
 	CommandFactory factory;
 	QDataStream in(pSocket);
 	in.setVersion(QDataStream::Qt_5_9);
-	Command* pCommand = factory.create(in);
+	pCommand = factory.create(in);
 	pCommand->execute();
 }
 
@@ -70,4 +69,14 @@ void MyThread::sendString(QString message)
 	QByteArray buffer(message.toStdString().c_str());
 	pSocket->write(buffer);
 	pSocket->waitForBytesWritten();
+}
+
+Lobby* MyThread::createLobby(QString lobbyName, int gameType)
+{
+	return new Lobby(lobbyName, player->playerName, gameType);
+}
+
+Player* MyThread::createPlayer(QString playerName)
+{
+	return new Player(playerName);
 }
