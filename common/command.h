@@ -1,6 +1,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include "lobby.h"
 #include <QDataStream>
 #include <QString>
 
@@ -10,12 +11,10 @@ struct CommandType
 {
 	enum class Type : unsigned int
 	{
-		AskLogin = 0,
-		AskHelp = 1,
-		AskPlayers = 2,
-		CreateLobby = 3,
-		AskLobbies = 4,
-		WrongCommand = 5
+		AskLogin,
+		CreateLobby,
+		AskLobbies,
+		WrongCommand
 	};
 	Type type;
 };
@@ -44,6 +43,8 @@ class Login : public Command
 public:
 	Login(QString _login = QString());
 
+	Player* player;
+
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
@@ -56,6 +57,8 @@ class CreateLobby : public Command
 {
 public:
 	CreateLobby(QString _lobbyName = QString("Lobby Name"), QString _hostLogin = QString(), int _gameType = 1);
+
+	Lobby* lobby;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

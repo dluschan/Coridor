@@ -26,8 +26,8 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 		pCommand = new Login();
 		break;
 
-	case CommandType::Type::AskHelp: // CommandType::AskHelp
-		// pCommand = new Help();
+	case CommandType::Type::CreateLobby: // CommandType::AskHelp
+		pCommand = new CreateLobby();
 		break;
 
 	default:
@@ -47,6 +47,7 @@ Login::Login(QString _login)
 void Login::execute()
 {
 	qDebug() << "Login is" << login;
+	player = new Player(login);
 }
 
 QDataStream& Login::operator>>(QDataStream& stream)
@@ -87,5 +88,6 @@ QDataStream& CreateLobby::operator<<(QDataStream& stream) const
 
 void CreateLobby::execute()
 {
+	lobby = new Lobby(lobbyName, hostLogin, gameType);
 	qDebug() << "execute CreateLobby command";
 }
