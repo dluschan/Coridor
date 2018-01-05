@@ -21,9 +21,9 @@ private:
 signals:
 
 public slots:
-	void playerList(MyThread* thread);
-	void createLobby(MyThread* thread, QString lobbyName);
-	void lobbyList(MyThread* thread);
+	// void playerList(MyThread* thread);
+	void createLobby(Lobby* lobby);
+	// void lobbyList(MyThread* thread);
 
 protected:
 	void incomingConnection(qintptr socketDescriptor);

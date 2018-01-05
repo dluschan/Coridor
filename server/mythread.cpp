@@ -73,10 +73,19 @@ void MyThread::sendString(QString message)
 
 Lobby* MyThread::createLobby(QString lobbyName, int gameType)
 {
-	return new Lobby(lobbyName, player->playerName, gameType);
+	return new Lobby(lobbyName, pPlayer->playerName, gameType);
 }
 
-Player* MyThread::createPlayer(QString playerName)
+void MyThread::switchCmd(Command* command)
 {
-	return new Player(playerName);
+	if (Login* pLogin = dynamic_cast<Login*>(command))
+	{
+		pPlayer = pLogin->player;
+		pPlayer->setID(socketDescriptor);
+	}
+	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(command))
+	{
+		pLobby = pCreateLobby->lobby;
+		emit createLobbySignal(pCreateLobby->lobby);
+	}
 }

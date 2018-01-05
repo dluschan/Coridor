@@ -16,17 +16,17 @@ public:
 	explicit MyThread(int ID, QObject* parent = 0);
 	QTcpSocket* pSocket;
 	// int socketDescriptor;
-	Player* player;
-	Lobby* lobby;
+	Player* pPlayer;
+	Lobby* pLobby;
 	void run();
 	void sendString(QString message);
 	Lobby* createLobby(QString lobbyName, int gameType);
-	Player* createPlayer(QString playerName);
+	// Player* createPlayer(QString playerName);
 
 signals:
 	void error(QTcpSocket::SocketError socketError);
 	void sendPlayerList(MyThread* thread);
-	void createLobbySignal(MyThread* thread, QString lobbyName);
+	void createLobbySignal(Lobby* pLobby);
 	void sendLobbiesList(MyThread* socket);
 
 public slots:
@@ -40,7 +40,7 @@ private:
 	// Player* player;
 
 	void login(QString login);
-	void help();
+	void switchCmd(Command* command);
 	// void playerList();
 	// void sendString(QString message);
 };
