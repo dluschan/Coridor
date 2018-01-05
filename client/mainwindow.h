@@ -33,13 +33,15 @@ signals:
 
 private:
 	Player* player;
+	Lobby* lobby;
 
 	QWidget* centralWidget;
-	QWidget* centralWidget2;
+
 	QVBoxLayout* connectLayout;
 	QPushButton* connectBtn;
 	QLineEdit* loginEdit;
 	QLineEdit* passwordEdit;
+
 	QVBoxLayout* mainLayout;
 	QPushButton* createLobbyBtn;
 	QPushButton* showLobbiesBtn;
@@ -47,6 +49,7 @@ private:
 
 	void switchToLoginIn();
 	void switchToMain();
+	void switchToLobby();
 };
 
 #endif // MAINWINDOW_H

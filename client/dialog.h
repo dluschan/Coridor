@@ -1,7 +1,7 @@
 #ifndef DIALOG_H
 #define DIALOG_H
 
-#include "../common/player.h"
+#include "../common/command.h"
 #include <QComboBox>
 #include <QDialog>
 #include <QHBoxLayout>

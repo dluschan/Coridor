@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "../common/command.h"
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
@@ -42,6 +41,8 @@ void MainWindow::connectToTheServer()
 	Command* pCommand = new Login(loginEdit->text());
 
 	player = new Player(loginEdit->text());
+	// qDebug() << int(pSocket->socketDescriptor());
+	// player->setID(int(pSocket->socketDescriptor()));
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -77,7 +78,6 @@ void MainWindow::switchToLoginIn()
 
 void MainWindow::switchToMain()
 {
-	// delete centralWidget->layout();
 	centralWidget = new QWidget(this);
 	setCentralWidget(centralWidget);
 	mainLayout = new QVBoxLayout(centralWidget);
@@ -89,6 +89,12 @@ void MainWindow::switchToMain()
 	mainLayout->addWidget(disconnectBtn);
 	connect(disconnectBtn, SIGNAL(clicked()), this, SLOT(sockDisc()));
 	connect(createLobbyBtn, SIGNAL(clicked()), this, SLOT(createLobbyDialog()));
+}
+
+void MainWindow::switchToLobby()
+{
+	centralWidget = new QWidget(this);
+	setCentralWidget(centralWidget);
 }
 
 void MainWindow::sockDisc()
@@ -110,6 +116,8 @@ void MainWindow::createLobby(QString _lobbyName, QString _hostLogin, int _gameTy
 	pCommand->operator<<(out);
 	pSocket->write(arrBlock);
 	pSocket->waitForBytesWritten();
+
+	lobby = new Lobby(_lobbyName, _hostLogin, _gameType);
 }
 
 void MainWindow::sockReady()
