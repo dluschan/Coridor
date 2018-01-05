@@ -2,7 +2,6 @@
 #define MYTHREAD_H
 
 #include "../common/command.h"
-#include "../common/lobby.h"
 #include <QDebug>
 #include <QTcpSocket>
 #include <QThread>
