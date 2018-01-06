@@ -30,6 +30,6 @@ CreateLobbyDialog::~CreateLobbyDialog()
 
 void CreateLobbyDialog::createLobby()
 {
-	emit clicked(lobbyNameEdit->text(), host, gameTypeEdit->currentIndex() + 1);
+	emit clicked(lobbyNameEdit->text(), host, gameTypeEdit->currentIndex());
 	this->hide();
 }

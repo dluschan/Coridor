@@ -101,6 +101,11 @@ void MyThread::switchCmd()
 		pLobby = pCreateLobby->lobby;
 		emit createLobbySignal(pCreateLobby->lobby);
 	}
+	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
+	{
+		emit deleteLobbySignal(pLobby);
+		pLobby = new Lobby();
+	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{
 		emit sendLobbiesList(this);

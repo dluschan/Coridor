@@ -61,7 +61,18 @@ void MainWindow::createLobbyDialog()
 	// (dialog->lobbyNameEdit->text(), dialog->hostLoginEdit->text(), dialog->gameTypeEdit->currentIndex())
 }
 
+void MainWindow::connectToLobby(QTreeWidgetItem* item, int column)
+{
+	qDebug() << "Connect to lobby";
+}
+
 void MainWindow::leaveLobby()
+{
+	deleteLobby(lobby->lobbyName);
+	switchToMain();
+}
+
+void MainWindow::leaveLobbiesList()
 {
 	switchToMain();
 }
@@ -129,6 +140,7 @@ void MainWindow::switchToLobby(int _gameType)
 	lobbyLayout->addWidget(exitLobbyBtn);
 
 	connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
+	// connect()
 }
 
 void MainWindow::switchToLobbiesList()
@@ -143,15 +155,15 @@ void MainWindow::switchToLobbiesList()
 	QStringList headers;
 	headers << tr("Lobby Name") << tr("Host") << tr("Game Type") << tr("Players Number");
 	lobbiesList->setHeaderLabels(headers);
-	connectToLobby = new QPushButton("Connect");
+	connectToLobbyBtn = new QPushButton("Connect");
 	exitLobbiesBtn = new QPushButton("Exit");
 
 	lobbiesListLayout->addWidget(lobbiesList);
-	lobbiesListLayout->addWidget(connectToLobby);
+	lobbiesListLayout->addWidget(connectToLobbyBtn);
 	lobbiesListLayout->addWidget(exitLobbiesBtn);
 
 	// connect(connectToLobby, SIGNAL(clicked()), , SLOT())
-	connect(exitLobbiesBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
+	connect(exitLobbiesBtn, SIGNAL(clicked()), this, SLOT(leaveLobbiesList()));
 }
 
 void MainWindow::sockDisc()
@@ -160,14 +172,14 @@ void MainWindow::sockDisc()
 	switchToLoginIn();
 }
 
-void MainWindow::createLobby(QString _lobbyName, QString _hostLogin, int _gameType)
+void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::CreateLobby};
-	Command* pCommand = new CreateLobby(_lobbyName, _hostLogin, _gameType);
+	Command* pCommand = new CreateLobby(lobbyName, hostLogin, gameType);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -176,9 +188,27 @@ void MainWindow::createLobby(QString _lobbyName, QString _hostLogin, int _gameTy
 
 	qDebug() << "CreateLobby Command Sent";
 
-	lobby = new Lobby(_lobbyName, _hostLogin, _gameType);
+	lobby = new Lobby(lobbyName, hostLogin, gameType);
 
-	switchToLobby(_gameType);
+	switchToLobby(gameType);
+}
+
+void MainWindow::deleteLobby(QString lobbyName)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::DeleteLobby};
+	Command* pCommand = new DeleteLobby(lobbyName);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "DeleteLobby Command Sent";
+	lobby = new Lobby();
 }
 
 void MainWindow::askLobbies()
@@ -235,15 +265,23 @@ void MainWindow::switchCmd()
 		switchToLobbiesList();
 
 		list<QTreeWidgetItem*> lobbyItems;
-		qDebug() << "HERE1";
 		for (const auto& i : pSendLobbies->lobbies)
 		{
 			lobbyItems.push_back(new QTreeWidgetItem(lobbiesList));
 			lobbyItems.back()->setText(0, i->lobbyName);
 			lobbyItems.back()->setText(1, i->host->playerName);
-			lobbyItems.back()->setText(2, QString(i->gameType));
-			lobbyItems.back()->setText(3, QString(i->connectedPlayersNumber) + "/" + QString(i->maxPlayers));
-			qDebug() << "HERE2";
+			// lobbyItems.back()->setText(2, QString::fromStdString(i->gameType.ToString("g")));
+			switch (i->gameType)
+			{
+			case Coridor:
+				lobbyItems.back()->setText(2, "Coridor");
+				break;
+			case Quarto:
+				lobbyItems.back()->setText(2, "Quarto");
+				break;
+			}
+			lobbyItems.back()->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
+			connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(connectToLobby(QTreeWidgetItem*, int)));
 		}
 	}
 }

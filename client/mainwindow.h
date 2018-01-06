@@ -13,6 +13,7 @@
 #include <QTcpSocket>
 #include <QTime>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 class MainWindow : public QMainWindow
 {
@@ -25,16 +26,17 @@ public:
 	QTcpSocket* pSocket;
 	QByteArray data;
 
-public slots:
+private slots:
 	void sockReady();
 	void sockDisc();
-	void createLobby(QString _lobbyName, QString _hostLogin, int _gameType);
+	void createLobby(QString lobbyName, QString hostLogin, int gameType);
 	void askLobbies();
 
-private slots:
 	void connectToTheServer();
 	void createLobbyDialog();
+	void connectToLobby(QTreeWidgetItem* item, int column);
 	void leaveLobby();
+	void leaveLobbiesList();
 
 signals:
 
@@ -71,7 +73,7 @@ private:
 
 	QGridLayout* lobbiesListLayout;
 	QTreeWidget* lobbiesList;
-	QPushButton* connectToLobby;
+	QPushButton* connectToLobbyBtn;
 	QPushButton* exitLobbiesBtn;
 
 	void switchToLoginIn();
@@ -79,6 +81,7 @@ private:
 	void switchToLobby(int _gameType);
 	void switchToLobbiesList();
 
+	void deleteLobby(QString lobbyName);
 	void switchCmd();
 };
 

@@ -23,6 +23,7 @@ signals:
 public slots:
 	// void playerList(MyThread* thread);
 	void createLobby(Lobby* lobby);
+	void deleteLobby(Lobby* lobby);
 	void lobbiesList(MyThread* thread);
 	// void lobbyList(MyThread* thread);
 

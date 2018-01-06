@@ -6,7 +6,6 @@
 
 enum GameType
 {
-	WrongType,
 	Coridor,
 	Quarto
 };

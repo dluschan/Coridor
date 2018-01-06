@@ -22,19 +22,21 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	Command* pCommand;
 	switch (commandType.type)
 	{
-	case CommandType::Type::AskLogin: // CommandType::AskLogin
+	case CommandType::Type::AskLogin:
 		pCommand = new Login();
 		break;
 
-	case CommandType::Type::CreateLobby: // CommandType::AskHelp
+	case CommandType::Type::CreateLobby:
 		pCommand = new CreateLobby();
 		break;
-
-	case CommandType::Type::AskLobbies: // CommandType::AskLogin
+	case CommandType::Type::DeleteLobby:
+		pCommand = new DeleteLobby();
+		break;
+	case CommandType::Type::AskLobbies:
 		pCommand = new AskLobbies();
 		break;
 
-	case CommandType::Type::SendLobbies: // CommandType::AskHelp
+	case CommandType::Type::SendLobbies:
 	{
 		list<Lobby*> lobbiesEmpty;
 		pCommand = new SendLobbies(lobbiesEmpty);
@@ -103,6 +105,31 @@ void CreateLobby::execute()
 {
 	lobby = new Lobby(lobbyName, hostLogin, gameType);
 	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
+}
+
+DeleteLobby::DeleteLobby(QString _lobbyName)
+//: lobbyName(_lobbyName)
+{
+	qDebug() << "DeleteLobby command created" << _lobbyName;
+}
+
+QDataStream& DeleteLobby::operator>>(QDataStream& stream)
+{
+	// qDebug() << "DeleteLobby read";
+	// stream >> lobbyName;
+	return stream;
+}
+
+QDataStream& DeleteLobby::operator<<(QDataStream& stream) const
+{
+	// qDebug() << "DeleteLobby written";
+	// stream << lobbyName;
+	return stream;
+}
+
+void DeleteLobby::execute()
+{
+	qDebug() << "execute DeleteLobby command";
 }
 
 AskLobbies::AskLobbies()

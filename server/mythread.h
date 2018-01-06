@@ -28,6 +28,7 @@ signals:
 	void error(QTcpSocket::SocketError socketError);
 	void sendPlayerList(MyThread* thread);
 	void createLobbySignal(Lobby* pLobby);
+	void deleteLobbySignal(Lobby* pLobby);
 	void sendLobbiesList(MyThread* thread);
 
 public slots:
