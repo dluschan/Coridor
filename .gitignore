@@ -1,3 +1,4 @@
+*.bat
 # macos files
 .DS_Store
 
