@@ -30,6 +30,19 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 		pCommand = new CreateLobby();
 		break;
 
+	case CommandType::Type::AskLobbies: // CommandType::AskLogin
+		pCommand = new AskLobbies();
+		break;
+
+	case CommandType::Type::SendLobbies: // CommandType::AskHelp
+	{
+		list<Lobby*> lobbiesEmpty;
+		pCommand = new SendLobbies(lobbiesEmpty);
+		break;
+	}
+	case CommandType::Type::SendString:
+		pCommand = new SendString();
+		break;
 	default:
 		throw std::logic_error("Incorrect type of command");
 	}
@@ -44,12 +57,6 @@ Login::Login(QString _login)
 	qDebug() << "Login command created" << login;
 }
 
-void Login::execute()
-{
-	qDebug() << "Login is" << login;
-	player = new Player(login);
-}
-
 QDataStream& Login::operator>>(QDataStream& stream)
 {
 	qDebug() << "login read";
@@ -62,6 +69,12 @@ QDataStream& Login::operator<<(QDataStream& stream) const
 	qDebug() << "login written";
 	stream << login;
 	return stream;
+}
+
+void Login::execute()
+{
+	qDebug() << "Login is" << login;
+	player = new Player(login);
 }
 
 CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin, int _gameType)
@@ -90,4 +103,107 @@ void CreateLobby::execute()
 {
 	lobby = new Lobby(lobbyName, hostLogin, gameType);
 	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
+}
+
+AskLobbies::AskLobbies()
+{
+	qDebug() << "AskLobbies command created";
+}
+
+QDataStream& AskLobbies::operator>>(QDataStream& stream)
+{
+	return stream;
+}
+
+QDataStream& AskLobbies::operator<<(QDataStream& stream) const
+{
+	return stream;
+}
+
+void AskLobbies::execute()
+{
+	qDebug() << "execute AskLobbies command";
+}
+
+SendLobbies::SendLobbies(list<Lobby*> _lobbies)
+	: lobbies(_lobbies)
+{
+	if (!lobbies.empty())
+	{
+		qDebug() << "SendLobbies command created";
+	}
+}
+
+QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
+{
+	QString lobbyName;
+	QString hostHame;
+	unsigned int gameType;
+
+	stream >> lobbyName >> hostHame >> gameType;
+	lobby = Lobby(lobbyName, hostHame, gameType);
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
+{
+	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType);
+	return stream;
+}
+
+QDataStream& SendLobbies::operator>>(QDataStream& stream)
+{
+	qDebug() << "SendLobbies read";
+	Lobby* lobbyTmp = new Lobby();
+	int size;
+	stream >> size;
+	for (int i = 0; i < size; i++)
+	{
+		stream >> *lobbyTmp;
+		lobbies.push_back(lobbyTmp);
+		qDebug() << ">>>>>>>>>>>>>>>>>>";
+	}
+	return stream;
+}
+
+QDataStream& SendLobbies::operator<<(QDataStream& stream) const
+{
+	qDebug() << "SendLobbies written";
+	stream << lobbies.size();
+	for (const auto& i : lobbies)
+	{
+		stream << *i;
+		qDebug() << "<<<<<<<<<<<<<<<<<<";
+	}
+	return stream;
+}
+
+void SendLobbies::execute()
+{
+	qDebug() << "execute SendLobbies command";
+}
+
+SendString::SendString(QString _message)
+	: message(_message)
+{
+	qDebug() << "SendString command created";
+}
+
+QDataStream& SendString::operator>>(QDataStream& stream)
+{
+	qDebug() << "SendString read";
+	stream >> message;
+	return stream;
+}
+
+QDataStream& SendString::operator<<(QDataStream& stream) const
+{
+	qDebug() << "SendString written";
+	stream << message;
+	return stream;
+}
+
+void SendString::execute()
+{
+	qDebug() << message;
 }

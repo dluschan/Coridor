@@ -11,8 +11,8 @@ CreateLobbyDialog::CreateLobbyDialog(QString _host, QWidget* parent)
 
 	lobbyNameEdit = new QLineEdit();
 	gameTypeEdit = new QComboBox;
-	gameTypeEdit->addItem(tr("Coridor"), 1);
-	gameTypeEdit->addItem(tr("Quarto"), 2);
+	gameTypeEdit->addItem(tr("Coridor"));
+	gameTypeEdit->addItem(tr("Quarto"));
 	createLobbyBtn = new QPushButton("Create lobby");
 	connect(createLobbyBtn, SIGNAL(clicked()), this, SLOT(createLobby()));
 
@@ -30,6 +30,6 @@ CreateLobbyDialog::~CreateLobbyDialog()
 
 void CreateLobbyDialog::createLobby()
 {
-	emit clicked(lobbyNameEdit->text(), host, gameTypeEdit->currentIndex());
+	emit clicked(lobbyNameEdit->text(), host, gameTypeEdit->currentIndex() + 1);
 	this->hide();
 }

@@ -8,11 +8,13 @@
 class Lobby
 {
 public:
-	Lobby(QString _name, QString _host, int _gameType);
+	Lobby(QString _name = "LobbyName", QString _host = "HostName", int _gameType = 1);
 	QString lobbyName;
 	Player* host;
+	int connectedPlayersNumber = 1, maxPlayers = 2;
 	std::list<Player*> connectedPlayers;
-	GameType game = (GameType)1;
+	GameType gameType = (GameType)1;
+	QString gameTypeStr;
 };
 
 #endif // LOBBY_H

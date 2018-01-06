@@ -19,8 +19,6 @@ void MyThread::run()
 	connect(pSocket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
 	connect(pSocket, SIGNAL(disconnected()), this, SLOT(disconnected()), Qt::DirectConnection);
 
-	sendString("Please, enter your name.");
-
 	qDebug() << socketDescriptor << "Client Connected";
 
 	exec();
@@ -33,6 +31,9 @@ void MyThread::readyRead()
 	in.setVersion(QDataStream::Qt_5_9);
 	pCommand = factory.create(in);
 	pCommand->execute();
+	switchCmd();
+
+	emit sendPlayerList(this);
 }
 
 /*
@@ -63,12 +64,24 @@ void MyThread::disconnected()
 	exit(0);
 }
 
-void MyThread::sendString(QString message)
+void MyThread::write(QByteArray buffer)
 {
-	message += "\n";
-	QByteArray buffer(message.toStdString().c_str());
 	pSocket->write(buffer);
 	pSocket->waitForBytesWritten();
+}
+
+void MyThread::sendString(QString message)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendString};
+	Command* pCommand = new SendString(message);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
 }
 
 Lobby* MyThread::createLobby(QString lobbyName, int gameType)
@@ -76,16 +89,20 @@ Lobby* MyThread::createLobby(QString lobbyName, int gameType)
 	return new Lobby(lobbyName, pPlayer->playerName, gameType);
 }
 
-void MyThread::switchCmd(Command* command)
+void MyThread::switchCmd()
 {
-	if (Login* pLogin = dynamic_cast<Login*>(command))
+	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
 	{
 		pPlayer = pLogin->player;
 		pPlayer->setID(socketDescriptor);
 	}
-	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(command))
+	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
 	{
 		pLobby = pCreateLobby->lobby;
 		emit createLobbySignal(pCreateLobby->lobby);
+	}
+	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
+	{
+		emit sendLobbiesList(this);
 	}
 }

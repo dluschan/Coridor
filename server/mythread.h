@@ -21,13 +21,14 @@ public:
 	void run();
 	void sendString(QString message);
 	Lobby* createLobby(QString lobbyName, int gameType);
+	void write(QByteArray buffer);
 	// Player* createPlayer(QString playerName);
 
 signals:
 	void error(QTcpSocket::SocketError socketError);
 	void sendPlayerList(MyThread* thread);
 	void createLobbySignal(Lobby* pLobby);
-	void sendLobbiesList(MyThread* socket);
+	void sendLobbiesList(MyThread* thread);
 
 public slots:
 	void readyRead();
@@ -40,7 +41,7 @@ private:
 	// Player* player;
 
 	void login(QString login);
-	void switchCmd(Command* command);
+	void switchCmd();
 	// void playerList();
 	// void sendString(QString message);
 };

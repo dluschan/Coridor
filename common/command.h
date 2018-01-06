@@ -4,6 +4,7 @@
 #include "lobby.h"
 #include <QDataStream>
 #include <QString>
+#include <list>
 
 using namespace std;
 
@@ -14,6 +15,8 @@ struct CommandType
 		AskLogin,
 		CreateLobby,
 		AskLobbies,
+		SendLobbies,
+		SendString,
 		WrongCommand
 	};
 	Type type;
@@ -68,6 +71,44 @@ private:
 	QString lobbyName;
 	QString hostLogin;
 	int gameType;
+};
+
+class AskLobbies : public Command
+{
+public:
+	AskLobbies();
+
+	// std::list<Lobby*> lobbies;
+	// Lobby* lobbyTmp;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+class SendLobbies : public Command
+{
+public:
+	SendLobbies(list<Lobby*> _lobbies);
+
+	std::list<Lobby*> lobbies;
+	// Lobby* lobbyTmp;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+class SendString : public Command
+{
+public:
+	SendString(QString _message = QString());
+
+	QString message;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
 #endif // COMMAND_H

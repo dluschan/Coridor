@@ -35,6 +35,21 @@ void MyServer::createLobby(Lobby* lobby)
 	lobbies.push_back(lobby);
 }
 
+void MyServer::lobbiesList(MyThread* thread)
+{
+	qDebug() << "OK";
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendLobbies};
+	Command* pCommand = new SendLobbies(lobbies);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	thread->write(arrBlock);
+}
+
 /*void MyServer::lobbyList(MyThread* thread)
 {
 	QString message = "";
@@ -52,8 +67,8 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	players.push_back(new MyThread(socketDescriptor, this));
 	connect(players.back(), SIGNAL(finished()), players.back(), SLOT(deleteLater()));
 	// connect(players.back(), SIGNAL(sendPlayerList(MyThread*)), this, SLOT(playerList(MyThread*)), Qt::DirectConnection);
-	connect(players.back(), SIGNAL(createLobbySignal(MyThread*, QString, int)), this, SLOT(createLobby(MyThread*, QString, int)));
-	// connect(players.back(), SIGNAL(sendLobbiesList(MyThread*)), this, SLOT(lobbyList(MyThread*)));
+	connect(players.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)));
+	connect(players.back(), SIGNAL(sendLobbiesList(MyThread*)), this, SLOT(lobbiesList(MyThread*)), Qt::DirectConnection);
 	players.back()->start();
 
 	/* MyThread* thread = new MyThread(socketDescriptor, this);
