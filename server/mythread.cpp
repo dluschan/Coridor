@@ -59,8 +59,8 @@ void MyThread::playerList()
 
 void MyThread::disconnected()
 {
-	emit deletePlayerSignal(this);
 	emit deleteLobbySignal(pLobby);
+	emit deletePlayerSignal(this);
 	qDebug() << socketDescriptor << "Client Disconnected";
 	pSocket->deleteLater();
 	exit(0);
@@ -110,8 +110,8 @@ void MyThread::switchCmd()
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		pLobby = new Lobby();
 		emit deleteLobbySignal(pLobby);
+		pLobby = new Lobby();
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{
