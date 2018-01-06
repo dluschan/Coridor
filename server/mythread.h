@@ -25,9 +25,11 @@ public:
 	// Player* createPlayer(QString playerName);
 
 signals:
+	void deletePlayerSignal(MyThread* thread);
 	void error(QTcpSocket::SocketError socketError);
 	void sendPlayerList(MyThread* thread);
 	void createLobbySignal(Lobby* pLobby);
+	void changeGameTypeSignal(MyThread* thread, int gameType);
 	void deleteLobbySignal(Lobby* pLobby);
 	void sendLobbiesList(MyThread* thread);
 

@@ -31,6 +31,7 @@ private slots:
 	void sockDisc();
 	void createLobby(QString lobbyName, QString hostLogin, int gameType);
 	void askLobbies();
+	void updateLobby(int);
 
 	void connectToTheServer();
 	void createLobbyDialog();
@@ -58,13 +59,7 @@ private:
 	QPushButton* disconnectBtn;
 
 	QGridLayout* lobbyLayout;
-
 	QListWidget* connectedPlayersList;
-	/*QLabel* hostName;
-	QCheckBox* hostRdy;
-	QLabel* connectedPlayerName;
-	QCheckBox* connectedPlayerRdy;*/
-
 	QComboBox* gameTypeEdit;
 	QPushButton* startGameBtn;
 	QPushButton* exitLobbyBtn;
@@ -73,7 +68,7 @@ private:
 
 	QGridLayout* lobbiesListLayout;
 	QTreeWidget* lobbiesList;
-	QPushButton* connectToLobbyBtn;
+	QPushButton* updateLobbiesListBtn;
 	QPushButton* exitLobbiesBtn;
 
 	void switchToLoginIn();

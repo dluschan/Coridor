@@ -14,6 +14,7 @@ struct CommandType
 	{
 		AskLogin,
 		CreateLobby,
+		ChangeGameType,
 		DeleteLobby,
 		AskLobbies,
 		SendLobbies,
@@ -72,6 +73,18 @@ private:
 	QString lobbyName;
 	QString hostLogin;
 	int gameType;
+};
+
+class ChangeGameType : public Command
+{
+public:
+	ChangeGameType(int _gameType = 0);
+
+	int gameType;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
 class DeleteLobby : public Command

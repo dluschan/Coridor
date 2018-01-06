@@ -131,6 +131,9 @@ void MainWindow::switchToLobby(int _gameType)
 	gameTypeEdit->addItem(tr("Coridor"));
 	gameTypeEdit->addItem(tr("Quarto"));
 	gameTypeEdit->setCurrentIndex(_gameType);
+
+	connect(gameTypeEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(updateLobby(int)));
+
 	startGameBtn = new QPushButton("Start");
 	exitLobbyBtn = new QPushButton("Exit");
 
@@ -155,14 +158,14 @@ void MainWindow::switchToLobbiesList()
 	QStringList headers;
 	headers << tr("Lobby Name") << tr("Host") << tr("Game Type") << tr("Players Number");
 	lobbiesList->setHeaderLabels(headers);
-	connectToLobbyBtn = new QPushButton("Connect");
+	updateLobbiesListBtn = new QPushButton("Update");
 	exitLobbiesBtn = new QPushButton("Exit");
 
 	lobbiesListLayout->addWidget(lobbiesList);
-	lobbiesListLayout->addWidget(connectToLobbyBtn);
+	lobbiesListLayout->addWidget(updateLobbiesListBtn);
 	lobbiesListLayout->addWidget(exitLobbiesBtn);
 
-	// connect(connectToLobby, SIGNAL(clicked()), , SLOT())
+	connect(updateLobbiesListBtn, SIGNAL(clicked()), this, SLOT(askLobbies()));
 	connect(exitLobbiesBtn, SIGNAL(clicked()), this, SLOT(leaveLobbiesList()));
 }
 
@@ -228,6 +231,24 @@ void MainWindow::askLobbies()
 	qDebug() << "AskLobbies Command Sent";
 }
 
+void MainWindow::updateLobby(int _gameType)
+{
+	lobby->update(_gameType);
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::ChangeGameType};
+	Command* pCommand = new ChangeGameType(_gameType);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "ChangeGameType Command Sent";
+}
+
 void MainWindow::sockReady()
 {
 	CommandFactory factory;
@@ -270,8 +291,8 @@ void MainWindow::switchCmd()
 			lobbyItems.push_back(new QTreeWidgetItem(lobbiesList));
 			lobbyItems.back()->setText(0, i->lobbyName);
 			lobbyItems.back()->setText(1, i->host->playerName);
-			// lobbyItems.back()->setText(2, QString::fromStdString(i->gameType.ToString("g")));
-			switch (i->gameType)
+			lobbyItems.back()->setText(2, i->gameTypeStr);
+			/*switch (i->gameType)
 			{
 			case Coridor:
 				lobbyItems.back()->setText(2, "Coridor");
@@ -279,7 +300,7 @@ void MainWindow::switchCmd()
 			case Quarto:
 				lobbyItems.back()->setText(2, "Quarto");
 				break;
-			}
+			}*/
 			lobbyItems.back()->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
 			connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(connectToLobby(QTreeWidgetItem*, int)));
 		}

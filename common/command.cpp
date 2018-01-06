@@ -29,6 +29,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::CreateLobby:
 		pCommand = new CreateLobby();
 		break;
+	case CommandType::Type::ChangeGameType:
+		pCommand = new ChangeGameType();
+		break;
 	case CommandType::Type::DeleteLobby:
 		pCommand = new DeleteLobby();
 		break;
@@ -105,6 +108,31 @@ void CreateLobby::execute()
 {
 	lobby = new Lobby(lobbyName, hostLogin, gameType);
 	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
+}
+
+ChangeGameType::ChangeGameType(int _gameType)
+	: gameType(_gameType)
+{
+	qDebug() << "ChangeGameType command created";
+}
+
+QDataStream& ChangeGameType::operator>>(QDataStream& stream)
+{
+	qDebug() << "ChangeGameType read";
+	stream >> gameType;
+	return stream;
+}
+
+QDataStream& ChangeGameType::operator<<(QDataStream& stream) const
+{
+	qDebug() << "ChangeGameType written";
+	stream << gameType;
+	return stream;
+}
+
+void ChangeGameType::execute()
+{
+	qDebug() << "execute ChangeGameType command" << gameType;
 }
 
 DeleteLobby::DeleteLobby(QString _lobbyName)

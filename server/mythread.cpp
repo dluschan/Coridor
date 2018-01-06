@@ -59,6 +59,8 @@ void MyThread::playerList()
 
 void MyThread::disconnected()
 {
+	emit deletePlayerSignal(this);
+	emit deleteLobbySignal(pLobby);
 	qDebug() << socketDescriptor << "Client Disconnected";
 	pSocket->deleteLater();
 	exit(0);
@@ -101,10 +103,15 @@ void MyThread::switchCmd()
 		pLobby = pCreateLobby->lobby;
 		emit createLobbySignal(pCreateLobby->lobby);
 	}
+	else if (ChangeGameType* pChangeGameType = dynamic_cast<ChangeGameType*>(pCommand))
+	{
+		pLobby->update(pChangeGameType->gameType);
+		emit changeGameTypeSignal(this, pChangeGameType->gameType);
+	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		emit deleteLobbySignal(pLobby);
 		pLobby = new Lobby();
+		emit deleteLobbySignal(pLobby);
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{

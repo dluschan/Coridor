@@ -22,7 +22,9 @@ signals:
 
 public slots:
 	// void playerList(MyThread* thread);
+	void deletePlayer(MyThread* thread);
 	void createLobby(Lobby* lobby);
+	void changeGameType(MyThread* thread, int _gameType);
 	void deleteLobby(Lobby* lobby);
 	void lobbiesList(MyThread* thread);
 	// void lobbyList(MyThread* thread);
