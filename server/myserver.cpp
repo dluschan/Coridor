@@ -79,6 +79,16 @@ void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _playe
 	i->pSocket->waitForBytesWritten();
 }
 
+void MyServer::sendRdy(Player* _host)
+{
+	for (const auto& i : threads)
+	{
+		qDebug() << i->pPlayer->playerName;
+		if (i->pPlayer->playerName == _host->playerName)
+			i->sendRdy();
+	}
+}
+
 void MyServer::deletePlayer(MyThread* _thread)
 {
 	threads.remove(_thread);
@@ -197,6 +207,7 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(sendLobbiesListSignal(MyThread*)), this, SLOT(lobbiesList(MyThread*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*)), this, SLOT(sendConnectToLobby(Lobby*, Player*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
 	threads.back()->start();
 
 	/* MyThread* thread = new MyThread(socketDescriptor, this);

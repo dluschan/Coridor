@@ -77,6 +77,23 @@ void MyThread::write(QByteArray buffer)
 	pSocket->waitForBytesWritten();
 }
 
+void MyThread::sendRdy()
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendRdy};
+	Command* pCommand = new SendRdy(pLobby->host);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "SendRdy Command Sent";
+}
+
 void MyThread::sendString(QString message)
 {
 	QByteArray arrBlock;
@@ -134,5 +151,6 @@ void MyThread::switchCmd()
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
+		emit sendRdySignal(pSendRdy->host);
 	}
 }

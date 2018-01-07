@@ -32,6 +32,7 @@ public slots:
 	void connectToLobby(Lobby* _lobby, Player* _player);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player);
 	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player);
+	void sendRdy(Player* _host);
 	// void lobbyList(MyThread* thread);
 
 protected:

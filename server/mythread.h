@@ -22,6 +22,7 @@ public:
 	void sendString(QString message);
 	Lobby* createLobby(QString lobbyName, int gameType);
 	void write(QByteArray buffer);
+	void sendRdy();
 	// Player* createPlayer(QString playerName);
 
 signals:
@@ -36,6 +37,7 @@ signals:
 	void connectToLobbySignal(Lobby* pLobby, Player* player);
 	void connectToHostLobbySignal(MyThread* thread, Lobby* pLobby, Player* player);
 	void sendLobbiesListSignal(MyThread* thread);
+	void sendRdySignal(Player* host);
 
 public slots:
 	void readyRead();

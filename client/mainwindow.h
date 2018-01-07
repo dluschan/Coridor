@@ -40,6 +40,7 @@ private slots:
 	void deleteLobby();
 	void leaveLobbiesList();
 	void setRdy();
+	void sendRdy();
 
 signals:
 

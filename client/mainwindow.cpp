@@ -105,12 +105,16 @@ void MainWindow::setRdy()
 		connectedPlayersList->item(1)->setCheckState(Qt::Unchecked);
 	else
 		connectedPlayersList->item(1)->setCheckState(Qt::Checked);
+}
+
+void MainWindow::sendRdy()
+{
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::SendRdy};
-	Command* pCommand = new SendRdy();
+	Command* pCommand = new SendRdy(pLobby->host);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -213,6 +217,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 			startGameBtn = new QPushButton("Ready");
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
 			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(setRdy())); // maybe will need player index
+			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(sendRdy()));
 		}
 	}
 
@@ -444,5 +449,9 @@ void MainWindow::switchCmd()
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
 		switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), false);
+	}
+	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
+	{
+		setRdy();
 	}
 }

@@ -161,7 +161,9 @@ public:
 class SendRdy : public Command
 {
 public:
-	SendRdy();
+	SendRdy(Player* _host = new Player());
+
+	Player* host;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

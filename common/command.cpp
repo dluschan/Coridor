@@ -334,24 +334,27 @@ void ConnectToLobby::execute()
 	qDebug() << "execute ConnectToLobby command";
 }
 
-SendRdy::SendRdy()
+SendRdy::SendRdy(Player* _host)
+	: host(_host)
 {
-	qDebug() << "SendRdy command created";
+	qDebug() << "SendRdy command created" << host->playerName;
 }
 
 QDataStream& SendRdy::operator>>(QDataStream& stream)
 {
+	stream >> *host;
 	return stream;
 }
 
 QDataStream& SendRdy::operator<<(QDataStream& stream) const
 {
+	stream << *host;
 	return stream;
 }
 
 void SendRdy::execute()
 {
-	qDebug() << "execute SendRdy command";
+	qDebug() << "execute SendRdy command" << host->playerName;
 }
 
 /* SendConnect::SendConnect(Lobby* _lobby, Player* _player)
