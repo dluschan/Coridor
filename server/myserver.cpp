@@ -39,23 +39,12 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 			pCommand->operator<<(out);
 			i->pSocket->write(arrBlock);
 			i->pSocket->waitForBytesWritten();
-		}
 
-		if (_connectFlag)
-		{
 			i->pLobby = _lobby;
 			i->pLobby->connect(_player);
 			for (const auto& j : lobbies)
 				if (j->lobbyName == _lobby->lobbyName)
 					j->connect(_player);
-		}
-		else
-		{
-			i->pLobby = _lobby;
-			i->pLobby->disconnect(_player);
-			for (const auto& j : lobbies)
-				if (j->lobbyName == _lobby->lobbyName)
-					j->disconnect(_player);
 		}
 
 		if (i->pPlayer->playerName == _lobby->host->playerName)
@@ -74,12 +63,14 @@ void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _playe
 	CommandType commandType = {CommandType::Type::ConnectToLobby};
 	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
 
-	/*i->pLobby = _lobby;
-	i->pLobby->connect(_player);
-	for (const auto& j : lobbies)
-		if (j->lobbyName == _lobby->lobbyName)
-			j->connect(_player);*/
-
+	if (!_connectFlag)
+	{
+		i->pLobby = _lobby;
+		i->pLobby->disconnect(_player);
+		for (const auto& j : lobbies)
+			if (j->lobbyName == _lobby->lobbyName)
+				j->disconnect(_player);
+	}
 	// qDebug() << _player->playerName;
 
 	out << commandType;
