@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 #include <QThread>
 #include <QtNetwork>
+#include <exception>
 #include <iostream>
 #include <string>
 

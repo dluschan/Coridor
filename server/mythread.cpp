@@ -172,7 +172,15 @@ void MyThread::switchCmd()
 		if (pConnectToLobby->connectFlag)
 		{
 			if (pConnectToLobby->lobby->connectedPlayersNumber < pConnectToLobby->lobby->maxPlayers)
-				emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
+				try
+				{
+					emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
+				}
+				catch (const exception& e)
+				{
+					emit sendMessage(tr(e.what()), true);
+					qDebug() << tr(e.what());
+				}
 			else
 				sendMessage("Error: Too much players", true);
 		}

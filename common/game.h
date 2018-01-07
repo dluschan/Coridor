@@ -7,7 +7,8 @@
 enum GameType
 {
 	Coridor,
-	Quarto
+	Quarto,
+	WrongGameType
 };
 
 class Game

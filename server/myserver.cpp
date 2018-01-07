@@ -24,6 +24,20 @@ void MyServer::sendString(QString _message, MyThread* _thread)
 
 void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
 {
+	Lobby* hostLobby = new Lobby();
+
+	for (const auto& j : lobbies)
+	{
+		qDebug() << j->lobbyName;
+		if (j->lobbyName == _lobby->lobbyName)
+			hostLobby = j;
+	}
+
+	if (hostLobby->lobbyName == "LobbyName" && hostLobby->host->playerName == "HostName" && hostLobby->gameType == WrongGameType)
+	{
+		throw runtime_error("Error: This lobby doesn't exists anymore");
+	}
+
 	for (const auto& i : threads)
 	{
 		if (i->pPlayer->playerName == _player->playerName && _connectFlag)
@@ -33,7 +47,7 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 			out.setVersion(QDataStream::Qt_5_9);
 
 			CommandType commandType = {CommandType::Type::ConnectToLobby};
-			Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
+			Command* pCommand = new ConnectToLobby(hostLobby, _player, _connectFlag);
 
 			out << commandType;
 			pCommand->operator<<(out);
@@ -48,7 +62,10 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 		}
 
 		if (i->pPlayer->playerName == _lobby->host->playerName)
-			emit i->connectToHostLobbySignal(i, _lobby, _player, _connectFlag);
+			if (_connectFlag)
+				emit i->connectToHostLobbySignal(i, hostLobby, _player, _connectFlag);
+			else
+				emit i->connectToHostLobbySignal(i, _lobby, _player, _connectFlag);
 	}
 
 	qDebug() << "ConnectToLobby Command Sent";
