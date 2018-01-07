@@ -397,6 +397,8 @@ void MainWindow::updateLobby(int _gameType)
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::ChangeGameType};
+	if (!pLobby->connectedPlayers.empty())
+		qDebug() << pLobby->connectedPlayers.back()->playerName;
 	Command* pCommand = new ChangeGameType(_gameType, pLobby->connectedPlayers);
 
 	out << commandType;
@@ -489,8 +491,10 @@ void MainWindow::switchCmd()
 		if (pConnectToLobby->connectFlag)
 			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), false);
 		else
+		{
 			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), true);
-		// pLobby->disconnect(pConnectToLobby->player);
+			pLobby->disconnect(pConnectToLobby->player);
+		}
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{

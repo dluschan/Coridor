@@ -80,7 +80,7 @@ void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _playe
 		if (j->lobbyName == _lobby->lobbyName)
 			j->connect(_player);*/
 
-	qDebug() << _player->playerName;
+	// qDebug() << _player->playerName;
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -92,7 +92,7 @@ void MyServer::sendRdy(Player* _host)
 {
 	for (const auto& i : threads)
 	{
-		qDebug() << i->pPlayer->playerName;
+		// qDebug() << i->pPlayer->playerName;
 		if (i->pPlayer->playerName == _host->playerName)
 			i->sendRdy();
 	}
@@ -119,8 +119,11 @@ void MyServer::createLobby(Lobby* _lobby)
 void MyServer::changeGameType(MyThread* _thread, int _gameType)
 {
 	for (const auto& i : lobbies)
-		if (i == _thread->pLobby)
+		if (i->lobbyName == _thread->pLobby->lobbyName)
+		{
 			i->updateGameType(_gameType);
+			qDebug() << i->gameTypeStr;
+		}
 }
 
 void MyServer::sendGameTypes(Player* _player, int _gameType)

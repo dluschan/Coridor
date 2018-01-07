@@ -55,9 +55,14 @@ void Lobby::connect(Player* connectingPlayer)
 
 void Lobby::disconnect(Player* disconnectingPlayer)
 {
+	// qDebug() << disconnectingPlayer->ID;
+	// qDebug() << connectedPlayers.back()->ID;
 	if (!connectedPlayers.empty())
 	{
-		connectedPlayers.remove(disconnectingPlayer);
+		// connectedPlayers.remove(disconnectingPlayer);
+		connectedPlayers.pop_back();
 		connectedPlayersNumber--;
+		if (!connectedPlayers.empty())
+			qDebug() << connectedPlayers.back()->playerName;
 	}
 }

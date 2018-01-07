@@ -166,7 +166,7 @@ ChangeGameType::ChangeGameType(int _gameType, std::list<Player*> _connectedPlaye
 	//, host(_host)
 	, connectedPlayers(_connectedPlayers)
 {
-	qDebug() << "ChangeGameType command created";
+	qDebug() << "ChangeGameType command created" << gameType;
 	// connectedPlayers.push_back(host);
 }
 
@@ -188,14 +188,14 @@ QDataStream& operator<<(QDataStream& stream, const Player& player)
 QDataStream& ChangeGameType::operator>>(QDataStream& stream)
 {
 	qDebug() << "ChangeGameType read";
-	// stream >> gameType >> host;
 
 	Player* playerTmp = new Player();
 	int size;
 	stream >> size;
+	stream >> gameType;
 	for (int i = 0; i < size; i++)
 	{
-		stream >> gameType >> *playerTmp;
+		stream >> *playerTmp;
 		connectedPlayers.push_back(playerTmp);
 	}
 
@@ -205,13 +205,13 @@ QDataStream& ChangeGameType::operator>>(QDataStream& stream)
 QDataStream& ChangeGameType::operator<<(QDataStream& stream) const
 {
 	qDebug() << "ChangeGameType written";
-	stream << connectedPlayers.size();
 
-	// stream << gameType << host;
+	stream << connectedPlayers.size();
+	stream << gameType;
 
 	for (const auto& i : connectedPlayers)
 	{
-		stream << gameType << *i;
+		stream << *i;
 	}
 
 	return stream;

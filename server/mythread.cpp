@@ -118,7 +118,7 @@ void MyThread::switchCmd()
 	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
 	{
 		pPlayer = pLogin->player;
-		pPlayer->setID(socketDescriptor);
+		// pPlayer->setID(socketDescriptor);
 	}
 	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
 	{
@@ -129,6 +129,7 @@ void MyThread::switchCmd()
 	{
 		emit changeGameTypeSignal(this, pChangeGameType->gameType);
 		pLobby->updateGameType(pChangeGameType->gameType);
+		qDebug() << pLobby->gameTypeStr;
 		if (!pChangeGameType->connectedPlayers.empty())
 		{
 			for (const auto& i : pChangeGameType->connectedPlayers)
