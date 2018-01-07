@@ -101,9 +101,9 @@ void MainWindow::leaveLobby()
 	switchToMain();
 }
 
-void MainWindow::deleteLobby()
+void MainWindow::deleteLobbySlot()
 {
-	deleteLobby(pLobby->lobbyName);
+	deleteLobby(pLobby);
 	pLobby = new Lobby();
 	switchToMain();
 }
@@ -206,7 +206,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 		gameTypeEdit->setEnabled(true);
 
 		startGameBtn = new QPushButton("Start");
-		connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobby()));
+		connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobbySlot()));
 	}
 	else
 	{
@@ -218,7 +218,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 			gameTypeEdit->setEnabled(true);
 
 			startGameBtn = new QPushButton("Start");
-			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobby()));
+			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobbySlot()));
 			pLobby->connect(connectingPlayer);
 		}
 		else
@@ -331,14 +331,16 @@ void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
 	switchToLobby(new Player(), new Lobby(), gameType, true);
 }
 
-void MainWindow::deleteLobby(QString lobbyName)
+void MainWindow::deleteLobby(Lobby* lobby)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::DeleteLobby};
-	Command* pCommand = new DeleteLobby(lobbyName);
+	if (!lobby->connectedPlayers.empty())
+		qDebug() << lobby->connectedPlayers.back()->playerName;
+	Command* pCommand = new DeleteLobby(lobby);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -468,18 +470,14 @@ void MainWindow::switchCmd()
 			lobbyItems.back()->setText(0, i->lobbyName);
 			lobbyItems.back()->setText(1, i->host->playerName);
 			lobbyItems.back()->setText(2, i->gameTypeStr);
-			/*switch (i->gameType)
-			{
-			case Coridor:
-				lobbyItems.back()->setText(2, "Coridor");
-				break;
-			case Quarto:
-				lobbyItems.back()->setText(2, "Quarto");
-				break;
-			}*/
 			lobbyItems.back()->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
 			connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(sendConnectToLobby(QTreeWidgetItem*, int)));
 		}
+	}
+	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
+	{
+		switchToMain();
+		pLobby = new Lobby();
 	}
 	else if (ChangeGameType* pChangeGameType = dynamic_cast<ChangeGameType*>(pCommand))
 	{

@@ -15,6 +15,52 @@ QDataStream& operator<<(QDataStream& stream, const CommandType& commandType)
 	return stream;
 }
 
+// запись и вывод Player в/из поток(а)
+QDataStream& operator>>(QDataStream& stream, Player& player)
+{
+	QString login;
+
+	stream >> login;
+	player = Player(login);
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Player& player)
+{
+	stream << player.playerName;
+	return stream;
+}
+
+// запись и вывод Lobby в/из поток(а)
+QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
+{
+	QString lobbyName;
+	QString hostHame;
+	unsigned int gameType;
+	int connectedPlayersNumber;
+	int size;
+
+	stream >> lobbyName >> hostHame >> gameType >> connectedPlayersNumber >> size;
+	lobby = Lobby(lobbyName, hostHame, gameType, connectedPlayersNumber);
+	Player* playerTmp = new Player();
+	for (int i = 0; i < size; i++)
+	{
+		stream >> *playerTmp;
+		lobby.connectedPlayers.push_back(playerTmp);
+	}
+	/*for (const auto& i : lobby.connectedPlayers)
+		qDebug() << i->playerName;*/
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
+{
+	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << lobby.connectedPlayersNumber << lobby.connectedPlayers.size();
+	for (const auto& i : lobby.connectedPlayers)
+		stream << *i;
+	return stream;
+}
+
 Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 {
 	CommandType commandType;
@@ -95,25 +141,6 @@ CreateLobby::CreateLobby(Lobby* _lobby)
 	qDebug() << "CreateLobby command created";
 }
 
-QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
-{
-	QString lobbyName;
-	QString hostHame;
-	unsigned int gameType;
-	int connectedPlayersNumber;
-
-	stream >> lobbyName >> hostHame >> gameType >> connectedPlayersNumber;
-	lobby = Lobby(lobbyName, hostHame, gameType, connectedPlayersNumber);
-	// lobby.connectedPlayersNumber = connectedPlayersNumber;
-	return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
-{
-	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << lobby.connectedPlayersNumber;
-	return stream;
-}
-
 QDataStream& CreateLobby::operator>>(QDataStream& stream)
 {
 	qDebug() << "CreateLobby read";
@@ -170,29 +197,13 @@ ChangeGameType::ChangeGameType(int _gameType, std::list<Player*> _connectedPlaye
 	// connectedPlayers.push_back(host);
 }
 
-QDataStream& operator>>(QDataStream& stream, Player& player)
-{
-	QString login;
-
-	stream >> login;
-	player = Player(login);
-	return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Player& player)
-{
-	stream << player.playerName;
-	return stream;
-}
-
 QDataStream& ChangeGameType::operator>>(QDataStream& stream)
 {
 	qDebug() << "ChangeGameType read";
 
 	Player* playerTmp = new Player();
 	int size;
-	stream >> size;
-	stream >> gameType;
+	stream >> size >> gameType;
 	for (int i = 0; i < size; i++)
 	{
 		stream >> *playerTmp;
@@ -206,8 +217,7 @@ QDataStream& ChangeGameType::operator<<(QDataStream& stream) const
 {
 	qDebug() << "ChangeGameType written";
 
-	stream << connectedPlayers.size();
-	stream << gameType;
+	stream << connectedPlayers.size() << gameType;
 
 	for (const auto& i : connectedPlayers)
 	{
@@ -222,23 +232,26 @@ void ChangeGameType::execute()
 	qDebug() << "execute ChangeGameType command" << gameType;
 }
 
-DeleteLobby::DeleteLobby(QString _lobbyName)
-//: lobbyName(_lobbyName)
+DeleteLobby::DeleteLobby(Lobby* _lobby)
+	: lobby(_lobby)
 {
-	qDebug() << "DeleteLobby command created" << _lobbyName;
+	for (const auto& i : _lobby->connectedPlayers)
+		// lobby->connectedPlayers.push_back(i);
+		qDebug() << i->playerName;
+	qDebug() << "DeleteLobby command created" << lobby->lobbyName;
 }
 
 QDataStream& DeleteLobby::operator>>(QDataStream& stream)
 {
-	// qDebug() << "DeleteLobby read";
-	// stream >> lobbyName;
+	qDebug() << "DeleteLobby read";
+	stream >> *lobby;
 	return stream;
 }
 
 QDataStream& DeleteLobby::operator<<(QDataStream& stream) const
 {
-	// qDebug() << "DeleteLobby written";
-	// stream << lobbyName;
+	qDebug() << "DeleteLobby written";
+	stream << *lobby;
 	return stream;
 }
 

@@ -37,7 +37,7 @@ private slots:
 	void createLobbyDialog();
 	void sendConnectToLobby(QTreeWidgetItem* item, int column);
 	void leaveLobby();
-	void deleteLobby();
+	void deleteLobbySlot();
 	void leaveLobbiesList();
 	void setRdy();
 	void sendRdy();
@@ -80,7 +80,7 @@ private:
 	void switchToLobbyGuest(Lobby* _lobby);
 	void switchToLobbiesList();
 
-	void deleteLobby(QString lobbyName);
+	void deleteLobby(Lobby* lobby);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void switchCmd();
 };

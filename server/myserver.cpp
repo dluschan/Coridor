@@ -152,7 +152,22 @@ void MyServer::sendGameType(MyThread* _thread, int _gameType)
 
 void MyServer::deleteLobby(Lobby* _lobby)
 {
-	lobbies.remove(_lobby);
+	for (const auto& i : lobbies)
+		if (i->lobbyName == _lobby->lobbyName)
+			lobbies.remove(i);
+}
+
+void MyServer::deleteGuestLobby(Player* _player)
+{
+	for (const auto& i : threads)
+	{
+		// qDebug() << i->pPlayer->playerName << i->pLobby->lobbyName; //<< _player->playerName;
+		if (i->pPlayer->playerName == _player->playerName)
+		{
+			i->deleteGuestLobby(i->pLobby);
+			i->pLobby = new Lobby();
+		}
+	}
 }
 
 void MyServer::lobbiesList(MyThread* _thread)
@@ -201,12 +216,13 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	threads.push_back(new MyThread(socketDescriptor, this));
 	connect(threads.back(), SIGNAL(finished()), threads.back(), SLOT(deleteLater()));
 	// connect(players.back(), SIGNAL(sendPlayerList(MyThread*)), this, SLOT(playerList(MyThread*)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)));
+	connect(threads.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(changeGameTypeSignal(MyThread*, int)), this, SLOT(changeGameType(MyThread*, int)), Qt::DirectConnection);
 	// qRegisterMetaType(std::list<Player*>);
 	connect(threads.back(), SIGNAL(sendGameTypesSignal(Player*, int)), this, SLOT(sendGameTypes(Player*, int)));
 	connect(threads.back(), SIGNAL(sendGameTypeSignal(MyThread*, int)), this, SLOT(sendGameType(MyThread*, int)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(deleteLobbySignal(Lobby*)), this, SLOT(deleteLobby(Lobby*)));
+	connect(threads.back(), SIGNAL(deleteLobbySignal(Lobby*)), this, SLOT(deleteLobby(Lobby*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(deleteGuestLobbySignal(Player*)), this, SLOT(deleteGuestLobby(Player*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendLobbiesListSignal(MyThread*)), this, SLOT(lobbiesList(MyThread*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);

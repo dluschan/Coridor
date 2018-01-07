@@ -114,9 +114,9 @@ public:
 class DeleteLobby : public Command
 {
 public:
-	DeleteLobby(QString _lobbyName = QString("Lobby Name"));
+	DeleteLobby(Lobby* _lobby = new Lobby());
 
-	// QString lobbyName;
+	Lobby* lobby;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

@@ -113,6 +113,24 @@ Lobby* MyThread::createLobby(QString lobbyName, int gameType)
 	return new Lobby(lobbyName, pPlayer->playerName, gameType);
 }
 
+void* MyThread::deleteGuestLobby(Lobby* lobby)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::DeleteLobby};
+	Command* pCommand = new DeleteLobby(lobby);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "DeleteLobby Command Sent";
+	pLobby = new Lobby();
+}
+
 void MyThread::switchCmd()
 {
 	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
@@ -138,7 +156,11 @@ void MyThread::switchCmd()
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		emit deleteLobbySignal(pLobby);
+		for (const auto& i : pDeleteLobby->lobby->connectedPlayers)
+		{
+			emit deleteGuestLobbySignal(i);
+		}
+		emit deleteLobbySignal(pDeleteLobby->lobby);
 		pLobby = new Lobby();
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
@@ -157,6 +179,7 @@ void MyThread::switchCmd()
 		else
 		{
 			emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, false);
+			pLobby = new Lobby();
 		}
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))

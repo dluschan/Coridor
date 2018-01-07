@@ -21,6 +21,7 @@ public:
 	void run();
 	void sendMessage(QString message, bool error);
 	Lobby* createLobby(QString lobbyName, int gameType);
+	void* deleteGuestLobby(Lobby* lobby);
 	void write(QByteArray buffer);
 	void sendRdy();
 	// Player* createPlayer(QString playerName);
@@ -34,6 +35,7 @@ signals:
 	void sendGameTypesSignal(Player* players, int gameType);
 	void sendGameTypeSignal(MyThread* thread, int gameType);
 	void deleteLobbySignal(Lobby* pLobby);
+	void deleteGuestLobbySignal(Player* pPlayer);
 	void connectToLobbySignal(Lobby* pLobby, Player* player, bool connectFlag);
 	void connectToHostLobbySignal(MyThread* thread, Lobby* pLobby, Player* player, bool connectFlag);
 	void sendLobbiesListSignal(MyThread* thread);
