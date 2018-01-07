@@ -51,6 +51,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::ConnectToLobby:
 		pCommand = new ConnectToLobby();
 		break;
+	case CommandType::Type::SendRdy:
+		pCommand = new SendRdy();
+		break;
 	case CommandType::Type::SendString:
 		pCommand = new SendString();
 		break;

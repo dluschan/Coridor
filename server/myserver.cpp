@@ -144,7 +144,6 @@ void MyServer::deleteLobby(Lobby* _lobby)
 
 void MyServer::lobbiesList(MyThread* _thread)
 {
-	qDebug() << "OK";
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);

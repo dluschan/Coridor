@@ -132,4 +132,7 @@ void MyThread::switchCmd()
 		emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player);
 		// pLobby->connect(pConnectToLobby->player);
 	}
+	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
+	{
+	}
 }
