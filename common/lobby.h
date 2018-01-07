@@ -27,6 +27,7 @@ public:
 	void updateGameType(int _gameType);
 	int getGameType(QString _gameTypeStr);
 	void connect(Player* connectingPlayer);
+	void disconnect(Player* disconnectingPlayer);
 };
 
 #endif // LOBBY_H

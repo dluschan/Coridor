@@ -52,3 +52,12 @@ void Lobby::connect(Player* connectingPlayer)
 	connectedPlayers.push_back(connectingPlayer);
 	connectedPlayersNumber++;
 }
+
+void Lobby::disconnect(Player* disconnectingPlayer)
+{
+	if (!connectedPlayers.empty())
+	{
+		connectedPlayers.remove(disconnectingPlayer);
+		connectedPlayersNumber--;
+	}
+}

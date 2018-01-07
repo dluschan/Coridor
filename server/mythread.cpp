@@ -146,10 +146,17 @@ void MyThread::switchCmd()
 	}
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
-		if (pConnectToLobby->lobby->connectedPlayersNumber < pConnectToLobby->lobby->maxPlayers)
-			emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player);
+		if (pConnectToLobby->connectFlag)
+		{
+			if (pConnectToLobby->lobby->connectedPlayersNumber < pConnectToLobby->lobby->maxPlayers)
+				emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
+			else
+				sendMessage("Error: Too much players", true);
+		}
 		else
-			sendMessage("Error: Too much players", true);
+		{
+			emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, false);
+		}
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{

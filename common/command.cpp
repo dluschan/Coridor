@@ -306,9 +306,10 @@ void SendLobbies::execute()
 	qDebug() << "execute SendLobbies command";
 }
 
-ConnectToLobby::ConnectToLobby(Lobby* _lobby, Player* _player)
+ConnectToLobby::ConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
 	: lobby(_lobby)
 	, player(_player)
+	, connectFlag(_connectFlag)
 {
 	qDebug() << "ConnectToLobby command created";
 }
@@ -316,14 +317,14 @@ ConnectToLobby::ConnectToLobby(Lobby* _lobby, Player* _player)
 QDataStream& ConnectToLobby::operator>>(QDataStream& stream)
 {
 	qDebug() << "ConnectToLobby read";
-	stream >> *lobby >> *player;
+	stream >> *lobby >> *player >> connectFlag;
 	return stream;
 }
 
 QDataStream& ConnectToLobby::operator<<(QDataStream& stream) const
 {
 	qDebug() << "ConnectToLobby written";
-	stream << *lobby << *player;
+	stream << *lobby << *player << connectFlag;
 	return stream;
 }
 
@@ -409,7 +410,7 @@ void SendError::execute()
 
 SendMessage::SendMessage(QString _message, bool _error)
 	: message(_message)
-	, error(_error)
+	, errorFlag(_error)
 {
 	qDebug() << "SendMessage command created";
 }
@@ -417,14 +418,14 @@ SendMessage::SendMessage(QString _message, bool _error)
 QDataStream& SendMessage::operator>>(QDataStream& stream)
 {
 	qDebug() << "SendMessage read";
-	stream >> message >> error;
+	stream >> message >> errorFlag;
 	return stream;
 }
 
 QDataStream& SendMessage::operator<<(QDataStream& stream) const
 {
 	qDebug() << "SendMessage written";
-	stream << message << error;
+	stream << message << errorFlag;
 	return stream;
 }
 

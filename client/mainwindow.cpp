@@ -64,11 +64,11 @@ void MainWindow::createLobbyDialog()
 
 void MainWindow::sendConnectToLobby(QTreeWidgetItem* item, int column)
 {
-	QByteArray arrBlock;
+	/*QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {CommandType::Type::ConnectToLobby};
+	CommandType commandType = {CommandType::Type::ConnectToLobby};*/
 
 	// получение connectedPlayersNumber
 	QRegExp rx(".*\\s*(\\d+)\\s*/.*");
@@ -81,7 +81,8 @@ void MainWindow::sendConnectToLobby(QTreeWidgetItem* item, int column)
 	}
 
 	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
-	Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
+	sendConnectToLobby(pLobby, pPlayer, true);
+	/*Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -90,11 +91,12 @@ void MainWindow::sendConnectToLobby(QTreeWidgetItem* item, int column)
 
 	qDebug() << "ConnectToLobby Command Sent";
 
-	pLobby->connect(pPlayer);
+	pLobby->connect(pPlayer);*/
 }
 
 void MainWindow::leaveLobby()
 {
+	sendConnectToLobby(pLobby, pPlayer, false);
 	pLobby = new Lobby();
 	switchToMain();
 }
@@ -102,7 +104,8 @@ void MainWindow::leaveLobby()
 void MainWindow::deleteLobby()
 {
 	deleteLobby(pLobby->lobbyName);
-	leaveLobby();
+	pLobby = new Lobby();
+	switchToMain();
 }
 
 void MainWindow::leaveLobbiesList()
@@ -216,7 +219,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 
 			startGameBtn = new QPushButton("Start");
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobby()));
-			pLobby->connectedPlayers.push_back(connectingPlayer);
+			pLobby->connect(connectingPlayer);
 		}
 		else
 		{
@@ -346,6 +349,29 @@ void MainWindow::deleteLobby(QString lobbyName)
 	pLobby = new Lobby();
 }
 
+void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::ConnectToLobby};
+
+	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "ConnectToLobby Command Sent" << _connectFlag;
+
+	if (_connectFlag)
+		pLobby->connect(_player);
+	else
+		pLobby->disconnect(_player);
+}
+
 void MainWindow::askLobbies()
 {
 	QByteArray arrBlock;
@@ -460,7 +486,11 @@ void MainWindow::switchCmd()
 	}
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
-		switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), false);
+		if (pConnectToLobby->connectFlag)
+			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), false);
+		else
+			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), true);
+		// pLobby->disconnect(pConnectToLobby->player);
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
@@ -468,7 +498,7 @@ void MainWindow::switchCmd()
 	}
 	else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))
 	{
-		if (pSendMessage->error)
+		if (pSendMessage->errorFlag)
 			QMessageBox::information(this, tr("Error"), pSendMessage->message);
 	}
 }

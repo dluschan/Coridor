@@ -29,9 +29,9 @@ public slots:
 	void sendGameType(MyThread* _thread, int _gameType);
 	void deleteLobby(Lobby* _lobby);
 	void lobbiesList(MyThread* _thread);
-	void connectToLobby(Lobby* _lobby, Player* _player);
-	void sendConnectToLobby(Lobby* _lobby, Player* _player);
-	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player);
+	// void connectToLobby(Lobby* _lobby, Player* _player);
+	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
+	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendRdy(Player* _host);
 	// void lobbyList(MyThread* thread);
 

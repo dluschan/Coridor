@@ -22,48 +22,57 @@ void MyServer::sendString(QString _message, MyThread* _thread)
 	_thread->sendMessage(_message, false);
 }
 
-void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player)
+void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
 {
 	for (const auto& i : threads)
 	{
-		if (i->pPlayer->playerName == _player->playerName)
+		if (i->pPlayer->playerName == _player->playerName && _connectFlag)
 		{
 			QByteArray arrBlock;
 			QDataStream out(&arrBlock, QIODevice::WriteOnly);
 			out.setVersion(QDataStream::Qt_5_9);
 
 			CommandType commandType = {CommandType::Type::ConnectToLobby};
-			Command* pCommand = new ConnectToLobby(_lobby, _player);
-
-			// qDebug() << i->pPlayer->playerName << _player->playerName << _lobby->host->playerName;
-
-			i->pLobby = _lobby;
-			i->pLobby->connect(_player);
-			for (const auto& j : lobbies)
-				if (j->lobbyName == _lobby->lobbyName)
-					j->connect(_player);
+			Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
 
 			out << commandType;
 			pCommand->operator<<(out);
 			i->pSocket->write(arrBlock);
 			i->pSocket->waitForBytesWritten();
 		}
-		// qDebug() << i->pPlayer->playerName << _player->playerName << _lobby->host->playerName;
+
+		if (_connectFlag)
+		{
+			i->pLobby = _lobby;
+			i->pLobby->connect(_player);
+			for (const auto& j : lobbies)
+				if (j->lobbyName == _lobby->lobbyName)
+					j->connect(_player);
+		}
+		else
+		{
+			i->pLobby = _lobby;
+			i->pLobby->disconnect(_player);
+			for (const auto& j : lobbies)
+				if (j->lobbyName == _lobby->lobbyName)
+					j->disconnect(_player);
+		}
+
 		if (i->pPlayer->playerName == _lobby->host->playerName)
-			emit i->connectToHostLobbySignal(i, _lobby, _player);
+			emit i->connectToHostLobbySignal(i, _lobby, _player, _connectFlag);
 	}
 
 	qDebug() << "ConnectToLobby Command Sent";
 }
 
-void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player)
+void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::ConnectToLobby};
-	Command* pCommand = new ConnectToLobby(_lobby, _player);
+	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
 
 	/*i->pLobby = _lobby;
 	i->pLobby->connect(_player);
@@ -166,7 +175,7 @@ void MyServer::lobbiesList(MyThread* _thread)
 	_thread->write(arrBlock);
 }
 
-void MyServer::connectToLobby(Lobby* _lobby, Player* _player)
+/*void MyServer::connectToLobby(Lobby* _lobby, Player* _player)
 {
 	// bool flag = true;
 	for (const auto& i : lobbies)
@@ -179,7 +188,7 @@ void MyServer::connectToLobby(Lobby* _lobby, Player* _player)
 			// flag = false;
 		}
 	// SendError
-}
+}*/
 
 /*void MyServer::lobbyList(MyThread* thread)
 {
@@ -205,8 +214,8 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(sendGameTypeSignal(MyThread*, int)), this, SLOT(sendGameType(MyThread*, int)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(deleteLobbySignal(Lobby*)), this, SLOT(deleteLobby(Lobby*)));
 	connect(threads.back(), SIGNAL(sendLobbiesListSignal(MyThread*)), this, SLOT(lobbiesList(MyThread*)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*)), this, SLOT(sendConnectToLobby(Lobby*, Player*)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
 	threads.back()->start();
 

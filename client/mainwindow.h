@@ -81,6 +81,7 @@ private:
 	void switchToLobbiesList();
 
 	void deleteLobby(QString lobbyName);
+	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void switchCmd();
 };
 

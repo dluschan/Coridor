@@ -149,10 +149,11 @@ public:
 class ConnectToLobby : public Command
 {
 public:
-	ConnectToLobby(Lobby* _lobby = new Lobby(), Player* _player = new Player());
+	ConnectToLobby(Lobby* _lobby = new Lobby(), Player* _player = new Player(), bool _connectFlag = true);
 
 	Lobby* lobby;
 	Player* player;
+	bool connectFlag;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
@@ -202,7 +203,7 @@ public:
 	SendMessage(QString _message = QString(), bool _error = false);
 
 	QString message;
-	bool error;
+	bool errorFlag;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
