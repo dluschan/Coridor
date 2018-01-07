@@ -19,7 +19,7 @@ void MyServer::StartServer()
 
 void MyServer::sendString(QString _message, MyThread* _thread)
 {
-	_thread->sendString(_message);
+	_thread->sendMessage(_message, false);
 }
 
 void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player)

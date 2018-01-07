@@ -21,8 +21,9 @@ struct CommandType
 		ConnectToLobby,
 		// SendConnect,
 		SendRdy,
-		SendError,
-		SendString,
+		// SendError,
+		// SendString,
+		SendMessage,
 		WrongCommand
 	};
 	Type type;
@@ -183,12 +184,25 @@ public:
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };*/
 
-class SendString : public Command
+/*class SendError : public Command
 {
 public:
-	SendString(QString _message = QString());
+	SendError(QString _error = QString());
+
+	QString error;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};*/
+
+class SendMessage : public Command
+{
+public:
+	SendMessage(QString _message = QString(), bool _error = false);
 
 	QString message;
+	bool error;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

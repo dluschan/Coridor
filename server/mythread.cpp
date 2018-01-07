@@ -33,7 +33,7 @@ void MyThread::readyRead()
 	pCommand->execute();
 	switchCmd();
 
-	emit sendPlayerListSignal(this);
+	// emit sendPlayerListSignal(this);
 }
 
 /*
@@ -94,14 +94,14 @@ void MyThread::sendRdy()
 	qDebug() << "SendRdy Command Sent";
 }
 
-void MyThread::sendString(QString message)
+void MyThread::sendMessage(QString message, bool error)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {CommandType::Type::SendString};
-	Command* pCommand = new SendString(message);
+	CommandType commandType = {CommandType::Type::SendMessage};
+	Command* pCommand = new SendMessage(message, error);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -146,8 +146,10 @@ void MyThread::switchCmd()
 	}
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
-		emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player);
-		// pLobby->connect(pConnectToLobby->player);
+		if (pConnectToLobby->lobby->connectedPlayersNumber < pConnectToLobby->lobby->maxPlayers)
+			emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player);
+		else
+			sendMessage("Error: Too much players", true);
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{

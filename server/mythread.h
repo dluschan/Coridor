@@ -19,7 +19,7 @@ public:
 	Player* pPlayer;
 	Lobby* pLobby = new Lobby();
 	void run();
-	void sendString(QString message);
+	void sendMessage(QString message, bool error);
 	Lobby* createLobby(QString lobbyName, int gameType);
 	void write(QByteArray buffer);
 	void sendRdy();

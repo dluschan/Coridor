@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QRegExp>
 
 MainWindow::MainWindow(QWidget* parent)
 	: QMainWindow(parent)
@@ -38,7 +39,7 @@ void MainWindow::connectToTheServer()
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::AskLogin};
-	Command* pCommand = new SendString(loginEdit->text());
+	Command* pCommand = new Login(loginEdit->text());
 
 	pPlayer = new Player(loginEdit->text());
 	// qDebug() << int(pSocket->socketDescriptor());
@@ -68,7 +69,18 @@ void MainWindow::sendConnectToLobby(QTreeWidgetItem* item, int column)
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::ConnectToLobby};
-	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)));
+
+	// получение connectedPlayersNumber
+	QRegExp rx(".*\\s*(\\d+)\\s*/.*");
+	int pos = 0;
+
+	int connectedPlayersNumber;
+	if ((pos = rx.indexIn(item->text(3), 0)) != -1)
+	{
+		connectedPlayersNumber = rx.cap(1).toInt();
+	}
+
+	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
 	Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
 
 	out << commandType;
@@ -453,5 +465,10 @@ void MainWindow::switchCmd()
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
 		setRdy();
+	}
+	else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))
+	{
+		if (pSendMessage->error)
+			QMessageBox::information(this, tr("Error"), pSendMessage->message);
 	}
 }

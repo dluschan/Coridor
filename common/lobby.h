@@ -22,7 +22,7 @@ public:
 	int connectedPlayersNumber = 1, maxPlayers = 2, status = WaitingForPlayersToConnect;
 	std::list<Player*> connectedPlayers;
 	GameType gameType;
-	QString gameTypeStr;
+	QString gameTypeStr; //, statusStr;
 
 	void updateGameType(int _gameType);
 	int getGameType(QString _gameTypeStr);

@@ -25,7 +25,6 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::AskLogin:
 		pCommand = new Login();
 		break;
-
 	case CommandType::Type::CreateLobby:
 		pCommand = new CreateLobby();
 		break;
@@ -41,7 +40,6 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::AskLobbies:
 		pCommand = new AskLobbies();
 		break;
-
 	case CommandType::Type::SendLobbies:
 	{
 		list<Lobby*> lobbiesEmpty;
@@ -54,8 +52,8 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::SendRdy:
 		pCommand = new SendRdy();
 		break;
-	case CommandType::Type::SendString:
-		pCommand = new SendString();
+	case CommandType::Type::SendMessage:
+		pCommand = new SendMessage();
 		break;
 	default:
 		throw std::logic_error("Incorrect type of command");
@@ -385,27 +383,52 @@ void SendConnect::execute()
 }
 */
 
-SendString::SendString(QString _message)
+/*SendError::SendError(QString _error)
+	: error(_error)
+{
+}
+
+QDataStream& SendError::operator>>(QDataStream& stream)
+{
+	qDebug() << "SendError read";
+	stream >> error;
+	return stream;
+}
+
+QDataStream& SendError::operator<<(QDataStream& stream) const
+{
+	qDebug() << "SendError written";
+	stream << error;
+	return stream;
+}
+
+void SendError::execute()
+{
+	qDebug() << "execute SendError command";
+}*/
+
+SendMessage::SendMessage(QString _message, bool _error)
 	: message(_message)
+	, error(_error)
 {
-	qDebug() << "SendString command created";
+	qDebug() << "SendMessage command created";
 }
 
-QDataStream& SendString::operator>>(QDataStream& stream)
+QDataStream& SendMessage::operator>>(QDataStream& stream)
 {
-	qDebug() << "SendString read";
-	stream >> message;
+	qDebug() << "SendMessage read";
+	stream >> message >> error;
 	return stream;
 }
 
-QDataStream& SendString::operator<<(QDataStream& stream) const
+QDataStream& SendMessage::operator<<(QDataStream& stream) const
 {
-	qDebug() << "SendString written";
-	stream << message;
+	qDebug() << "SendMessage written";
+	stream << message << error;
 	return stream;
 }
 
-void SendString::execute()
+void SendMessage::execute()
 {
-	qDebug() << message;
+	qDebug() << "execute SendMessage command:" << message;
 }
