@@ -35,15 +35,17 @@ private slots:
 
 	void connectToTheServer();
 	void createLobbyDialog();
-	void connectToLobby(QTreeWidgetItem* item, int column);
+	void sendConnectToLobby(QTreeWidgetItem* item, int column);
 	void leaveLobby();
+	void deleteLobby();
 	void leaveLobbiesList();
+	void setRdy();
 
 signals:
 
 private:
-	Player* player;
-	Lobby* lobby;
+	Player* pPlayer;
+	Lobby* pLobby;
 	Command* pCommand;
 
 	QWidget* centralWidget;
@@ -64,7 +66,7 @@ private:
 	QPushButton* startGameBtn;
 	QPushButton* exitLobbyBtn;
 
-	bool playerConnected = false;
+	// bool playerConnected = false;
 
 	QGridLayout* lobbiesListLayout;
 	QTreeWidget* lobbiesList;
@@ -73,7 +75,8 @@ private:
 
 	void switchToLoginIn();
 	void switchToMain();
-	void switchToLobby(int _gameType);
+	void switchToLobby(Player* connectingPlayer = new Player(), Lobby* _lobby = new Lobby(), int _gameType = 0, bool flagHosting = true);
+	void switchToLobbyGuest(Lobby* _lobby);
 	void switchToLobbiesList();
 
 	void deleteLobby(QString lobbyName);

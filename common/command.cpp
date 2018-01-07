@@ -30,8 +30,11 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 		pCommand = new CreateLobby();
 		break;
 	case CommandType::Type::ChangeGameType:
-		pCommand = new ChangeGameType();
+	{
+		list<Player*> playerEmpty;
+		pCommand = new ChangeGameType(0, playerEmpty);
 		break;
+	}
 	case CommandType::Type::DeleteLobby:
 		pCommand = new DeleteLobby();
 		break;
@@ -45,6 +48,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 		pCommand = new SendLobbies(lobbiesEmpty);
 		break;
 	}
+	case CommandType::Type::ConnectToLobby:
+		pCommand = new ConnectToLobby();
+		break;
 	case CommandType::Type::SendString:
 		pCommand = new SendString();
 		break;
@@ -110,23 +116,59 @@ void CreateLobby::execute()
 	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
 }
 
-ChangeGameType::ChangeGameType(int _gameType)
+ChangeGameType::ChangeGameType(int _gameType, std::list<Player*> _connectedPlayers)
 	: gameType(_gameType)
+	//, host(_host)
+	, connectedPlayers(_connectedPlayers)
 {
 	qDebug() << "ChangeGameType command created";
+	// connectedPlayers.push_back(host);
+}
+
+QDataStream& operator>>(QDataStream& stream, Player& player)
+{
+	QString login;
+
+	stream >> login;
+	player = Player(login);
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Player& player)
+{
+	stream << player.playerName;
+	return stream;
 }
 
 QDataStream& ChangeGameType::operator>>(QDataStream& stream)
 {
 	qDebug() << "ChangeGameType read";
-	stream >> gameType;
+	// stream >> gameType >> host;
+
+	Player* playerTmp = new Player();
+	int size;
+	stream >> size;
+	for (int i = 0; i < size; i++)
+	{
+		stream >> gameType >> *playerTmp;
+		connectedPlayers.push_back(playerTmp);
+	}
+
 	return stream;
 }
 
 QDataStream& ChangeGameType::operator<<(QDataStream& stream) const
 {
 	qDebug() << "ChangeGameType written";
-	stream << gameType;
+	stream << connectedPlayers.size();
+
+	// stream << gameType << host;
+
+	for (const auto& i : connectedPlayers)
+	{
+		stream << gameType << *i;
+	}
+
 	return stream;
 }
 
@@ -194,15 +236,17 @@ QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
 	QString lobbyName;
 	QString hostHame;
 	unsigned int gameType;
+	int connectedPlayersNumber;
 
-	stream >> lobbyName >> hostHame >> gameType;
-	lobby = Lobby(lobbyName, hostHame, gameType);
+	stream >> lobbyName >> hostHame >> gameType >> connectedPlayersNumber;
+	lobby = Lobby(lobbyName, hostHame, gameType, connectedPlayersNumber);
+	// lobby.connectedPlayersNumber = connectedPlayersNumber;
 	return stream;
 }
 
 QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
 {
-	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType);
+	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << lobby.connectedPlayersNumber;
 	return stream;
 }
 
@@ -216,7 +260,6 @@ QDataStream& SendLobbies::operator>>(QDataStream& stream)
 	{
 		stream >> *lobbyTmp;
 		lobbies.push_back(lobbyTmp);
-		qDebug() << ">>>>>>>>>>>>>>>>>>";
 	}
 	return stream;
 }
@@ -228,7 +271,6 @@ QDataStream& SendLobbies::operator<<(QDataStream& stream) const
 	for (const auto& i : lobbies)
 	{
 		stream << *i;
-		qDebug() << "<<<<<<<<<<<<<<<<<<";
 	}
 	return stream;
 }
@@ -237,6 +279,60 @@ void SendLobbies::execute()
 {
 	qDebug() << "execute SendLobbies command";
 }
+
+ConnectToLobby::ConnectToLobby(Lobby* _lobby, Player* _player)
+	: lobby(_lobby)
+	, player(_player)
+{
+	qDebug() << "ConnectToLobby command created";
+}
+
+QDataStream& ConnectToLobby::operator>>(QDataStream& stream)
+{
+	qDebug() << "ConnectToLobby read";
+	stream >> *lobby >> *player;
+	return stream;
+}
+
+QDataStream& ConnectToLobby::operator<<(QDataStream& stream) const
+{
+	qDebug() << "ConnectToLobby written";
+	stream << *lobby << *player;
+	return stream;
+}
+
+void ConnectToLobby::execute()
+{
+	qDebug() << "execute ConnectToLobby command";
+}
+
+/* SendConnect::SendConnect(Lobby* _lobby, Player* _player)
+	: lobby(_lobby)
+, player(_player)
+{
+	qDebug() << "SendConnect command created";
+}
+
+QDataStream& SendConnect::operator>>(QDataStream& stream)
+{
+	qDebug() << "SendConnect read";
+	stream >> *lobby >> *player;
+	return stream;
+}
+
+QDataStream& SendConnect::operator<<(QDataStream& stream) const
+{
+	qDebug() << "SendConnect written";
+	stream << *lobby << *player;
+	return stream;
+}
+
+void SendConnect::execute()
+{
+	lobby->connect(player);
+	qDebug() << "execute SendConnect command";
+}
+*/
 
 SendString::SendString(QString _message)
 	: message(_message)

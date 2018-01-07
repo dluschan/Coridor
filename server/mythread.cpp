@@ -12,7 +12,7 @@ void MyThread::run()
 	pSocket = new QTcpSocket();
 	if (!pSocket->setSocketDescriptor(this->socketDescriptor))
 	{
-		emit error(pSocket->error());
+		emit errorSignal(pSocket->error());
 		return;
 	}
 
@@ -33,7 +33,7 @@ void MyThread::readyRead()
 	pCommand->execute();
 	switchCmd();
 
-	emit sendPlayerList(this);
+	emit sendPlayerListSignal(this);
 }
 
 /*
@@ -64,6 +64,11 @@ void MyThread::disconnected()
 	qDebug() << socketDescriptor << "Client Disconnected";
 	pSocket->deleteLater();
 	exit(0);
+}
+
+void MyThread::changeGameType(int _gameType)
+{
+	pLobby->gameType = (GameType)_gameType;
 }
 
 void MyThread::write(QByteArray buffer)
@@ -100,13 +105,18 @@ void MyThread::switchCmd()
 	}
 	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
 	{
-		pLobby = pCreateLobby->lobby;
 		emit createLobbySignal(pCreateLobby->lobby);
+		pLobby = pCreateLobby->lobby;
 	}
 	else if (ChangeGameType* pChangeGameType = dynamic_cast<ChangeGameType*>(pCommand))
 	{
-		pLobby->update(pChangeGameType->gameType);
 		emit changeGameTypeSignal(this, pChangeGameType->gameType);
+		pLobby->updateGameType(pChangeGameType->gameType);
+		if (!pChangeGameType->connectedPlayers.empty())
+		{
+			for (const auto& i : pChangeGameType->connectedPlayers)
+				emit sendGameTypesSignal(i, pChangeGameType->gameType);
+		}
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
@@ -115,6 +125,11 @@ void MyThread::switchCmd()
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{
-		emit sendLobbiesList(this);
+		emit sendLobbiesListSignal(this);
+	}
+	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
+	{
+		emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player);
+		// pLobby->connect(pConnectToLobby->player);
 	}
 }

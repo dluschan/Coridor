@@ -1,12 +1,13 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <QDebug>
 #include <QString>
 
 class Player
 {
 public:
-	Player(QString login);
+	Player(QString login = "Login");
 
 	QString playerName;
 	int ID, wins, loses;

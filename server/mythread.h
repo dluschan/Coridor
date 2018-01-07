@@ -17,7 +17,7 @@ public:
 	QTcpSocket* pSocket;
 	// int socketDescriptor;
 	Player* pPlayer;
-	Lobby* pLobby;
+	Lobby* pLobby = new Lobby();
 	void run();
 	void sendString(QString message);
 	Lobby* createLobby(QString lobbyName, int gameType);
@@ -26,16 +26,21 @@ public:
 
 signals:
 	void deletePlayerSignal(MyThread* thread);
-	void error(QTcpSocket::SocketError socketError);
-	void sendPlayerList(MyThread* thread);
+	void errorSignal(QTcpSocket::SocketError socketError);
+	void sendPlayerListSignal(MyThread* thread);
 	void createLobbySignal(Lobby* pLobby);
 	void changeGameTypeSignal(MyThread* thread, int gameType);
+	void sendGameTypesSignal(Player* players, int gameType);
+	void sendGameTypeSignal(MyThread* thread, int gameType);
 	void deleteLobbySignal(Lobby* pLobby);
-	void sendLobbiesList(MyThread* thread);
+	void connectToLobbySignal(Lobby* pLobby, Player* player);
+	void connectToHostLobbySignal(MyThread* thread, Lobby* pLobby, Player* player);
+	void sendLobbiesListSignal(MyThread* thread);
 
 public slots:
 	void readyRead();
 	void disconnected();
+	void changeGameType(int _gameType);
 
 private:
 	// QTcpSocket* pSocket;

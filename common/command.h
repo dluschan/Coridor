@@ -18,6 +18,9 @@ struct CommandType
 		DeleteLobby,
 		AskLobbies,
 		SendLobbies,
+		ConnectToLobby,
+		SendConnect,
+		SendError,
 		SendString,
 		WrongCommand
 	};
@@ -78,9 +81,11 @@ private:
 class ChangeGameType : public Command
 {
 public:
-	ChangeGameType(int _gameType = 0);
+	ChangeGameType(int _gameType, /*Player* _host,*/ std::list<Player*> _connectedPlayers);
 
 	int gameType;
+	// Player* host;
+	std::list<Player*> connectedPlayers;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
@@ -124,6 +129,32 @@ public:
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
+
+class ConnectToLobby : public Command
+{
+public:
+	ConnectToLobby(Lobby* _lobby = new Lobby(), Player* _player = new Player());
+
+	Lobby* lobby;
+	Player* player;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+/*class SendConnect : public Command
+{
+public:
+	SendConnect(Lobby* _lobby = new Lobby(), Player* _player = new Player());
+
+	Lobby* lobby;
+	Player* player;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};*/
 
 class SendString : public Command
 {
