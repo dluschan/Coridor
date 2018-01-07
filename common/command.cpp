@@ -88,7 +88,51 @@ void Login::execute()
 	player = new Player(login);
 }
 
-CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin, int _gameType)
+CreateLobby::CreateLobby(Lobby* _lobby)
+	: lobby(_lobby)
+{
+	qDebug() << "CreateLobby command created";
+}
+
+QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
+{
+	QString lobbyName;
+	QString hostHame;
+	unsigned int gameType;
+	int connectedPlayersNumber;
+
+	stream >> lobbyName >> hostHame >> gameType >> connectedPlayersNumber;
+	lobby = Lobby(lobbyName, hostHame, gameType, connectedPlayersNumber);
+	// lobby.connectedPlayersNumber = connectedPlayersNumber;
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
+{
+	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << lobby.connectedPlayersNumber;
+	return stream;
+}
+
+QDataStream& CreateLobby::operator>>(QDataStream& stream)
+{
+	qDebug() << "CreateLobby read";
+	stream >> *lobby;
+	return stream;
+}
+
+QDataStream& CreateLobby::operator<<(QDataStream& stream) const
+{
+	qDebug() << "CreateLobby written";
+	stream << *lobby;
+	return stream;
+}
+
+void CreateLobby::execute()
+{
+	qDebug() << "execute CreateLobby command";
+}
+
+/*CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin, int _gameType)
 	: lobbyName(_lobbyName)
 	, hostLogin(_hostLogin)
 	, gameType(_gameType)
@@ -114,7 +158,7 @@ void CreateLobby::execute()
 {
 	lobby = new Lobby(lobbyName, hostLogin, gameType);
 	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
-}
+}*/
 
 ChangeGameType::ChangeGameType(int _gameType, std::list<Player*> _connectedPlayers)
 	: gameType(_gameType)
@@ -231,25 +275,6 @@ SendLobbies::SendLobbies(list<Lobby*> _lobbies)
 	}
 }
 
-QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
-{
-	QString lobbyName;
-	QString hostHame;
-	unsigned int gameType;
-	int connectedPlayersNumber;
-
-	stream >> lobbyName >> hostHame >> gameType >> connectedPlayersNumber;
-	lobby = Lobby(lobbyName, hostHame, gameType, connectedPlayersNumber);
-	// lobby.connectedPlayersNumber = connectedPlayersNumber;
-	return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
-{
-	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << lobby.connectedPlayersNumber;
-	return stream;
-}
-
 QDataStream& SendLobbies::operator>>(QDataStream& stream)
 {
 	qDebug() << "SendLobbies read";
@@ -304,6 +329,26 @@ QDataStream& ConnectToLobby::operator<<(QDataStream& stream) const
 void ConnectToLobby::execute()
 {
 	qDebug() << "execute ConnectToLobby command";
+}
+
+SendRdy::SendRdy()
+{
+	qDebug() << "SendRdy command created";
+}
+
+QDataStream& SendRdy::operator>>(QDataStream& stream)
+{
+	return stream;
+}
+
+QDataStream& SendRdy::operator<<(QDataStream& stream) const
+{
+	return stream;
+}
+
+void SendRdy::execute()
+{
+	qDebug() << "execute SendRdy command";
 }
 
 /* SendConnect::SendConnect(Lobby* _lobby, Player* _player)

@@ -105,6 +105,19 @@ void MainWindow::setRdy()
 		connectedPlayersList->item(1)->setCheckState(Qt::Unchecked);
 	else
 		connectedPlayersList->item(1)->setCheckState(Qt::Checked);
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendRdy};
+	Command* pCommand = new SendRdy();
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "SendRdy Command Sent";
 }
 
 void MainWindow::switchToLoginIn()
@@ -284,7 +297,7 @@ void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::CreateLobby};
-	Command* pCommand = new CreateLobby(lobbyName, hostLogin, gameType);
+	Command* pCommand = new CreateLobby(new Lobby(lobbyName, hostLogin, gameType));
 
 	out << commandType;
 	pCommand->operator<<(out);

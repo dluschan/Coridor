@@ -19,7 +19,8 @@ struct CommandType
 		AskLobbies,
 		SendLobbies,
 		ConnectToLobby,
-		SendConnect,
+		// SendConnect,
+		SendRdy,
 		SendError,
 		SendString,
 		WrongCommand
@@ -64,7 +65,7 @@ private:
 class CreateLobby : public Command
 {
 public:
-	CreateLobby(QString _lobbyName = QString("Lobby Name"), QString _hostLogin = QString(), int _gameType = 1);
+	CreateLobby(Lobby* _lobby = new Lobby());
 
 	Lobby* lobby;
 
@@ -77,6 +78,23 @@ private:
 	QString hostLogin;
 	int gameType;
 };
+
+/*class CreateLobby : public Command
+{
+public:
+	CreateLobby(QString _lobbyName = QString("Lobby Name"), QString _hostLogin = QString(), int _gameType = 1);
+
+	Lobby* lobby;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+
+private:
+	QString lobbyName;
+	QString hostLogin;
+	int gameType;
+};*/
 
 class ChangeGameType : public Command
 {
@@ -109,9 +127,6 @@ class AskLobbies : public Command
 public:
 	AskLobbies();
 
-	// std::list<Lobby*> lobbies;
-	// Lobby* lobbyTmp;
-
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
@@ -137,6 +152,16 @@ public:
 
 	Lobby* lobby;
 	Player* player;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+class SendRdy : public Command
+{
+public:
+	SendRdy();
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
