@@ -100,9 +100,27 @@ void MyServer::sendRdy(Player* _host)
 {
 	for (const auto& i : threads)
 	{
-		// qDebug() << i->pPlayer->playerName;
 		if (i->pPlayer->playerName == _host->playerName)
 			i->sendRdy();
+		for (const auto& j : lobbies)
+			if (j->status == Unready)
+				j->updateStatus(Ready);
+			else if (j->status == Ready)
+				j->updateStatus(Unready);
+	}
+}
+
+void MyServer::sendStart(Player* _connectedPlayer)
+{
+	for (const auto& i : threads)
+	{
+		if (i->pPlayer->playerName == _connectedPlayer->playerName)
+		{
+			i->sendStart();
+			for (const auto& j : lobbies)
+				if (j->status == Ready)
+					j->status = InGame;
+		}
 	}
 }
 
@@ -244,6 +262,7 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(sendStartSignal(Player*)), this, SLOT(sendStart(Player*)), Qt::DirectConnection);
 	threads.back()->start();
 
 	/* MyThread* thread = new MyThread(socketDescriptor, this);

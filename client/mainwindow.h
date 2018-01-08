@@ -1,7 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "coridorwindow.h"
 #include "dialog.h"
+#include "quartowindow.h"
 #include <QCheckBox>
 #include <QDebug>
 #include <QGridLayout>
@@ -41,6 +43,10 @@ private slots:
 	void leaveLobbiesList();
 	void setRdy();
 	void sendRdy();
+	void SendStartSlot();
+	void switchToCoridorWindow(bool host);
+	void switchToQuartoWindow(bool host);
+	void switchToGameLikeHostSlot();
 
 signals:
 
@@ -48,6 +54,8 @@ private:
 	Player* pPlayer;
 	Lobby* pLobby;
 	Command* pCommand;
+	CoridorWindow* coridorWindow;
+	QuartoWindow* quartoWindow;
 
 	QWidget* centralWidget;
 
@@ -82,6 +90,7 @@ private:
 
 	void deleteLobby(Lobby* lobby);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
+	void switchToGame(bool host);
 	void switchCmd();
 };
 

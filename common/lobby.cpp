@@ -6,18 +6,8 @@ Lobby::Lobby(QString _name, QString _host, int _gameType, int _connectedPlayersN
 	, gameType((GameType)_gameType)
 	, connectedPlayersNumber(_connectedPlayersNumber)
 {
-	switch (gameType)
-	{
-	case Coridor:
-		gameTypeStr = "Coridor";
-		break;
-	case Quarto:
-		gameTypeStr = "Quarto";
-		break;
-	default:
-		// Wrong gameType
-		break;
-	}
+	updateGameType(gameType);
+	updateStatus(status);
 }
 
 void Lobby::updateGameType(int _gameType)
@@ -35,6 +25,32 @@ void Lobby::updateGameType(int _gameType)
 		// Wrong gameType
 		break;
 	}
+}
+
+void Lobby::updateStatus(Status _status)
+{
+	status = _status;
+	switch (status)
+	{
+	case Unready:
+		statusStr = "InLobby";
+		break;
+	case Ready:
+		statusStr = "InLobby";
+		break;
+	case InGame:
+		statusStr = "InGame";
+		break;
+	default:
+		// Wrong gameType
+		break;
+	}
+}
+
+void Lobby::update(int _gameType, Status _status)
+{
+	updateGameType(_gameType);
+	updateStatus(_status);
 }
 
 int Lobby::getGameType(QString _gameTypeStr)

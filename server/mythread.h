@@ -25,6 +25,7 @@ public:
 	void* deleteGuestLobby(Lobby* lobby);
 	void write(QByteArray buffer);
 	void sendRdy();
+	void sendStart();
 	// Player* createPlayer(QString playerName);
 
 signals:
@@ -41,6 +42,7 @@ signals:
 	void connectToHostLobbySignal(MyThread* thread, Lobby* pLobby, Player* player, bool connectFlag);
 	void sendLobbiesListSignal(MyThread* thread);
 	void sendRdySignal(Player* host);
+	void sendStartSignal(Player* connectedPlayer);
 
 public slots:
 	void readyRead();

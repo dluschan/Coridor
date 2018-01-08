@@ -2,14 +2,15 @@
 #define LOBBY_H
 
 #include "game.h"
+#include "player.h"
 #include <QObject>
 //#include <QString>
 //#include "player.h"
 
 enum Status
 {
-	WaitingForPlayersToConnect,
-	WaitingForPlayersToBeRdy,
+	Unready,
+	Ready,
 	InGame
 };
 
@@ -19,12 +20,15 @@ public:
 	Lobby(QString _name = "LobbyName", QString _host = "HostName", int _gameType = 2, int _connectedPlayersNumber = 1);
 	QString lobbyName;
 	Player* host;
-	int connectedPlayersNumber = 1, maxPlayers = 2, status = WaitingForPlayersToConnect;
+	int connectedPlayersNumber = 1, maxPlayers = 2;
+	Status status = Unready;
 	std::list<Player*> connectedPlayers;
-	GameType gameType;
-	QString gameTypeStr; //, statusStr;
+	GameType gameType = WrongGameType;
+	QString gameTypeStr = "WrongGameType", statusStr = "Status";
 
 	void updateGameType(int _gameType);
+	void updateStatus(Status _status);
+	void update(int _gameType, Status _status);
 	int getGameType(QString _gameTypeStr);
 	void connect(Player* connectingPlayer);
 	void disconnect(Player* disconnectingPlayer);

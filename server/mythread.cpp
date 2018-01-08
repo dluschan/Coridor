@@ -94,6 +94,22 @@ void MyThread::sendRdy()
 	qDebug() << "SendRdy Command Sent";
 }
 
+void MyThread::sendStart()
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendStart};
+	std::list<Player*> players;
+	players.push_back(pPlayer);
+	Command* pCommand = new SendStart(players);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+}
+
 void MyThread::sendMessage(QString message, bool error)
 {
 	QByteArray arrBlock;
@@ -193,5 +209,16 @@ void MyThread::switchCmd()
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
 		emit sendRdySignal(pSendRdy->host);
+		if (pLobby->status == Unready)
+			pLobby->updateStatus(Ready);
+		else if (pLobby->status == Ready)
+			pLobby->updateStatus(Unready);
+	}
+	else if (SendStart* pSendStart = dynamic_cast<SendStart*>(pCommand))
+	{
+		for (const auto& i : pSendStart->players)
+			emit sendStartSignal(i);
+		if (pLobby->status == Ready)
+			pLobby->status = InGame;
 	}
 }

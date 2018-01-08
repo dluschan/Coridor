@@ -21,6 +21,7 @@ struct CommandType
 		ConnectToLobby,
 		// SendConnect,
 		SendRdy,
+		SendStart,
 		// SendError,
 		// SendString,
 		SendMessage,
@@ -172,6 +173,17 @@ public:
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
+class SendStart : public Command
+{
+public:
+	SendStart(list<Player*> _players);
+
+	std::list<Player*> players;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
 /*class SendConnect : public Command
 {
 public:
