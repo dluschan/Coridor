@@ -13,17 +13,35 @@ TEMPLATE = app
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
-SOURCES += main.cpp\
+SOURCES += \
+         main.cpp\
         mainwindow.cpp \
         ../common/command.cpp \
         ../common/lobby.cpp \
         ../common/game.cpp \
         ../common/player.cpp \
-        dialog.cpp
+        dialog.cpp \
+    coridorwindow.cpp \
+    images.cpp \
+    field.cpp \
+    quartowindow.cpp \
+    coridorlogic.cpp \
+    quartologic.cpp
 
-HEADERS  += mainwindow.h \
+HEADERS  += \
+        mainwindow.h \
         ../common/command.h \
         ../common/lobby.h \
         ../common/game.h \
         ../common/player.h \
-        dialog.h
+        dialog.h \
+    coridorwindow.h \
+    images.h \
+    field.h \
+    quartowindow.h \
+    coridorlogic.h \
+    quartologic.h
+
+FORMS += \
+    coridorwindow.ui \
+    quartowindow.ui
