@@ -33,7 +33,7 @@ private slots:
 	void sockDisc();
 	void createLobby(QString lobbyName, QString hostLogin, int gameType);
 	void askLobbies();
-	void updateLobby(int);
+	void updateLobby(int _gameType);
 
 	void connectToTheServer();
 	void createLobbyDialog();
@@ -43,7 +43,6 @@ private slots:
 	void leaveLobbiesList();
 	void setRdy();
 	void sendRdy();
-	void SendStartSlot();
 	void switchToCoridorWindow(bool host);
 	void switchToQuartoWindow(bool host);
 	void switchToGameLikeHostSlot();
@@ -84,12 +83,13 @@ private:
 
 	void switchToLoginIn();
 	void switchToMain();
-	void switchToLobby(Player* connectingPlayer = new Player(), Lobby* _lobby = new Lobby(), int _gameType = 0, bool flagHosting = true);
-	void switchToLobbyGuest(Lobby* _lobby);
+	void switchToLobby(Player* connectingPlayer = new Player(), Lobby* _lobby = new Lobby(), bool flagHosting = true);
+	// void switchToLobbyGuest(Lobby* _lobby);
 	void switchToLobbiesList();
 
 	void deleteLobby(Lobby* lobby);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
+	void sendUpdateLobby(int _gameType, int _status);
 	void switchToGame(bool host);
 	void switchCmd();
 };

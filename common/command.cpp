@@ -37,25 +37,25 @@ QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
 	QString lobbyName;
 	QString hostHame;
 	unsigned int gameType;
+	int status;
 	int connectedPlayersNumber;
 	int size;
 
-	stream >> lobbyName >> hostHame >> gameType >> connectedPlayersNumber >> size;
+	stream >> lobbyName >> hostHame >> gameType >> status >> connectedPlayersNumber >> size;
 	lobby = Lobby(lobbyName, hostHame, gameType, connectedPlayersNumber);
+	lobby.updateStatus(status);
 	Player* playerTmp = new Player();
 	for (int i = 0; i < size; i++)
 	{
 		stream >> *playerTmp;
 		lobby.connectedPlayers.push_back(playerTmp);
 	}
-	/*for (const auto& i : lobby.connectedPlayers)
-		qDebug() << i->playerName;*/
 	return stream;
 }
 
 QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
 {
-	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << lobby.connectedPlayersNumber << lobby.connectedPlayers.size();
+	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << unsigned(lobby.status) << lobby.connectedPlayersNumber << lobby.connectedPlayers.size();
 	for (const auto& i : lobby.connectedPlayers)
 		stream << *i;
 	return stream;
@@ -74,10 +74,10 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::CreateLobby:
 		pCommand = new CreateLobby();
 		break;
-	case CommandType::Type::ChangeGameType:
+	case CommandType::Type::UpdateLobby:
 	{
 		list<Player*> playersEmpty;
-		pCommand = new UpdateLobby(0, playersEmpty);
+		pCommand = new UpdateLobby(0, 0, playersEmpty);
 		break;
 	}
 	case CommandType::Type::DeleteLobby:
@@ -98,12 +98,12 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::SendRdy:
 		pCommand = new SendRdy();
 		break;
-	case CommandType::Type::SendStart:
+	/*case CommandType::Type::SendStart:
 	{
 		list<Player*> playersEmpty;
 		pCommand = new SendStart(playersEmpty);
 		break;
-	}
+	}*/
 	case CommandType::Type::SendMessage:
 		pCommand = new SendMessage();
 		break;
@@ -194,22 +194,23 @@ void CreateLobby::execute()
 	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
 }*/
 
-UpdateLobby::UpdateLobby(int _gameType, std::list<Player*> _connectedPlayers)
+UpdateLobby::UpdateLobby(int _gameType, int _status, std::list<Player*> _connectedPlayers)
 	: gameType(_gameType)
-	//, host(_host)
+	, status(_status)
 	, connectedPlayers(_connectedPlayers)
 {
-	qDebug() << "ChangeGameType command created" << gameType;
+	qDebug() << "UpdateLobby command created" << gameType << status;
 	// connectedPlayers.push_back(host);
 }
 
 QDataStream& UpdateLobby::operator>>(QDataStream& stream)
 {
-	qDebug() << "ChangeGameType read";
+	qDebug() << "UpdateLobby read";
 
 	Player* playerTmp = new Player();
 	int size;
-	stream >> size >> gameType;
+	stream >> size >> gameType >> status;
+	qDebug() << gameType << status;
 	for (int i = 0; i < size; i++)
 	{
 		stream >> *playerTmp;
@@ -221,9 +222,9 @@ QDataStream& UpdateLobby::operator>>(QDataStream& stream)
 
 QDataStream& UpdateLobby::operator<<(QDataStream& stream) const
 {
-	qDebug() << "ChangeGameType written";
+	qDebug() << "UpdateLobby written";
 
-	stream << connectedPlayers.size() << gameType;
+	stream << connectedPlayers.size() << gameType << status;
 
 	for (const auto& i : connectedPlayers)
 	{
@@ -235,7 +236,7 @@ QDataStream& UpdateLobby::operator<<(QDataStream& stream) const
 
 void UpdateLobby::execute()
 {
-	qDebug() << "execute ChangeGameType command" << gameType;
+	qDebug() << "execute UpdateLobby command" << gameType;
 }
 
 DeleteLobby::DeleteLobby(Lobby* _lobby)
@@ -375,7 +376,7 @@ void SendRdy::execute()
 	qDebug() << "execute SendRdy command" << host->playerName;
 }
 
-SendStart::SendStart(list<Player*> _players)
+/*SendStart::SendStart(list<Player*> _players)
 	: players(_players)
 {
 	qDebug() << "SendStart command created";
@@ -409,7 +410,7 @@ QDataStream& SendStart::operator<<(QDataStream& stream) const
 void SendStart::execute()
 {
 	qDebug() << "execute SendStart command";
-}
+}*/
 
 /* SendConnect::SendConnect(Lobby* _lobby, Player* _player)
 	: lobby(_lobby)

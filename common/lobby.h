@@ -27,8 +27,8 @@ public:
 	QString gameTypeStr = "WrongGameType", statusStr = "Status";
 
 	void updateGameType(int _gameType);
-	void updateStatus(Status _status);
-	void update(int _gameType, Status _status);
+	void updateStatus(int _status);
+	void update(int _gameType, int _status);
 	int getGameType(QString _gameTypeStr);
 	void connect(Player* connectingPlayer);
 	void disconnect(Player* disconnectingPlayer);

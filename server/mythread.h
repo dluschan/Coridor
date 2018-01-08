@@ -33,16 +33,16 @@ signals:
 	void errorSignal(QTcpSocket::SocketError socketError);
 	void sendPlayerListSignal(MyThread* thread);
 	void createLobbySignal(Lobby* pLobby);
-	void changeGameTypeSignal(MyThread* thread, int gameType);
-	void sendGameTypesSignal(Player* players, int gameType);
-	void sendGameTypeSignal(MyThread* thread, int gameType);
+	// void changeGameTypeSignal(MyThread* thread, int gameType);
+	void changeGameTypeSignal(MyThread* thread, int gameType, int _status);
+	void sendGameTypesSignal(Player* player, int gameType, int _status);
 	void deleteLobbySignal(Lobby* pLobby);
 	void deleteGuestLobbySignal(Player* pPlayer);
 	void connectToLobbySignal(Lobby* pLobby, Player* player, bool connectFlag);
 	void connectToHostLobbySignal(MyThread* thread, Lobby* pLobby, Player* player, bool connectFlag);
 	void sendLobbiesListSignal(MyThread* thread);
 	void sendRdySignal(Player* host);
-	void sendStartSignal(Player* connectedPlayer);
+	// void sendStartSignal(Player* connectedPlayer);
 
 public slots:
 	void readyRead();

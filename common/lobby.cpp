@@ -27,16 +27,16 @@ void Lobby::updateGameType(int _gameType)
 	}
 }
 
-void Lobby::updateStatus(Status _status)
+void Lobby::updateStatus(int _status)
 {
-	status = _status;
+	status = (Status)_status;
 	switch (status)
 	{
 	case Unready:
-		statusStr = "InLobby";
+		statusStr = "InLobby(Unready)";
 		break;
 	case Ready:
-		statusStr = "InLobby";
+		statusStr = "InLobby(Ready)";
 		break;
 	case InGame:
 		statusStr = "InGame";
@@ -47,7 +47,7 @@ void Lobby::updateStatus(Status _status)
 	}
 }
 
-void Lobby::update(int _gameType, Status _status)
+void Lobby::update(int _gameType, int _status)
 {
 	updateGameType(_gameType);
 	updateStatus(_status);

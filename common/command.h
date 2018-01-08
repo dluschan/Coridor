@@ -14,14 +14,14 @@ struct CommandType
 	{
 		AskLogin,
 		CreateLobby,
-		ChangeGameType,
+		UpdateLobby,
 		DeleteLobby,
 		AskLobbies,
 		SendLobbies,
 		ConnectToLobby,
 		// SendConnect,
 		SendRdy,
-		SendStart,
+		// SendStart,
 		// SendError,
 		// SendString,
 		SendMessage,
@@ -98,13 +98,12 @@ private:
 	int gameType;
 };*/
 
-class ChangeGameType : public Command
+class UpdateLobby : public Command
 {
 public:
-	ChangeGameType(int _gameType, /*Player* _host,*/ std::list<Player*> _connectedPlayers);
+	UpdateLobby(int _gameType, int _status, std::list<Player*> _connectedPlayers);
 
-	int gameType;
-	// Player* host;
+	int gameType, status;
 	std::list<Player*> connectedPlayers;
 
 	virtual void execute();
@@ -173,7 +172,7 @@ public:
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
-class SendStart : public Command
+/*class SendStart : public Command
 {
 public:
 	SendStart(list<Player*> _players);
@@ -183,7 +182,8 @@ public:
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
-};
+};*/
+
 /*class SendConnect : public Command
 {
 public:

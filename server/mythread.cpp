@@ -100,10 +100,8 @@ void MyThread::sendStart()
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {CommandType::Type::SendStart};
-	std::list<Player*> players;
-	players.push_back(pPlayer);
-	Command* pCommand = new SendStart(players);
+	CommandType commandType = {CommandType::Type::UpdateLobby};
+	Command* pCommand = new UpdateLobby(pLobby->gameType, pLobby->status, pLobby->connectedPlayers);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -159,16 +157,12 @@ void MyThread::switchCmd()
 		emit createLobbySignal(pCreateLobby->lobby);
 		pLobby = pCreateLobby->lobby;
 	}
-	else if (ChangeGameType* pChangeGameType = dynamic_cast<ChangeGameType*>(pCommand))
+	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{
-		emit changeGameTypeSignal(this, pChangeGameType->gameType);
-		pLobby->updateGameType(pChangeGameType->gameType);
-		qDebug() << pLobby->gameTypeStr;
-		if (!pChangeGameType->connectedPlayers.empty())
-		{
-			for (const auto& i : pChangeGameType->connectedPlayers)
-				emit sendGameTypesSignal(i, pChangeGameType->gameType);
-		}
+		// emit changeGameTypeSignal(this, pChangeGameType->gameType, pChangeGameType->status);
+		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
+		for (const auto& i : pUpdateLobby->connectedPlayers)
+			emit sendGameTypesSignal(i, pUpdateLobby->gameType, pUpdateLobby->status);
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
@@ -214,11 +208,11 @@ void MyThread::switchCmd()
 		else if (pLobby->status == Ready)
 			pLobby->updateStatus(Unready);
 	}
-	else if (SendStart* pSendStart = dynamic_cast<SendStart*>(pCommand))
+	/*else if (SendStart* pSendStart = dynamic_cast<SendStart*>(pCommand))
 	{
 		for (const auto& i : pSendStart->players)
 			emit sendStartSignal(i);
 		if (pLobby->status == Ready)
 			pLobby->status = InGame;
-	}
+	}*/
 }

@@ -90,6 +90,8 @@ void MainWindow::sendConnectToLobby(QTreeWidgetItem* item, int column)
 	}
 
 	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
+	pLobby->host->playerName;
+	pLobby->connectedPlayers.push_back(pPlayer); //Лобби подключаемого игрока хранит в connectedPlayers только своего Player*!!!
 	sendConnectToLobby(pLobby, pPlayer, true);
 	/*Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
 
@@ -128,12 +130,12 @@ void MainWindow::setRdy()
 	if (connectedPlayersList->item(1)->checkState())
 	{
 		connectedPlayersList->item(1)->setCheckState(Qt::Unchecked);
-		pLobby->updateStatus(Ready);
+		pLobby->updateStatus(Unready);
 	}
 	else
 	{
 		connectedPlayersList->item(1)->setCheckState(Qt::Checked);
-		pLobby->updateStatus(Unready);
+		pLobby->updateStatus(Ready);
 	}
 }
 
@@ -154,21 +156,6 @@ void MainWindow::sendRdy()
 	qDebug() << "SendRdy Command Sent";
 }
 
-void MainWindow::SendStartSlot()
-{
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::SendStart};
-	Command* pCommand = new SendStart(pLobby->connectedPlayers);
-
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
-}
-
 void MainWindow::switchToCoridorWindow(bool host)
 {
 	coridorWindow->show(); // Показываем второе окно
@@ -181,23 +168,29 @@ void MainWindow::switchToQuartoWindow(bool host)
 	this->close();		  // Закрываем основное окно
 }
 
-void MainWindow::switchToGameLikeHostSlot()
-{
-	switchToGame(true);
-}
-
 void MainWindow::switchToGame(bool host)
 {
-	if (pLobby->status == Ready)
+	if (pLobby->status == InGame)
 	{
-		pLobby->status = InGame;
 		switch (pLobby->gameType)
 		{
 		case Coridor:
 			switchToCoridorWindow(host);
+			break;
 		case Quarto:
 			switchToQuartoWindow(host);
+			break;
 		}
+	}
+}
+
+void MainWindow::switchToGameLikeHostSlot()
+{
+	if (pLobby->status == Ready)
+	{
+		pLobby->updateStatus(InGame);
+		sendUpdateLobby(pLobby->gameType, pLobby->status);
+		switchToGame(true);
 	}
 }
 
@@ -235,7 +228,7 @@ void MainWindow::switchToMain()
 	connect(createLobbyBtn, SIGNAL(clicked()), this, SLOT(createLobbyDialog()));
 }
 
-void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gameType, bool flagHosting)
+void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool flagHosting)
 {
 	centralWidget = new QWidget(this);
 	setCentralWidget(centralWidget);
@@ -249,13 +242,16 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 	player1->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 
 	QListWidgetItem* player2 = new QListWidgetItem("Player2", connectedPlayersList);
-	player2->setCheckState(Qt::Unchecked);
+	if (pLobby->status == Unready)
+		player2->setCheckState(Qt::Unchecked);
+	else if (pLobby->status == Ready)
+		player2->setCheckState(Qt::Checked);
 	player2->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 
 	gameTypeEdit = new QComboBox;
 	gameTypeEdit->addItem(tr("Coridor"));
 	gameTypeEdit->addItem(tr("Quarto"));
-	gameTypeEdit->setCurrentIndex(_gameType);
+	gameTypeEdit->setCurrentIndex(pLobby->gameType);
 	connect(gameTypeEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(updateLobby(int)));
 
 	exitLobbyBtn = new QPushButton("Exit");
@@ -295,7 +291,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 
 			startGameBtn = new QPushButton("Ready");
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
-			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(setRdy())); // maybe will need player index
+			// connect(startGameBtn, SIGNAL(clicked()), this, SLOT(setRdy())); // maybe will need player index
 			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(sendRdy()));
 		}
 	}
@@ -308,7 +304,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, int _gam
 	// connect()
 }
 
-void MainWindow::switchToLobbyGuest(Lobby* _lobby)
+/*void MainWindow::switchToLobbyGuest(Lobby* _lobby)
 {
 	pLobby = _lobby;
 
@@ -343,7 +339,7 @@ void MainWindow::switchToLobbyGuest(Lobby* _lobby)
 	lobbyLayout->addWidget(exitLobbyBtn);
 
 	connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
-}
+}*/
 
 void MainWindow::switchToLobbiesList()
 {
@@ -392,7 +388,7 @@ void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
 
 	pLobby = new Lobby(lobbyName, hostLogin, gameType);
 
-	switchToLobby(new Player(), new Lobby(), gameType, true);
+	switchToLobby(new Player(), new Lobby(), true);
 }
 
 void MainWindow::deleteLobby(Lobby* lobby)
@@ -402,8 +398,6 @@ void MainWindow::deleteLobby(Lobby* lobby)
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::DeleteLobby};
-	if (!lobby->connectedPlayers.empty())
-		qDebug() << lobby->connectedPlayers.back()->playerName;
 	Command* pCommand = new DeleteLobby(lobby);
 
 	out << commandType;
@@ -438,6 +432,23 @@ void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connec
 		pLobby->disconnect(_player);
 }
 
+void MainWindow::sendUpdateLobby(int _gameType, int _status)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::UpdateLobby};
+	Command* pCommand = new UpdateLobby(_gameType, _status, pLobby->connectedPlayers);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "ChangeGameType Command Sent";
+}
+
 void MainWindow::askLobbies()
 {
 	QByteArray arrBlock;
@@ -458,37 +469,7 @@ void MainWindow::askLobbies()
 void MainWindow::updateLobby(int _gameType)
 {
 	pLobby->updateGameType(_gameType);
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::ChangeGameType};
-	if (!pLobby->connectedPlayers.empty())
-		qDebug() << pLobby->connectedPlayers.back()->playerName;
-	Command* pCommand = new ChangeGameType(_gameType, pLobby->connectedPlayers);
-
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
-
-	qDebug() << "ChangeGameType Command Sent";
-
-	pLobby->updateGameType(_gameType);
-
-	/*QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::CreateLobby};
-	Command* pCommand = new CreateLobby(lobby->lobbyName, pPlayer->playerName, _gameType);
-
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
-
-	qDebug() << "CreateLobby Command Sent";*/
+	sendUpdateLobby(_gameType, pLobby->status);
 }
 
 void MainWindow::sockReady()
@@ -544,18 +525,28 @@ void MainWindow::switchCmd()
 		switchToMain();
 		pLobby = new Lobby();
 	}
-	else if (ChangeGameType* pChangeGameType = dynamic_cast<ChangeGameType*>(pCommand))
+	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{
-		pLobby->updateGameType(pChangeGameType->gameType);
-		switchToLobby(pPlayer, pLobby, pChangeGameType->gameType, false);
+		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
+		if (pUpdateLobby->status != InGame)
+		{
+			for (const auto& i : pUpdateLobby->connectedPlayers)
+				if (i->playerName == pPlayer->playerName)
+					switchToLobby(i, pLobby, false);
+		}
+		else
+			switchToGame(false);
+		// switchToLobby(pPlayer, pLobby, false);
 	}
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
 		if (pConnectToLobby->connectFlag)
-			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), false);
+			//***** GameType
+			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, false);
 		else
 		{
-			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, pConnectToLobby->lobby->getGameType(pConnectToLobby->lobby->gameTypeStr), true);
+			//***** GameType
+			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, true);
 			pLobby->disconnect(pConnectToLobby->player);
 		}
 	}
@@ -568,8 +559,8 @@ void MainWindow::switchCmd()
 		if (pSendMessage->errorFlag)
 			QMessageBox::information(this, tr("Error"), pSendMessage->message);
 	}
-	else if (SendStart* pSendStart = dynamic_cast<SendStart*>(pCommand))
+	/*else if (SendStart* pSendStart = dynamic_cast<SendStart*>(pCommand))
 	{
 		switchToGame(false);
-	}
+	}*/
 }
