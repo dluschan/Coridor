@@ -1,7 +1,9 @@
 #ifndef MYTHREAD_H
 #define MYTHREAD_H
 
+#include "../common/CoridorLogic.h"
 #include "../common/command.h"
+#include "../common/quartologic.h"
 #include <QDebug>
 #include <QTcpSocket>
 #include <QThread>
@@ -26,6 +28,7 @@ public:
 	void write(QByteArray buffer);
 	void sendRdy();
 	void sendStart();
+	void sendFirstPlayer(QString _firstPlayer, QString _guest);
 	// Player* createPlayer(QString playerName);
 
 signals:
@@ -42,6 +45,7 @@ signals:
 	void connectToHostLobbySignal(MyThread* thread, Lobby* pLobby, Player* player, bool connectFlag);
 	void sendLobbiesListSignal(MyThread* thread);
 	void sendRdySignal(Player* host);
+	void sendFirstPlayerSignal(QString firstPlayer, QString guest);
 	// void sendStartSignal(Player* connectedPlayer);
 
 public slots:
@@ -53,6 +57,8 @@ private:
 	// QTcpSocket* pSocket;
 	int socketDescriptor;
 	Command* pCommand;
+	CoridorLogic* gameCoridor;
+	QuartoLogic* gameQuarto;
 	// Player* player;
 
 	void login(QString login);

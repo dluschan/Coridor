@@ -88,8 +88,7 @@ void MyThread::sendRdy()
 
 	out << commandType;
 	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
+	write(arrBlock);
 
 	qDebug() << "SendRdy Command Sent";
 }
@@ -102,6 +101,20 @@ void MyThread::sendStart()
 
 	CommandType commandType = {CommandType::Type::UpdateLobby};
 	Command* pCommand = new UpdateLobby(pLobby->gameType, pLobby->status, pLobby->connectedPlayers);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+}
+
+void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendFirstPlayer};
+	Command* pCommand = new SendFirstPlayer(_firstPlayer, _guest);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -138,8 +151,7 @@ void* MyThread::deleteGuestLobby(Lobby* lobby)
 
 	out << commandType;
 	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
+	write(arrBlock);
 
 	qDebug() << "DeleteLobby Command Sent";
 	pLobby = new Lobby();
@@ -208,11 +220,8 @@ void MyThread::switchCmd()
 		else if (pLobby->status == Ready)
 			pLobby->updateStatus(Unready);
 	}
-	/*else if (SendStart* pSendStart = dynamic_cast<SendStart*>(pCommand))
+	else if (SendFirstPlayer* pSendFirstPlayer = dynamic_cast<SendFirstPlayer*>(pCommand))
 	{
-		for (const auto& i : pSendStart->players)
-			emit sendStartSignal(i);
-		if (pLobby->status == Ready)
-			pLobby->status = InGame;
-	}*/
+		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest);
+	}
 }

@@ -98,6 +98,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::SendRdy:
 		pCommand = new SendRdy();
 		break;
+	case CommandType::Type::SendFirstPlayer:
+		pCommand = new SendFirstPlayer();
+		break;
 	/*case CommandType::Type::SendStart:
 	{
 		list<Player*> playersEmpty;
@@ -374,6 +377,30 @@ QDataStream& SendRdy::operator<<(QDataStream& stream) const
 void SendRdy::execute()
 {
 	qDebug() << "execute SendRdy command" << host->playerName;
+}
+
+SendFirstPlayer::SendFirstPlayer(QString _firstPlayer, QString _guest)
+	: firstPlayer(_firstPlayer)
+	, guest(_guest)
+{
+	qDebug() << "SendFirstPlayer command created";
+}
+
+QDataStream& SendFirstPlayer::operator>>(QDataStream& stream)
+{
+	stream >> firstPlayer >> guest;
+	return stream;
+}
+
+QDataStream& SendFirstPlayer::operator<<(QDataStream& stream) const
+{
+	stream << firstPlayer << guest;
+	return stream;
+}
+
+void SendFirstPlayer::execute()
+{
+	qDebug() << "execute SendFirstPlayer command";
 }
 
 /*SendStart::SendStart(list<Player*> _players)

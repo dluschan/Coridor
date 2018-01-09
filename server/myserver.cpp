@@ -112,6 +112,13 @@ void MyServer::sendRdy(Player* _host)
 	}
 }
 
+void MyServer::sendFirstPlayerSlot(QString _firstPlayer, QString _guest)
+{
+	for (const auto& i : threads)
+		if (i->pPlayer->playerName == _guest)
+			i->sendFirstPlayer(_firstPlayer, _guest);
+}
+
 /*void MyServer::sendStart(Player* _connectedPlayer)
 {
 	for (const auto& i : threads)
@@ -264,6 +271,7 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(sendFirstPlayerSignal(QString, QString)), this, SLOT(sendFirstPlayerSlot(QString, QString)), Qt::DirectConnection);
 	// connect(threads.back(), SIGNAL(sendStartSignal(Player*)), this, SLOT(sendStart(Player*)), Qt::DirectConnection);
 	threads.back()->start();
 

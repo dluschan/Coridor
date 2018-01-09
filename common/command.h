@@ -21,6 +21,7 @@ struct CommandType
 		ConnectToLobby,
 		// SendConnect,
 		SendRdy,
+		SendFirstPlayer,
 		// SendStart,
 		// SendError,
 		// SendString,
@@ -166,6 +167,19 @@ public:
 	SendRdy(Player* _host = new Player());
 
 	Player* host;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+class SendFirstPlayer : public Command
+{
+public:
+	SendFirstPlayer(QString _firstPlayer = QString(), QString _guest = QString());
+
+	QString firstPlayer;
+	QString guest;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

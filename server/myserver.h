@@ -34,6 +34,7 @@ public slots:
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendRdy(Player* _host);
+	void sendFirstPlayerSlot(QString _firstPlayer, QString _guest);
 	// void sendStart(Player* _connectedPlayer);
 	// void lobbyList(MyThread* thread);
 

@@ -3,6 +3,7 @@
 
 #include "coridorwindow.h"
 #include "dialog.h"
+#include "dialogchoseplayer.h"
 #include "quartowindow.h"
 #include <QCheckBox>
 #include <QDebug>
@@ -37,17 +38,20 @@ private slots:
 
 	void connectToTheServer();
 	void createLobbyDialog();
-	void sendConnectToLobby(QTreeWidgetItem* item, int column);
+	void sendConnectToLobbySlot(QTreeWidgetItem* item, int column);
 	void leaveLobby();
 	void deleteLobbySlot();
 	void leaveLobbiesList();
 	void setRdy();
 	void sendRdy();
-	void switchToCoridorWindow(bool host);
+	void switchToCoridorWindow(bool hosting);
 	void switchToQuartoWindow(bool host);
 	void switchToGameLikeHostSlot();
+	void choseFirstPlayer(QString _firstPlayer);
+	void sendFirstPlayerSlot(QString _firstPlayer);
 
 signals:
+	// void choseFirstPlayerSignal();
 
 private:
 	Player* pPlayer;
@@ -81,6 +85,8 @@ private:
 	QPushButton* updateLobbiesListBtn;
 	QPushButton* exitLobbiesBtn;
 
+	DialogChosePlayer* dialogChoosePlayer;
+
 	void switchToLoginIn();
 	void switchToMain();
 	void switchToLobby(Player* connectingPlayer = new Player(), Lobby* _lobby = new Lobby(), bool flagHosting = true);
@@ -90,7 +96,9 @@ private:
 	void deleteLobby(Lobby* lobby);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendUpdateLobby(int _gameType, int _status);
-	void switchToGame(bool host);
+	void sendMessage(QString message);
+	void sendChooseFirstPlayer(QString _firstPlayer, QString _guest);
+	void switchToGame(bool hosting);
 	void switchCmd();
 };
 

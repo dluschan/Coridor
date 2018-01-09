@@ -1,7 +1,9 @@
 #ifndef CORIDORWINDOW_H
 #define CORIDORWINDOW_H
 
-#include "coridorlogic.h"
+#include "../common/command.h"
+#include "../common/coridorlogic.h"
+#include "dialogchoseplayer.h"
 #include "field.h"
 #include "images.h"
 #include <QObject>
@@ -30,7 +32,7 @@ class CoridorWindow : public QWidget
 	Q_OBJECT
 
 public:
-	explicit CoridorWindow(QWidget* parent = 0);
+	explicit CoridorWindow(QString _firstPlayer, QString _secondPlayer, QWidget* parent = 0);
 	~CoridorWindow();
 
 protected:
@@ -55,6 +57,7 @@ private:
 	Walls walls;
 	CoridorLogic* game;
 	QString status = "Move or place a wall";
+	QString firstPl, secondPl;
 
 	void PlaceWall(QPoint point);
 	void MovePlayer(QPoint point);

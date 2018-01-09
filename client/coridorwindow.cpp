@@ -56,20 +56,21 @@ void Walls::mouseReleased(QPoint pos)
 	update(pos);
 }
 
-CoridorWindow::CoridorWindow(QWidget* parent)
+CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QWidget* parent)
 	: QWidget(parent)
 	, ui(new Ui::CoridorWindow)
 {
 	ui->setupUi(this);
-	connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
+	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 
 	pictures = new Images;
 	pictures->load();
 
 	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
-	game = new CoridorLogic();
+	game = new CoridorLogic(_firstPlayer, _secondPlayer);
 
 	field->redraw(game->pole);
+	this->show();
 }
 
 CoridorWindow::~CoridorWindow()
@@ -228,7 +229,7 @@ void CoridorWindow::on_pushButton_clicked()
 void CoridorWindow::start_pushButton_clicked()
 {
 	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
-	game = new CoridorLogic();
+	// game = new CoridorLogic();
 	field->redraw(game->pole);
 	this->update();
 }
