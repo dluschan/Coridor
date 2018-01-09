@@ -29,6 +29,7 @@ public:
 	void sendRdy();
 	void sendStart();
 	void sendFirstPlayer(QString _firstPlayer, QString _guest);
+	void coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal);
 	// Player* createPlayer(QString playerName);
 
 signals:
@@ -46,6 +47,7 @@ signals:
 	void sendLobbiesListSignal(MyThread* thread);
 	void sendRdySignal(Player* host);
 	void sendFirstPlayerSignal(QString firstPlayer, QString guest);
+	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	// void sendStartSignal(Player* connectedPlayer);
 
 public slots:

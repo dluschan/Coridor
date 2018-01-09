@@ -49,9 +49,11 @@ private slots:
 	void switchToGameLikeHostSlot();
 	void choseFirstPlayer(QString _firstPlayer);
 	void sendFirstPlayerSlot(QString _firstPlayer);
+	void sendQPoint(QPoint point, bool move, QString enemy, bool horizontal);
 
 signals:
 	// void choseFirstPlayerSignal();
+	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 
 private:
 	Player* pPlayer;

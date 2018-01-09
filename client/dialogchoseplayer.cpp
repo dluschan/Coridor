@@ -10,8 +10,8 @@ DialogChosePlayer::DialogChosePlayer(bool _hosting, QString host, QString player
 	{
 		this->setWindowTitle("Choose first player");
 		firstPlayerEdit = new QComboBox;
-		firstPlayerEdit->addItem(host);
 		firstPlayerEdit->addItem(player);
+		firstPlayerEdit->addItem(host);
 		chooseFirstPlayerBtn = new QPushButton("Ok");
 		connect(chooseFirstPlayerBtn, SIGNAL(clicked()), this, SLOT(startTheGame()));
 

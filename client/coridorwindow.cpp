@@ -56,9 +56,10 @@ void Walls::mouseReleased(QPoint pos)
 	update(pos);
 }
 
-CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QWidget* parent)
+CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QString _player, QWidget* parent)
 	: QWidget(parent)
 	, ui(new Ui::CoridorWindow)
+	, player(_player)
 {
 	ui->setupUi(this);
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
@@ -82,57 +83,19 @@ void CoridorWindow::paintEvent(QPaintEvent* pEvent)
 {
 	QPainter painter(this);
 	ui->status->setText(status);
-	ui->turn->setText("Turn of player " + QString::number(game->player + 1));
+	ui->turn->setText("Turn of player " + game->getCurrentPlayerName(game->currentPlayerId));
 	painter.drawImage(field->getX(), field->getY(), field->getImage());
 	painter.drawImage(walls.hX, walls.hY, walls.gorWall);
 	painter.drawImage(walls.vX, walls.vY, walls.verWall);
 }
 
-void CoridorWindow::PlaceWall(QPoint point)
+void CoridorWindow::placeWall(QPoint point, bool horizontal)
 {
-	if (point.x() >= 0 && point.x() <= 16 && point.y() >= 0 && point.y() <= 16)
-	{
-		if (walls.hSelected)
-		{
-			try
-			{
-				if (game->nextTurn(game->placeWall(game->player, (point.x() - 1) / 2, (point.y() - 1) / 2, 'h')) != 0)
-					status = "Player" + QString::number(game->winner + 1) + " wins!";
-				else
-					status = "Move or place a wall";
-			}
-			catch (const exception& e)
-			{
-				cout << e.what() << endl;
-				status = e.what();
-			}
-		}
-		if (walls.vSelected)
-		{
-			try
-			{
-				if (game->nextTurn(game->placeWall(game->player, (point.x() - 1) / 2, (point.y() - 1) / 2, 'v')) != 0)
-					status = "Player" + QString::number(game->winner + 1) + " wins!";
-				else
-					status = "Move or place a wall";
-			}
-			catch (const exception& e)
-			{
-				cout << e.what() << endl;
-				status = e.what();
-			}
-		}
-	}
-}
-
-void CoridorWindow::MovePlayer(QPoint point)
-{
-	if (point.x() >= 0 && point.x() <= 16 && point.y() >= 0 && point.y() <= 16 && !walls.vSelected && !walls.hSelected)
+	if (horizontal)
 	{
 		try
 		{
-			// qDebug() << point.x() << " " << point.y();
-			if (game->nextTurn(game->move(game->pole, game->player, point.x(), point.y())) != 0)
+			if (game->nextTurn(game->placeWall(game->currentPlayerId, (point.x() - 1) / 2, (point.y() - 1) / 2, 'h')) != 0)
 				status = "Player" + QString::number(game->winner + 1) + " wins!";
 			else
 				status = "Move or place a wall";
@@ -142,6 +105,38 @@ void CoridorWindow::MovePlayer(QPoint point)
 			cout << e.what() << endl;
 			status = e.what();
 		}
+	}
+	else // if (walls.vSelected)
+	{
+		try
+		{
+			if (game->nextTurn(game->placeWall(game->currentPlayerId, (point.x() - 1) / 2, (point.y() - 1) / 2, 'v')) != 0)
+				status = "Player" + QString::number(game->winner + 1) + " wins!";
+			else
+				status = "Move or place a wall";
+		}
+		catch (const exception& e)
+		{
+			cout << e.what() << endl;
+			status = e.what();
+		}
+	}
+}
+
+void CoridorWindow::movePlayer(QPoint point)
+{
+	try
+	{
+		// qDebug() << point.x() << " " << point.y();
+		if (game->nextTurn(game->move(game->pole, game->currentPlayerId, point.x(), point.y())) != 0)
+			status = "Player" + QString::number(game->winner + 1) + " wins!";
+		else
+			status = "Move or place a wall";
+	}
+	catch (const exception& e)
+	{
+		cout << e.what() << endl;
+		status = e.what();
 	}
 }
 
@@ -208,13 +203,25 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		QPoint pos = mEvent->pos();
 		QPoint point = field->getCoord(pos.x(), pos.y());
 
-		if (walls.vSelected || walls.hSelected)
+		if (game->checkTurn(player))
 		{
-			PlaceWall(point);
-			walls.mouseReleased(pos);
+			if (walls.vSelected || walls.hSelected && checkPoint(point))
+			{
+				emit sendQPointSignal(point, false, game->getCurrentPlayerName((game->currentPlayerId + 1) % 2), walls.hSelected);
+				placeWall(point, walls.hSelected);
+				status = "Waiting for another player";
+			}
+			else if (checkPoint(point))
+			{
+
+				emit sendQPointSignal(point, true, game->getCurrentPlayerName((game->currentPlayerId + 1) % 2), true);
+				movePlayer(point);
+				status = "Waiting for another player";
+			}
 		}
 		else
-			MovePlayer(point);
+			status = "Its not your turn";
+		walls.mouseReleased(pos);
 	}
 	field->redraw(game->pole);
 	this->update();
@@ -228,8 +235,23 @@ void CoridorWindow::on_pushButton_clicked()
 
 void CoridorWindow::start_pushButton_clicked()
 {
-	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
+	// field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
 	// game = new CoridorLogic();
 	field->redraw(game->pole);
 	this->update();
+}
+
+void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal)
+{
+	if (move & checkPoint(point))
+		movePlayer(point);
+	else if (checkPoint(point))
+		placeWall(point, horizontal);
+	field->redraw(game->pole);
+	this->update();
+}
+
+bool CoridorWindow::checkPoint(QPoint point)
+{
+	return point.x() >= 0 && point.x() <= 16 && point.y() >= 0 && point.y() <= 16;
 }

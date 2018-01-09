@@ -3,6 +3,7 @@
 
 #include "lobby.h"
 #include <QDataStream>
+#include <QPoint>
 #include <QString>
 #include <list>
 
@@ -22,6 +23,7 @@ struct CommandType
 		// SendConnect,
 		SendRdy,
 		SendFirstPlayer,
+		CoridorSendQPoint,
 		// SendStart,
 		// SendError,
 		// SendString,
@@ -180,6 +182,21 @@ public:
 
 	QString firstPlayer;
 	QString guest;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+class CoridorSendQPoint : public Command
+{
+public:
+	CoridorSendQPoint(QPoint _point = QPoint(), bool _move = true, QString _enemy = QString(), bool _horizontal = true);
+
+	QPoint point;
+	bool move;
+	QString enemy;
+	bool horizontal;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

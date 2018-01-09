@@ -41,7 +41,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::connectToTheServer()
 {
-	pSocket->connectToHost("127.0.0.1", 5555);
+	pSocket->connectToHost("25.83.194.201", 5555);
 
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -218,10 +218,12 @@ void MainWindow::choseFirstPlayer(QString _firstPlayer)
 {
 	QString _secondPlayer;
 	if (_firstPlayer == pLobby->host->playerName)
-		_secondPlayer = pLobby->connectedPlayers.back()->playerName;
+		_secondPlayer = pLobby->connectedPlayers.back()->playerName; // CRASHES HERE CAUSE THERE IS NO connectedPlayers in pLobby
 	else
 		_secondPlayer = pLobby->host->playerName;
-	coridorWindow = new CoridorWindow(_firstPlayer, _secondPlayer);
+	coridorWindow = new CoridorWindow(_firstPlayer, _secondPlayer, pPlayer->playerName);
+	connect(coridorWindow, SIGNAL(sendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(sendQPoint(QPoint, bool, QString, bool)));
+	connect(this, SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), coridorWindow, SLOT(coridorRecieveQPoint(QPoint, bool, QString, bool)));
 	// connect(coridorWindow, &CoridorWindow::firstWindow, this, &MainWindow::show);
 }
 
@@ -520,6 +522,23 @@ void MainWindow::sendChooseFirstPlayer(QString _firstPlayer, QString _guest)
 	qDebug() << "CreateLobby Command Sent";
 }
 
+void MainWindow::sendQPoint(QPoint point, bool move, QString enemy, bool horizontal)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::CoridorSendQPoint};
+	Command* pCommand = new CoridorSendQPoint(point, move, enemy, horizontal);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "Login Command Sent";
+}
+
 void MainWindow::askLobbies()
 {
 	QByteArray arrBlock;
@@ -644,5 +663,9 @@ void MainWindow::switchCmd()
 	{
 		dialogChoosePlayer->hide();
 		choseFirstPlayer(pSendFirstPlayer->firstPlayer);
+	}
+	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
+	{
+		emit coridorSendQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);
 	}
 }

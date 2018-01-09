@@ -121,6 +121,23 @@ void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest)
 	write(arrBlock);
 }
 
+void MyThread::coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::CoridorSendQPoint};
+	Command* pCommand = new CoridorSendQPoint(point, move, enemy, horizontal);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "CoridorSendQPoint Command Sent";
+}
+
 void MyThread::sendMessage(QString message, bool error)
 {
 	QByteArray arrBlock;
@@ -223,5 +240,9 @@ void MyThread::switchCmd()
 	else if (SendFirstPlayer* pSendFirstPlayer = dynamic_cast<SendFirstPlayer*>(pCommand))
 	{
 		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest);
+	}
+	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
+	{
+		emit coridorSendQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);
 	}
 }

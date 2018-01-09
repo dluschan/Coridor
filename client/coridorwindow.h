@@ -32,7 +32,7 @@ class CoridorWindow : public QWidget
 	Q_OBJECT
 
 public:
-	explicit CoridorWindow(QString _firstPlayer, QString _secondPlayer, QWidget* parent = 0);
+	explicit CoridorWindow(QString _firstPlayer, QString _secondPlayer, QString _player, QWidget* parent = 0);
 	~CoridorWindow();
 
 protected:
@@ -43,11 +43,14 @@ protected:
 
 signals:
 	void firstWindow(); // Сигнал для первого окна на открытие
+	void sendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 
 private slots:
 	// Слот-обработчик нажатия кнопки
 	void on_pushButton_clicked();
 	void start_pushButton_clicked();
+
+	void coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal);
 
 private:
 	Ui::CoridorWindow* ui;
@@ -57,10 +60,11 @@ private:
 	Walls walls;
 	CoridorLogic* game;
 	QString status = "Move or place a wall";
-	QString firstPl, secondPl;
+	QString player;
 
-	void PlaceWall(QPoint point);
-	void MovePlayer(QPoint point);
+	void placeWall(QPoint point, bool horizontal);
+	void movePlayer(QPoint point);
+	bool checkPoint(QPoint point);
 	// void nextTurn(int res);
 	// void end();
 };

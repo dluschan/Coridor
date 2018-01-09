@@ -101,6 +101,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::SendFirstPlayer:
 		pCommand = new SendFirstPlayer();
 		break;
+	case CommandType::Type::CoridorSendQPoint:
+		pCommand = new CoridorSendQPoint();
+		break;
 	/*case CommandType::Type::SendStart:
 	{
 		list<Player*> playersEmpty;
@@ -403,6 +406,33 @@ void SendFirstPlayer::execute()
 	qDebug() << "execute SendFirstPlayer command";
 }
 
+CoridorSendQPoint::CoridorSendQPoint(QPoint _point, bool _move, QString _enemy, bool _horizontal)
+	: point(_point)
+	, move(_move)
+	, enemy(_enemy)
+	, horizontal(_horizontal)
+{
+	qDebug() << "CoridorSendQPoint command created";
+}
+
+QDataStream& CoridorSendQPoint::operator>>(QDataStream& stream)
+{
+	stream >> point >> move >> enemy >> horizontal;
+	qDebug() << "CoridorSendQPoint read" << enemy;
+	return stream;
+}
+
+QDataStream& CoridorSendQPoint::operator<<(QDataStream& stream) const
+{
+	stream << point << move << enemy << horizontal;
+	qDebug() << "CoridorSendQPoint written" << enemy;
+	return stream;
+}
+
+void CoridorSendQPoint::execute()
+{
+	qDebug() << "execute CoridorSendQPoint command";
+}
 /*SendStart::SendStart(list<Player*> _players)
 	: players(_players)
 {

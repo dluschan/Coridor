@@ -35,6 +35,7 @@ public slots:
 	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendRdy(Player* _host);
 	void sendFirstPlayerSlot(QString _firstPlayer, QString _guest);
+	void coridorSendQPointSlot(QPoint point, bool move, QString enemy, bool horizontal);
 	// void sendStart(Player* _connectedPlayer);
 	// void lobbyList(MyThread* thread);
 
