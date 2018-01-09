@@ -17,10 +17,6 @@ public:
 	explicit CreateLobbyDialog(QString _host = QString(), QWidget* parent = 0);
 	~CreateLobbyDialog();
 
-	QPushButton* createLobbyBtn;
-	QLineEdit* lobbyNameEdit;
-	QComboBox* gameTypeEdit;
-
 public slots:
 	void createLobby();
 
@@ -28,6 +24,10 @@ signals:
 	void clicked(QString ln, QString hl, int gt);
 
 private:
+	QPushButton* createLobbyBtn;
+	QLineEdit* lobbyNameEdit;
+	QComboBox* gameTypeEdit;
+
 	QString host;
 	QVBoxLayout* mainLayout;
 };
