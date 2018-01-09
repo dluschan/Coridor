@@ -16,17 +16,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
-    myserver.cpp \
-    mythread.cpp \
-    ../common/player.cpp \
-    ../common/lobby.cpp \
-    ../common/game.cpp \
-    ../common/command.cpp
+        myserver.cpp \
+        mythread.cpp \
+        ../common/player.cpp \
+        ../common/lobby.cpp \
+        ../common/game.cpp \
+        ../common/command.cpp \
+    ../common/coridorlogic.cpp \
+    ../common/quartologic.cpp
 
 HEADERS += \
-    myserver.h \
-    mythread.h \
-    ../common/player.h \
-    ../common/lobby.h \
-    ../common/game.h \
-    ../common/command.h
+        myserver.h \
+        mythread.h \
+        ../common/player.h \
+        ../common/lobby.h \
+        ../common/game.h \
+        ../common/command.h \
+    ../common/coridorlogic.h \
+    ../common/quartologic.h
