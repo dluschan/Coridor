@@ -64,6 +64,8 @@ CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QStrin
 {
 	ui->setupUi(this);
 	this->setWindowTitle(_player);
+	this->setMinimumWidth(784);
+	this->setMinimumHeight(660);
 	ui->restartBtn->hide();
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 	connect(ui->exitBtn, SIGNAL(clicked()), this, SLOT(exitBtn_clicked()));
@@ -103,7 +105,6 @@ void CoridorWindow::placeWall(QPoint point, bool horizontal)
 			if (game->nextTurn(game->placeWall(game->currentPlayerId, (point.x() - 1) / 2, (point.y() - 1) / 2, 'h')) != 0)
 			{
 				status = game->getPlayerName(game->winner) + " wins!";
-				QMessageBox::information(this, tr("End"), status);
 			}
 			else
 				status = "Move or place a wall";
@@ -121,7 +122,6 @@ void CoridorWindow::placeWall(QPoint point, bool horizontal)
 			if (game->nextTurn(game->placeWall(game->currentPlayerId, (point.x() - 1) / 2, (point.y() - 1) / 2, 'v')) != 0)
 			{
 				status = game->getPlayerName(game->winner) + " wins!";
-				QMessageBox::information(this, tr("End"), status);
 			}
 			else
 				status = "Move or place a wall";
@@ -142,7 +142,6 @@ void CoridorWindow::movePlayer(QPoint point)
 		if (game->nextTurn(game->move(game->pole, game->currentPlayerId, point.x(), point.y())) != 0)
 		{
 			status = game->getPlayerName(game->winner) + " wins!";
-			QMessageBox::information(this, tr("End"), status);
 		}
 		else
 			status = "Move or place a wall";
@@ -237,7 +236,11 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 			status = "Its not your turn";
 		walls.mouseReleased(pos);
 		this->update();
+		if (game->endValue != 0)
+			QMessageBox::information(this, tr("End"), status + " you can leave now");
 	}
+	else
+		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 void CoridorWindow::exitBtn_clicked()
@@ -260,6 +263,8 @@ void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciev
 	else // if (checkPoint(point))
 		placeWall(point, horizontal);
 	this->update();
+	if (game->endValue != 0)
+		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 bool CoridorWindow::checkPoint(QPoint point)

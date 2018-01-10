@@ -71,6 +71,8 @@ QuartoWindow::QuartoWindow(QString _firstPlayer, QString _secondPlayer, QString 
 	ui->setupUi(this);
 	ui->start->hide();
 	this->setWindowTitle(_player);
+	this->setMinimumWidth(610);
+	this->setMinimumHeight(329);
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 
 	pictures = new Images;
@@ -155,44 +157,49 @@ void QuartoWindow::mouseMoveEvent(QMouseEvent* mEvent)
 
 void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 {
-	QPoint pos = mEvent->pos();
-	QPoint point = field->getCoordQuarto(pos.x(), pos.y());
-
-	// can this be oprimised??
-	if (checkPoint(point))
+	if (!game->end)
 	{
-		if (figures.getSelectedID() != -1)
+		QPoint pos = mEvent->pos();
+		QPoint point = field->getCoordQuarto(pos.x(), pos.y());
+
+		// can this be oprimised??
+		if (checkPoint(point))
 		{
-			if (game->checkTurn(player))
+			if (figures.getSelectedID() != -1)
 			{
-				emit sendQPointSignal(point, figures.getSelectedID(), game->getPlayerName((game->currentPlayerId + 1) % 2));
-				placeFigure(point, figures.getSelectedID());
+				if (game->checkTurn(player))
+				{
+					emit sendQPointSignal(point, figures.getSelectedID(), game->getPlayerName((game->currentPlayerId + 1) % 2));
+					placeFigure(point, figures.getSelectedID());
+				}
+				else
+				{
+					figures.figures[figures.getSelectedID()] = true;
+					figures.fSelected[figures.getSelectedID()] = false;
+					status = "Its not your turn";
+				}
 			}
 			else
 			{
-				figures.figures[figures.getSelectedID()] = true;
-				figures.fSelected[figures.getSelectedID()] = false;
-				status = "Its not your turn";
+				if (game->checkTurn(player))
+				{
+					status = "Grab a figure first";
+				}
 			}
 		}
 		else
 		{
-			if (game->checkTurn(player))
+			if (figures.getSelectedID() != -1)
 			{
-				status = "Grab a figure first";
+				figures.figures[figures.getSelectedID()] = true;
+				figures.fSelected[figures.getSelectedID()] = false;
 			}
 		}
+
+		this->update();
 	}
 	else
-	{
-		if (figures.getSelectedID() != -1)
-		{
-			figures.figures[figures.getSelectedID()] = true;
-			figures.fSelected[figures.getSelectedID()] = false;
-		}
-	}
-
-	this->update();
+		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 void QuartoWindow::on_pushButton_clicked()

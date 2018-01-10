@@ -32,7 +32,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::connectToTheServer()
 {
-	pSocket->connectToHost("25.83.194.201", 5555);
+	pSocket->connectToHost("127.0.0.1", 5555);
 
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -108,7 +108,8 @@ void MainWindow::leaveLobby()
 
 void MainWindow::deleteLobbySlot()
 {
-	deleteLobby(pLobby);
+	if (pLobby->gameType != WrongGameType)
+		deleteLobby(pLobby);
 	pLobby = new Lobby();
 	switchToMain();
 }
@@ -222,7 +223,7 @@ void MainWindow::switchToGameLikeHostSlot()
 
 void MainWindow::returnFromGame()
 {
-	pLobby = new Lobby();
+	deleteLobby(pLobby);
 	this->show();
 	switchToMain();
 }
