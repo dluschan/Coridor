@@ -43,7 +43,8 @@ protected:
 
 signals:
 	void firstWindow(); // Сигнал для первого окна на открытие
-	void sendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
+	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
+	void quartoSendQPointSignal(QPoint point, int figureId, QString enemy);
 
 private slots:
 	// Слот-обработчик нажатия кнопки

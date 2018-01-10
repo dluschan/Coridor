@@ -24,6 +24,8 @@ struct CommandType
 		SendRdy,
 		SendFirstPlayer,
 		CoridorSendQPoint,
+		QuartoSendQPoint,
+		QuartoSendCheckWin,
 		// SendStart,
 		// SendError,
 		// SendString,
@@ -178,10 +180,11 @@ public:
 class SendFirstPlayer : public Command
 {
 public:
-	SendFirstPlayer(QString _firstPlayer = QString(), QString _guest = QString());
+	SendFirstPlayer(QString _firstPlayer = QString(), QString _guest = QString(), int _gameType = WrongGameType);
 
 	QString firstPlayer;
 	QString guest;
+	int gameType;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
@@ -203,6 +206,32 @@ public:
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
+class QuartoSendQPoint : public Command
+{
+public:
+	QuartoSendQPoint(QPoint _point = QPoint(), int _figureId = -1, QString _enemy = QString());
+
+	QPoint point;
+	int figureId;
+	QString enemy;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
+
+class QuartoSendCheckWin : public Command
+{
+public:
+	QuartoSendCheckWin(QString _enemy = QString(), bool _checkWin = false);
+
+	QString enemy;
+	bool checkWin; // false -> nextTurn
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};
 /*class SendStart : public Command
 {
 public:

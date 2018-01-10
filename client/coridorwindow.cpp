@@ -63,6 +63,7 @@ CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QStrin
 	, player(_player)
 {
 	ui->setupUi(this);
+	this->setWindowTitle(_player);
 	ui->restartBtn->hide();
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 	connect(ui->exitBtn, SIGNAL(clicked()), this, SLOT(exitBtn_clicked()));
@@ -73,7 +74,7 @@ CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QStrin
 	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
 	game = new CoridorLogic(_firstPlayer, _secondPlayer);
 
-	field->redraw(game->pole);
+	field->redrawCoridor(game->pole);
 	this->show();
 }
 
@@ -85,6 +86,7 @@ CoridorWindow::~CoridorWindow()
 void CoridorWindow::paintEvent(QPaintEvent* pEvent)
 {
 	QPainter painter(this);
+	field->redrawCoridor(game->pole);
 	ui->status->setText(status);
 	ui->turn->setText("Turn of player " + game->getPlayerName(game->currentPlayerId));
 	painter.drawImage(field->getX(), field->getY(), field->getImage());
@@ -191,7 +193,6 @@ void CoridorWindow::mousePressEvent(QMouseEvent* mEvent)
 		walls.mousePressed(pos);
 
 		// SelectPlayer(point);
-		field->redraw(game->pole);
 		this->update();
 	}
 }
@@ -201,9 +202,8 @@ void CoridorWindow::mouseMoveEvent(QMouseEvent* mEvent)
 	if (game->endValue == 0)
 	{
 		QPoint pos = mEvent->pos();
-		QPoint point = field->getCoord(pos.x(), pos.y());
+		QPoint point = field->getCoordCoridor(pos.x(), pos.y());
 		walls.mouseMoved(pos, point);
-		field->redraw(game->pole);
 		this->update();
 	}
 }
@@ -213,13 +213,13 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 	if (game->endValue == 0)
 	{
 		QPoint pos = mEvent->pos();
-		QPoint point = field->getCoord(pos.x(), pos.y());
+		QPoint point = field->getCoordCoridor(pos.x(), pos.y());
 
 		if (game->checkTurn(player))
 		{
 			if (walls.vSelected || walls.hSelected && checkPoint(point))
 			{
-				emit sendQPointSignal(point, false, game->getPlayerName((game->currentPlayerId + 1) % 2), walls.hSelected);
+				emit coridorSendQPointSignal(point, false, game->getPlayerName((game->currentPlayerId + 1) % 2), walls.hSelected);
 				placeWall(point, walls.hSelected);
 				if (status == "Move or place a wall")
 					status = "Waiting for another player";
@@ -227,7 +227,7 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 			else if (checkPoint(point))
 			{
 
-				emit sendQPointSignal(point, true, game->getPlayerName((game->currentPlayerId + 1) % 2), true);
+				emit coridorSendQPointSignal(point, true, game->getPlayerName((game->currentPlayerId + 1) % 2), true);
 				movePlayer(point);
 				if (status == "Move or place a wall")
 					status = "Waiting for another player";
@@ -236,7 +236,6 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		else
 			status = "Its not your turn";
 		walls.mouseReleased(pos);
-		field->redraw(game->pole);
 		this->update();
 	}
 }
@@ -251,17 +250,15 @@ void CoridorWindow::start_pushButton_clicked()
 {
 	// field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
 	// game = new CoridorLogic();
-	field->redraw(game->pole);
 	this->update();
 }
 
 void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal)
 {
-	if (move & checkPoint(point))
+	if (move /*& checkPoint(point)*/)
 		movePlayer(point);
-	else if (checkPoint(point))
+	else // if (checkPoint(point))
 		placeWall(point, horizontal);
-	field->redraw(game->pole);
 	this->update();
 }
 

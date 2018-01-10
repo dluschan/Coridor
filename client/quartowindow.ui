@@ -62,7 +62,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>I won</string>
+    <string>Quarto</string>
    </property>
   </widget>
   <widget class="QPushButton" name="start">

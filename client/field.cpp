@@ -22,7 +22,7 @@ const QImage& Field::getImage() const
 	return *image;
 }
 
-void Field::redraw(int pole[17][17])
+void Field::redrawCoridor(int pole[17][17])
 {
 	image->fill(0);
 	QPainter painter(image);
@@ -36,7 +36,7 @@ void Field::redraw(int pole[17][17])
 	// 57:50
 }
 
-void Field::redraw2(int pole[4][4])
+void Field::redrawQuarto(int pole[4][4])
 {
 	image->fill(0);
 	QPainter painter(image);
@@ -49,7 +49,7 @@ void Field::redraw2(int pole[4][4])
 		}
 }
 
-QPoint Field::getCoord(int x, int y)
+QPoint Field::getCoordCoridor(int x, int y)
 {
 	QPoint res;
 	res.setX(-1);
@@ -63,7 +63,7 @@ QPoint Field::getCoord(int x, int y)
 	return res;
 }
 
-QPoint Field::getCoord2(int x, int y)
+QPoint Field::getCoordQuarto(int x, int y)
 {
 	QPoint res;
 	res.setX(-1);
