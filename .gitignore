@@ -1,5 +1,6 @@
 *.qmake.stash
 *.bat
+*.qm
 # macos files
 .DS_Store
 
