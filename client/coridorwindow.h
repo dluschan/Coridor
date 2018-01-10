@@ -2,7 +2,7 @@
 #define CORIDORWINDOW_H
 
 #include "../common/command.h"
-#include "../common/coridorlogic.h"
+#include "coridorlogic.h"
 #include "dialogchoseplayer.h"
 #include "field.h"
 #include "images.h"

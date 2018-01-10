@@ -1,9 +1,9 @@
 #ifndef QUARTOWINDOW_H
 #define QUARTOWINDOW_H
 
-#include "../common/quartologic.h"
 #include "field.h"
 #include "images.h"
+#include "quartologic.h"
 #include <QObject>
 #include <QPainter>
 #include <QPoint>

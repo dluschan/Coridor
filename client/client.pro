@@ -25,8 +25,8 @@ SOURCES += \
     images.cpp \
     field.cpp \
     quartowindow.cpp \
-    ../common/coridorlogic.cpp \
-    ../common/quartologic.cpp \
+    coridorlogic.cpp \
+    quartologic.cpp \
     dialogchoseplayer.cpp
 
 HEADERS  += \
@@ -40,8 +40,8 @@ HEADERS  += \
     images.h \
     field.h \
     quartowindow.h \
-    ../common/coridorlogic.h \
-    ../common/quartologic.h \
+    coridorlogic.h \
+    quartologic.h \
     dialogchoseplayer.h
 
 FORMS += \
