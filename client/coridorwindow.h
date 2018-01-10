@@ -47,7 +47,7 @@ signals:
 
 private slots:
 	// Слот-обработчик нажатия кнопки
-	void on_pushButton_clicked();
+	void exitBtn_clicked();
 	void start_pushButton_clicked();
 
 	void coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal);

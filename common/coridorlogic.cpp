@@ -394,7 +394,7 @@ int CoridorLogic::nextTurn(int res)
 	else
 		winner = (currentPlayerId + 1) % 2;
 	currentPlayerId = (currentPlayerId + 1) % 2;
-	output(pole);
+	// output(pole);
 
 	/*if (endValue!=0)
 		end();*/
@@ -423,7 +423,7 @@ bool CoridorLogic::jumpCheck(int new_x, int new_y, int player_id)
 	return false;
 }
 
-QString CoridorLogic::getCurrentPlayerName(int currentId)
+QString CoridorLogic::getPlayerName(int currentId)
 {
 	if (currentId == player1.id)
 		return player1.name;
@@ -433,5 +433,5 @@ QString CoridorLogic::getCurrentPlayerName(int currentId)
 
 bool CoridorLogic::checkTurn(QString playerName)
 {
-	return playerName == getCurrentPlayerName(currentPlayerId);
+	return playerName == getPlayerName(currentPlayerId);
 }

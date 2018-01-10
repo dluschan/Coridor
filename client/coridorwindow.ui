@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="exitBtn">
    <property name="geometry">
     <rect>
      <x>650</x>
@@ -39,7 +39,7 @@
     <string>TextLabel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="restartBtn">
    <property name="geometry">
     <rect>
      <x>650</x>

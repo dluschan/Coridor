@@ -24,15 +24,6 @@ MainWindow::MainWindow(QWidget* parent)
 	connectLayout->addWidget(passwordEdit);
 	connectLayout->addWidget(connectBtn);
 	connect(connectBtn, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
-
-	// coridorWindow = new CoridorWindow();
-	// подключаем к слоту запуска главного окна по кнопке во втором окне
-	// connect(coridorWindow, &CoridorWindow::firstWindow, this, &MainWindow::show);
-
-	// Инициализируем третье окно
-	// quartoWindow = new QuartoWindow();
-	// подключаем к слоту запуска главного окна по кнопке во третьем окне
-	// connect(quartoWindow, &QuartoWindow::firstWindow, this, &MainWindow::show);
 }
 
 MainWindow::~MainWindow()
@@ -177,8 +168,6 @@ void MainWindow::switchToCoridorWindow(bool hosting)
 	{
 		dialogChoosePlayer = new DialogChosePlayer(hosting);
 	}
-	// coridorWindow = new CoridorWindow(hosting, pLobby->host->playerName, pLobby->connectedPlayers.back()->playerName); // Создаём и показываем второе окно
-	// connect(coridorWindow, &CoridorWindow::firstWindow, this, &MainWindow::show);
 }
 
 void MainWindow::switchToQuartoWindow(bool host)
@@ -214,6 +203,13 @@ void MainWindow::switchToGameLikeHostSlot()
 	}
 }
 
+void MainWindow::returnFromGame()
+{
+	pLobby = new Lobby();
+	this->show();
+	switchToMain();
+}
+
 void MainWindow::choseFirstPlayer(QString _firstPlayer)
 {
 	QString _secondPlayer;
@@ -224,7 +220,7 @@ void MainWindow::choseFirstPlayer(QString _firstPlayer)
 	coridorWindow = new CoridorWindow(_firstPlayer, _secondPlayer, pPlayer->playerName);
 	connect(coridorWindow, SIGNAL(sendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(sendQPoint(QPoint, bool, QString, bool)));
 	connect(this, SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), coridorWindow, SLOT(coridorRecieveQPoint(QPoint, bool, QString, bool)));
-	// connect(coridorWindow, &CoridorWindow::firstWindow, this, &MainWindow::show);
+	connect(coridorWindow, SIGNAL(firstWindow), this, SLOT(returnFromGame()));
 }
 
 void MainWindow::sendFirstPlayerSlot(QString _firstPlayer)

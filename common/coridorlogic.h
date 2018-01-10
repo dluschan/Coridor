@@ -51,7 +51,7 @@ public:
 
 	CoridorPlayer player1, player2;
 
-	QString getCurrentPlayerName(int currentId);
+	QString getPlayerName(int currentId);
 	bool checkTurn(QString playerName);
 };
 

@@ -1,5 +1,6 @@
 #include "coridorwindow.h"
 #include "ui_CoridorWindow.h"
+#include <QMessageBox>
 
 void Walls::update(QPoint pos)
 {
@@ -62,7 +63,9 @@ CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QStrin
 	, player(_player)
 {
 	ui->setupUi(this);
+	ui->restartBtn->hide();
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
+	connect(ui->exitBtn, SIGNAL(clicked()), this, SLOT(exitBtn_clicked()));
 
 	pictures = new Images;
 	pictures->load();
@@ -83,7 +86,7 @@ void CoridorWindow::paintEvent(QPaintEvent* pEvent)
 {
 	QPainter painter(this);
 	ui->status->setText(status);
-	ui->turn->setText("Turn of player " + game->getCurrentPlayerName(game->currentPlayerId));
+	ui->turn->setText("Turn of player " + game->getPlayerName(game->currentPlayerId));
 	painter.drawImage(field->getX(), field->getY(), field->getImage());
 	painter.drawImage(walls.hX, walls.hY, walls.gorWall);
 	painter.drawImage(walls.vX, walls.vY, walls.verWall);
@@ -96,7 +99,10 @@ void CoridorWindow::placeWall(QPoint point, bool horizontal)
 		try
 		{
 			if (game->nextTurn(game->placeWall(game->currentPlayerId, (point.x() - 1) / 2, (point.y() - 1) / 2, 'h')) != 0)
-				status = "Player" + QString::number(game->winner + 1) + " wins!";
+			{
+				status = game->getPlayerName(game->winner) + " wins!";
+				QMessageBox::information(this, tr("End"), status);
+			}
 			else
 				status = "Move or place a wall";
 		}
@@ -111,7 +117,10 @@ void CoridorWindow::placeWall(QPoint point, bool horizontal)
 		try
 		{
 			if (game->nextTurn(game->placeWall(game->currentPlayerId, (point.x() - 1) / 2, (point.y() - 1) / 2, 'v')) != 0)
-				status = "Player" + QString::number(game->winner + 1) + " wins!";
+			{
+				status = game->getPlayerName(game->winner) + " wins!";
+				QMessageBox::information(this, tr("End"), status);
+			}
 			else
 				status = "Move or place a wall";
 		}
@@ -129,7 +138,10 @@ void CoridorWindow::movePlayer(QPoint point)
 	{
 		// qDebug() << point.x() << " " << point.y();
 		if (game->nextTurn(game->move(game->pole, game->currentPlayerId, point.x(), point.y())) != 0)
-			status = "Player" + QString::number(game->winner + 1) + " wins!";
+		{
+			status = game->getPlayerName(game->winner) + " wins!";
+			QMessageBox::information(this, tr("End"), status);
+		}
 		else
 			status = "Move or place a wall";
 	}
@@ -179,9 +191,9 @@ void CoridorWindow::mousePressEvent(QMouseEvent* mEvent)
 		walls.mousePressed(pos);
 
 		// SelectPlayer(point);
+		field->redraw(game->pole);
+		this->update();
 	}
-	field->redraw(game->pole);
-	this->update();
 }
 
 void CoridorWindow::mouseMoveEvent(QMouseEvent* mEvent)
@@ -191,9 +203,9 @@ void CoridorWindow::mouseMoveEvent(QMouseEvent* mEvent)
 		QPoint pos = mEvent->pos();
 		QPoint point = field->getCoord(pos.x(), pos.y());
 		walls.mouseMoved(pos, point);
+		field->redraw(game->pole);
+		this->update();
 	}
-	field->redraw(game->pole);
-	this->update();
 }
 
 void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
@@ -207,29 +219,31 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		{
 			if (walls.vSelected || walls.hSelected && checkPoint(point))
 			{
-				emit sendQPointSignal(point, false, game->getCurrentPlayerName((game->currentPlayerId + 1) % 2), walls.hSelected);
+				emit sendQPointSignal(point, false, game->getPlayerName((game->currentPlayerId + 1) % 2), walls.hSelected);
 				placeWall(point, walls.hSelected);
-				status = "Waiting for another player";
+				if (status == "Move or place a wall")
+					status = "Waiting for another player";
 			}
 			else if (checkPoint(point))
 			{
 
-				emit sendQPointSignal(point, true, game->getCurrentPlayerName((game->currentPlayerId + 1) % 2), true);
+				emit sendQPointSignal(point, true, game->getPlayerName((game->currentPlayerId + 1) % 2), true);
 				movePlayer(point);
-				status = "Waiting for another player";
+				if (status == "Move or place a wall")
+					status = "Waiting for another player";
 			}
 		}
 		else
 			status = "Its not your turn";
 		walls.mouseReleased(pos);
+		field->redraw(game->pole);
+		this->update();
 	}
-	field->redraw(game->pole);
-	this->update();
 }
 
-void CoridorWindow::on_pushButton_clicked()
+void CoridorWindow::exitBtn_clicked()
 {
-	this->close();		// Закрываем окно
+	this->hide();		// Закрываем окно
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 }
 
