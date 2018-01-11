@@ -55,7 +55,7 @@ QDataStream& operator>>(QDataStream& stream, Lobby& lobby)
 
 QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
 {
-	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << unsigned(lobby.status) << lobby.connectedPlayersNumber << lobby.connectedPlayers.size();
+	stream << lobby.lobbyName << lobby.host->playerName << unsigned(lobby.gameType) << unsigned(lobby.status) << lobby.connectedPlayersNumber << int(lobby.connectedPlayers.size());
 	for (const auto& i : lobby.connectedPlayers)
 		stream << *i;
 	return stream;
@@ -230,7 +230,7 @@ QDataStream& UpdateLobby::operator<<(QDataStream& stream) const
 {
 	qDebug() << "UpdateLobby written";
 
-	stream << connectedPlayers.size() << gameType << status;
+	stream << int(connectedPlayers.size()) << gameType << status;
 
 	for (const auto& i : connectedPlayers)
 	{
@@ -319,7 +319,7 @@ QDataStream& SendLobbies::operator>>(QDataStream& stream)
 QDataStream& SendLobbies::operator<<(QDataStream& stream) const
 {
 	qDebug() << "SendLobbies written";
-	stream << lobbies.size();
+	stream << int(lobbies.size());
 	for (const auto& i : lobbies)
 	{
 		stream << *i;

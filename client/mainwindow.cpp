@@ -32,7 +32,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::connectToTheServer()
 {
-	pSocket->connectToHost("25.83.194.201", 5555);
+	pSocket->connectToHost("localhost", 5555);
 
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
