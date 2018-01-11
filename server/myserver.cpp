@@ -37,7 +37,13 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 {
 	Lobby* hostLobby = findLobby(_lobby);
 
-	hostLobby->connect(_player);
+	if (_connectFlag)
+		hostLobby->connect(_player);
+	else
+	{
+		hostLobby->disconnect(_player);
+		hostLobby->updateStatus(Unready);
+	}
 
 	for (const auto& i : threads)
 	{
@@ -58,16 +64,14 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 
 			i->pLobby = _lobby;
 			i->pLobby->connect(_player);
-			for (const auto& j : lobbies)
+			// WHERE THIS CONNECTS?
+			/*for (const auto& j : lobbies)
 				if (j->lobbyName == _lobby->lobbyName)
-					j->connect(_player);
+					j->connect(_player);*/
 		}
 
 		if (i->pPlayer->playerName == _lobby->host->playerName)
-			if (_connectFlag)
-				emit i->connectToHostLobbySignal(i, hostLobby, _player, _connectFlag);
-			else
-				emit i->connectToHostLobbySignal(i, _lobby, _player, _connectFlag);
+			emit i->connectToHostLobbySignal(i, hostLobby, _player, _connectFlag);
 	}
 
 	qDebug() << "ConnectToLobby Command Sent";
@@ -82,14 +86,14 @@ void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _playe
 	CommandType commandType = {CommandType::Type::ConnectToLobby};
 	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
 
-	if (!_connectFlag)
+	/*if (!_connectFlag)
 	{
 		i->pLobby = _lobby;
 		i->pLobby->disconnect(_player);
 		for (const auto& j : lobbies)
 			if (j->lobbyName == _lobby->lobbyName)
 				j->disconnect(_player);
-	}
+	}*/
 	// qDebug() << _player->playerName;
 
 	out << commandType;

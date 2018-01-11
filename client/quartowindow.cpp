@@ -133,7 +133,7 @@ void QuartoWindow::checkWin()
 void QuartoWindow::nextTurn()
 {
 	game->nextTurn();
-	status = "End the turn";
+	status = "Place a figure";
 	this->update();
 }
 

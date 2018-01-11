@@ -59,17 +59,10 @@ void MainWindow::createLobbyDialog()
 {
 	CreateLobbyDialog* dialog = new CreateLobbyDialog(pPlayer->playerName);
 	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(createLobby(QString, QString, int)));
-	// (dialog->lobbyNameEdit->text(), dialog->hostLoginEdit->text(), dialog->gameTypeEdit->currentIndex())
 }
 
 void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
 {
-	/*QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::ConnectToLobby};*/
-
 	// получение connectedPlayersNumber
 	QRegExp rx(".*\\s*(\\d+)\\s*/.*");
 	int pos = 0;
@@ -82,23 +75,12 @@ void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
 
 	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
 	pLobby->host->playerName;
-	// pLobby->connectedPlayers.push_back(pPlayer); //Лобби подключаемого игрока хранит в connectedPlayers только своего Player*!!!
-	// qDebug() << pLobby->connectedPlayers.back()->playerName;
-	sendConnectToLobby(pLobby, pPlayer, true); //Лобби подключаемого игрока хранит в connectedPlayers только своего Player*!!!
-											   /*Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
-
-											   out << commandType;
-											   pCommand->operator<<(out);
-											   pSocket->write(arrBlock);
-											   pSocket->waitForBytesWritten();
-
-											   qDebug() << "ConnectToLobby Command Sent";
-
-											   pLobby->connect(pPlayer);*/
+	sendConnectToLobby(pLobby, pPlayer, true);
 }
 
 void MainWindow::leaveLobby()
 {
+	// sendUpdateLobby(pLobby->gameType, Unready);
 	sendConnectToLobby(pLobby, pPlayer, false);
 	pLobby = new Lobby();
 	switchToMain();
@@ -186,10 +168,6 @@ void MainWindow::switchToQuartoWindow(bool hosting)
 	{
 		dialogChoosePlayer = new DialogChoosePlayer(hosting);
 	}
-	// chooseFirstPlayerQuarto
-	// quartoWindow = new QuartoWindow();
-	// quartoWindow->show(); // Показываем второе окно
-	// this->close();		  // Закрываем основное окно
 }
 
 void MainWindow::switchToGame(bool hosting)
@@ -247,6 +225,7 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 		_secondPlayer = pLobby->connectedPlayers.back()->playerName; // CRASHES HERE CAUSE THERE IS NO connectedPlayers in pLobby
 	else
 		_secondPlayer = pLobby->host->playerName;
+
 	// createGame(_firstPlayer, _secondPlayer, Quarto); sendQPointSignal
 	quartoWindow = new QuartoWindow(_firstPlayer, _secondPlayer, pPlayer->playerName);
 	connect(quartoWindow, SIGNAL(sendQPointSignal(QPoint, int, QString)), this, SLOT(quartoSendQPoint(QPoint, int, QString)));
@@ -332,12 +311,14 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 	player1->setCheckState(Qt::Checked);
 	player1->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 
-	QListWidgetItem* player2 = new QListWidgetItem("Player2", connectedPlayersList);
+	/*QListWidgetItem* player2 = new QListWidgetItem("Player2", connectedPlayersList);
 	if (pLobby->status == Unready)
 		player2->setCheckState(Qt::Unchecked);
 	else if (pLobby->status == Ready)
 		player2->setCheckState(Qt::Checked);
-	player2->setFlags(Qt::ItemIsEnabled); // this disables checkable...
+	player2->setFlags(Qt::ItemIsEnabled); // this disables checkable...*/
+
+	QListWidgetItem* tmpItem;
 
 	gameTypeEdit = new QComboBox;
 	gameTypeEdit->addItem(tr("Coridor"));
@@ -350,7 +331,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 	if (flagHosting)
 	{
 		player1->setText(pPlayer->playerName);
-		player2->setText("");
+		// player2->setText("");
 
 		gameTypeEdit->setEnabled(true);
 
@@ -360,10 +341,21 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 	}
 	else
 	{
-		if (connectingPlayer->playerName != pPlayer->playerName)
+		if (pLobby->host->playerName == pPlayer->playerName)
 		{
 			player1->setText(pPlayer->playerName);
-			player2->setText(connectingPlayer->playerName);
+
+			for (const auto& i : pLobby->connectedPlayers)
+			{
+				tmpItem = new QListWidgetItem(i->playerName, connectedPlayersList);
+				if (pLobby->status == Unready)
+					tmpItem->setCheckState(Qt::Unchecked);
+				else if (pLobby->status == Ready)
+					tmpItem->setCheckState(Qt::Checked);
+				tmpItem->setFlags(Qt::ItemIsEnabled); // this disables checkable...
+			}
+
+			// player2->setText(connectingPlayer->playerName);
 
 			gameTypeEdit->setEnabled(true);
 
@@ -371,10 +363,25 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(switchToGameLikeHostSlot()));
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobbySlot()));
 		}
+		else if (connectingPlayer->playerName != pPlayer->playerName)
+		{
+			// for already connected players (not hosting & not connecting)
+		}
 		else
 		{
 			player1->setText(pLobby->host->playerName);
-			player2->setText(pPlayer->playerName);
+
+			for (const auto& i : pLobby->connectedPlayers)
+			{
+				tmpItem = new QListWidgetItem(i->playerName, connectedPlayersList);
+				if (pLobby->status == Unready)
+					tmpItem->setCheckState(Qt::Unchecked);
+				else if (pLobby->status == Ready)
+					tmpItem->setCheckState(Qt::Checked);
+				tmpItem->setFlags(Qt::ItemIsEnabled); // this disables checkable...
+			}
+
+			// player2->setText(pPlayer->playerName);
 
 			gameTypeEdit->setEnabled(false);
 
@@ -389,46 +396,7 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 	lobbyLayout->addWidget(gameTypeEdit);
 	lobbyLayout->addWidget(startGameBtn);
 	lobbyLayout->addWidget(exitLobbyBtn);
-
-	// connect()
 }
-
-/*void MainWindow::switchToLobbyGuest(Lobby* _lobby)
-{
-	pLobby = _lobby;
-
-	centralWidget = new QWidget(this);
-	setCentralWidget(centralWidget);
-
-	lobbyLayout = new QGridLayout(centralWidget);
-
-	connectedPlayersList = new QListWidget();
-
-	QListWidgetItem* player1 = new QListWidgetItem(pLobby->host->playerName, connectedPlayersList);
-	player1->setCheckState(Qt::Checked);
-	player1->setFlags(Qt::ItemIsEnabled); // this disables checkable...
-
-	QListWidgetItem* player2 = new QListWidgetItem(pPlayer->playerName, connectedPlayersList);
-	player2->setCheckState(Qt::Unchecked);
-	player2->setFlags(Qt::ItemIsEnabled); // this disables checkable...
-
-	gameTypeEdit = new QComboBox;
-	gameTypeEdit->addItem(tr("Coridor"));
-	gameTypeEdit->addItem(tr("Quarto"));
-	gameTypeEdit->setCurrentIndex(pLobby->gameType);
-
-	// connect(gameTypeEdit, SIGNAL(currentIndexChanged(int)), this, SLOT(updateLobby(int)));
-
-	startGameBtn = new QPushButton("Ready");
-	exitLobbyBtn = new QPushButton("Exit");
-
-	lobbyLayout->addWidget(connectedPlayersList);
-	lobbyLayout->addWidget(gameTypeEdit);
-	lobbyLayout->addWidget(startGameBtn);
-	lobbyLayout->addWidget(exitLobbyBtn);
-
-	connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
-}*/
 
 void MainWindow::switchToLobbiesList()
 {
@@ -723,13 +691,12 @@ void MainWindow::switchCmd()
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
 		if (pConnectToLobby->connectFlag)
-			//***** GameType
+			//***** connect
 			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, false);
 		else
 		{
-			//***** GameType
-			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, true);
-			pLobby->disconnect(pConnectToLobby->player);
+			//***** disconnect
+			switchToLobby(pConnectToLobby->player, pConnectToLobby->lobby, false);
 		}
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
