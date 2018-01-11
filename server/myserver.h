@@ -15,6 +15,8 @@ public:
 	std::list<MyThread*> threads;
 	std::list<Lobby*> lobbies;
 
+	Lobby* findLobby(Lobby* _lobby);
+
 private:
 	void sendString(QString _message, MyThread* _thread);
 

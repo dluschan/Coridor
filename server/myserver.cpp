@@ -22,21 +22,22 @@ void MyServer::sendString(QString _message, MyThread* _thread)
 	_thread->sendMessage(_message, false);
 }
 
-void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+Lobby* MyServer::findLobby(Lobby* _lobby)
 {
-	Lobby* hostLobby = new Lobby();
-
 	for (const auto& j : lobbies)
 	{
 		qDebug() << j->lobbyName;
 		if (j->lobbyName == _lobby->lobbyName)
-			hostLobby = j;
+			return j;
 	}
+	throw runtime_error("Error: This lobby doesn't exists anymore");
+}
 
-	if (hostLobby->lobbyName == "LobbyName" && hostLobby->host->playerName == "HostName" && hostLobby->gameType == WrongGameType)
-	{
-		throw runtime_error("Error: This lobby doesn't exists anymore");
-	}
+void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+{
+	Lobby* hostLobby = findLobby(_lobby);
+
+	hostLobby->connect(_player);
 
 	for (const auto& i : threads)
 	{
@@ -210,7 +211,7 @@ void MyServer::changeGameType(MyThread* _thread, int _gameType, int _status)
 	_thread->pSocket->write(arrBlock);
 	_thread->pSocket->waitForBytesWritten();
 
-	qDebug() << "ChangeGameType Command Sent";
+	qDebug() << "UpdateLobby Command Sent";
 
 	// qDebug() << _thread->pLobby->gameTypeStr;
 }

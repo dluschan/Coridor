@@ -33,5 +33,5 @@ DialogChoosePlayer::~DialogChoosePlayer()
 void DialogChoosePlayer::startTheGame()
 {
 	emit clicked(firstPlayerEdit->currentText());
-	this->hide();
+	this->close();
 }

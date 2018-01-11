@@ -6,6 +6,7 @@ CreateLobbyDialog::CreateLobbyDialog(QString _host, QWidget* parent)
 	, host(_host)
 {
 	this->setWindowTitle("Create lobby");
+	this->setModal(true);
 	mainLayout = new QVBoxLayout();
 	setLayout(mainLayout);
 
@@ -31,5 +32,5 @@ CreateLobbyDialog::~CreateLobbyDialog()
 void CreateLobbyDialog::createLobby()
 {
 	emit clicked(lobbyNameEdit->text(), host, gameTypeEdit->currentIndex());
-	this->hide();
+	this->close();
 }

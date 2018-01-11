@@ -85,18 +85,16 @@ void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
 	// pLobby->connectedPlayers.push_back(pPlayer); //Лобби подключаемого игрока хранит в connectedPlayers только своего Player*!!!
 	// qDebug() << pLobby->connectedPlayers.back()->playerName;
 	sendConnectToLobby(pLobby, pPlayer, true); //Лобби подключаемого игрока хранит в connectedPlayers только своего Player*!!!
-	if (pLobby->connectedPlayers.empty())
-		qDebug() << "sendConnectToLobbySlot ERROR - WTFFFFFFFFFFFF";
-	/*Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
+											   /*Command* pCommand = new ConnectToLobby(pLobby, pPlayer);
 
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
+											   out << commandType;
+											   pCommand->operator<<(out);
+											   pSocket->write(arrBlock);
+											   pSocket->waitForBytesWritten();
 
-	qDebug() << "ConnectToLobby Command Sent";
+											   qDebug() << "ConnectToLobby Command Sent";
 
-	pLobby->connect(pPlayer);*/
+											   pLobby->connect(pPlayer);*/
 }
 
 void MainWindow::leaveLobby()
@@ -110,7 +108,6 @@ void MainWindow::deleteLobbySlot()
 {
 	if (pLobby->gameType != WrongGameType)
 		deleteLobby(pLobby);
-	pLobby = new Lobby();
 	switchToMain();
 }
 
@@ -323,6 +320,7 @@ void MainWindow::switchToMain()
 
 void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool flagHosting)
 {
+	pLobby = _lobby;
 	centralWidget = new QWidget(this);
 	setCentralWidget(centralWidget);
 
@@ -372,11 +370,9 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 			startGameBtn = new QPushButton("Start");
 			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(switchToGameLikeHostSlot()));
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(deleteLobbySlot()));
-			pLobby->connect(connectingPlayer);
 		}
 		else
 		{
-			pLobby = _lobby;
 			player1->setText(pLobby->host->playerName);
 			player2->setText(pPlayer->playerName);
 
@@ -481,7 +477,7 @@ void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
 
 	pLobby = new Lobby(lobbyName, hostLogin, gameType);
 
-	switchToLobby(new Player(), new Lobby(), true);
+	switchToLobby(new Player(), pLobby, true);
 }
 
 void MainWindow::deleteLobby(Lobby* lobby)
@@ -519,10 +515,10 @@ void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connec
 
 	qDebug() << "ConnectToLobby Command Sent" << _connectFlag;
 
-	if (_connectFlag)
+	/*if (_connectFlag)
 		pLobby->connect(_player);
 	else
-		pLobby->disconnect(_player);
+		pLobby->disconnect(_player);*/
 }
 
 void MainWindow::sendUpdateLobby(int _gameType, int _status)
@@ -749,7 +745,7 @@ void MainWindow::switchCmd()
 	}
 	else if (SendFirstPlayer* pSendFirstPlayer = dynamic_cast<SendFirstPlayer*>(pCommand))
 	{
-		dialogChoosePlayer->hide();
+		dialogChoosePlayer->close();
 		chooseFirstPlayer(pSendFirstPlayer->firstPlayer, (GameType)pSendFirstPlayer->gameType);
 	}
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
