@@ -201,6 +201,11 @@ void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 
 void QuartoWindow::on_pushButton_clicked()
 {
+	if (!game->end)
+		if (player == game->player1.name)
+			emit sendQuitSignal(game->player2.name);
+		else
+			emit sendQuitSignal(game->player1.name);
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	this->disconnect();
 	this->close(); // Закрываем окно
@@ -268,6 +273,14 @@ void QuartoWindow::quartoRecieveCheckWin(QString _enemy, bool _checkWin)
 		checkWin();
 	else
 		nextTurn();
+}
+
+void QuartoWindow::recieveQuit()
+{
+	game->end = true;
+	status = "Your opponet has left the game";
+	this->update();
+	QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 bool QuartoWindow::checkPoint(QPoint point)

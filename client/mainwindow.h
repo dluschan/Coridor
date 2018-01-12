@@ -44,10 +44,13 @@ private slots:
 	void leaveLobbiesList();
 	void setRdy();
 	void sendRdy();
+	void sendMessage(QString message, bool errorFlag, QString playerName);
 	void switchToCoridorWindow(bool hosting);
 	void switchToQuartoWindow(bool hosting);
 	void switchToGameLikeHostSlot();
 	void returnFromGame();
+	void sendQuit(QString _reciever);
+	void recieveQuit();
 	void chooseFirstPlayerCoridor(QString _firstPlayer);
 	void chooseFirstPlayerQuarto(QString _firstPlayer);
 	void chooseFirstPlayer(QString _firstPlayer, GameType _gameType);
@@ -59,6 +62,7 @@ private slots:
 
 signals:
 	// void choseFirstPlayerSignal();
+	void sendQuitSignal();
 	void coridorRecieveQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoRecieveQPointSignal(QPoint point, int figureId, QString enemy);
 	void quartoRecieveCheckWinSignal(QString enemy, bool checkWin);
@@ -106,7 +110,6 @@ private:
 	void deleteLobby(Lobby* lobby);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendUpdateLobby(int _gameType, int _status);
-	void sendMessage(QString message);
 	void sendChooseFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType);
 	void switchToGame(bool hosting);
 	void switchCmd();

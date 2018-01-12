@@ -36,7 +36,9 @@ public slots:
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendRdy(Player* _host);
+	void sendMessageSlot(QString _message, bool _errorFlag, QString _playerName);
 	void sendFirstPlayerSlot(QString _firstPlayer, QString _guest, GameType _gameType);
+	void sendQuitSlot(QString _reciever);
 	void coridorSendQPointSlot(QPoint _point, bool _move, QString _enemy, bool _horizontal);
 	void quartoSendQPointSlot(QPoint _point, int _figureId, QString _enemy);
 	void quartoSendCheckWinSlot(QString _enemy, bool _checkWin);

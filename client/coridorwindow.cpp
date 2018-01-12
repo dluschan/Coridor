@@ -245,6 +245,11 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 
 void CoridorWindow::exitBtn_clicked()
 {
+	if (game->endValue == 0)
+		if (player == game->player1.name)
+			emit sendQuitSignal(game->player2.name);
+		else
+			emit sendQuitSignal(game->player1.name);
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	this->disconnect();
 	this->close(); // Закрываем окно
@@ -267,6 +272,14 @@ void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciev
 	this->update();
 	if (game->endValue != 0)
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
+}
+
+void CoridorWindow::recieveQuit()
+{
+	game->endValue = 3;
+	status = "Your opponet has left the game";
+	this->update();
+	QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 bool CoridorWindow::checkPoint(QPoint point)

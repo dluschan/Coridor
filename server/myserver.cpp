@@ -42,6 +42,7 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 	else
 	{
 		hostLobby->disconnect(_player);
+		// if (_lobby->status != InGame)
 		hostLobby->updateStatus(Unready);
 	}
 
@@ -117,11 +118,25 @@ void MyServer::sendRdy(Player* _host)
 	}
 }
 
+void MyServer::sendMessageSlot(QString _message, bool _errorFlag, QString _playerName)
+{
+	for (const auto& i : threads)
+		if (i->pPlayer->playerName == _playerName)
+			i->sendMessage(_message, _errorFlag);
+}
+
 void MyServer::sendFirstPlayerSlot(QString _firstPlayer, QString _guest, GameType _gameType)
 {
 	for (const auto& i : threads)
 		if (i->pPlayer->playerName == _guest)
 			i->sendFirstPlayer(_firstPlayer, _guest, _gameType);
+}
+
+void MyServer::sendQuitSlot(QString _reciever)
+{
+	for (const auto& i : threads)
+		if (i->pPlayer->playerName == _reciever)
+			i->sendQuit(_reciever);
 }
 
 void MyServer::coridorSendQPointSlot(QPoint _point, bool _move, QString _enemy, bool _horizontal)
@@ -297,7 +312,9 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(sendMessageSignal(QString, bool, QString)), this, SLOT(sendMessageSlot(QString, bool, QString)));
 	connect(threads.back(), SIGNAL(sendFirstPlayerSignal(QString, QString, GameType)), this, SLOT(sendFirstPlayerSlot(QString, QString, GameType)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuitSlot(QString)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(coridorSendQPointSlot(QPoint, bool, QString, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(quartoSendQPointSignal(QPoint, int, QString)), this, SLOT(quartoSendQPointSlot(QPoint, int, QString)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(quartoSendCheckWinSignal(QString, bool)), this, SLOT(quartoSendCheckWinSlot(QString, bool)));

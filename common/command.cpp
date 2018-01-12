@@ -117,6 +117,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::SendFirstPlayer:
 		pCommand = new SendFirstPlayer();
 		break;
+	case CommandType::Type::SendQuit:
+		pCommand = new SendQuit();
+		break;
 	case CommandType::Type::CoridorSendQPoint:
 		pCommand = new CoridorSendQPoint();
 		break;
@@ -126,12 +129,6 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::QuartoSendCheckWin:
 		pCommand = new QuartoSendCheckWin();
 		break;
-	/*case CommandType::Type::SendStart:
-	{
-		list<Player*> playersEmpty;
-		pCommand = new SendStart(playersEmpty);
-		break;
-	}*/
 	case CommandType::Type::SendMessage:
 		pCommand = new SendMessage();
 		break;
@@ -193,34 +190,6 @@ void CreateLobby::execute()
 {
 	qDebug() << "execute CreateLobby command";
 }
-
-/*CreateLobby::CreateLobby(QString _lobbyName, QString _hostLogin, int _gameType)
-	: lobbyName(_lobbyName)
-	, hostLogin(_hostLogin)
-	, gameType(_gameType)
-{
-	qDebug() << "CreateLobby command created" << _lobbyName;
-}
-
-QDataStream& CreateLobby::operator>>(QDataStream& stream)
-{
-	qDebug() << "CreateLobby read";
-	stream >> lobbyName >> hostLogin >> gameType;
-	return stream;
-}
-
-QDataStream& CreateLobby::operator<<(QDataStream& stream) const
-{
-	qDebug() << "CreateLobby written";
-	stream << lobbyName << hostLogin << gameType;
-	return stream;
-}
-
-void CreateLobby::execute()
-{
-	lobby = new Lobby(lobbyName, hostLogin, gameType);
-	qDebug() << "execute CreateLobby command" << lobbyName << hostLogin << gameType;
-}*/
 
 UpdateLobby::UpdateLobby(int _gameType, int _status, std::list<Player*> _connectedPlayers)
 	: gameType(_gameType)
@@ -431,6 +400,31 @@ void SendFirstPlayer::execute()
 	qDebug() << "execute SendFirstPlayer command";
 }
 
+SendQuit::SendQuit(QString _reciever)
+	: reciever(_reciever)
+{
+	qDebug() << "SendQuit command created";
+}
+
+QDataStream& SendQuit::operator>>(QDataStream& stream)
+{
+	stream >> reciever;
+	qDebug() << "SendQuit read";
+	return stream;
+}
+
+QDataStream& SendQuit::operator<<(QDataStream& stream) const
+{
+	stream << reciever;
+	qDebug() << "SendQuit written";
+	return stream;
+}
+
+void SendQuit::execute()
+{
+	qDebug() << "execute SendQuit command";
+}
+
 CoridorSendQPoint::CoridorSendQPoint(QPoint _point, bool _move, QString _enemy, bool _horizontal)
 	: point(_point)
 	, move(_move)
@@ -512,97 +506,10 @@ void QuartoSendCheckWin::execute()
 	qDebug() << "execute QuartoSendCheckWin command";
 }
 
-/*SendStart::SendStart(list<Player*> _players)
-	: players(_players)
-{
-	qDebug() << "SendStart command created";
-}
-
-QDataStream& SendStart::operator>>(QDataStream& stream)
-{
-	qDebug() << "SendStart read";
-	Player* playerTmp = new Player();
-	int size;
-	stream >> size;
-	for (int i = 0; i < size; i++)
-	{
-		stream >> *playerTmp;
-		players.push_back(playerTmp);
-	}
-	return stream;
-}
-
-QDataStream& SendStart::operator<<(QDataStream& stream) const
-{
-	qDebug() << "SendStart written";
-	stream << players.size();
-	for (const auto& i : players)
-	{
-		stream << *i;
-	}
-	return stream;
-}
-
-void SendStart::execute()
-{
-	qDebug() << "execute SendStart command";
-}*/
-
-/* SendConnect::SendConnect(Lobby* _lobby, Player* _player)
-	: lobby(_lobby)
-, player(_player)
-{
-	qDebug() << "SendConnect command created";
-}
-
-QDataStream& SendConnect::operator>>(QDataStream& stream)
-{
-	qDebug() << "SendConnect read";
-	stream >> *lobby >> *player;
-	return stream;
-}
-
-QDataStream& SendConnect::operator<<(QDataStream& stream) const
-{
-	qDebug() << "SendConnect written";
-	stream << *lobby << *player;
-	return stream;
-}
-
-void SendConnect::execute()
-{
-	lobby->connect(player);
-	qDebug() << "execute SendConnect command";
-}
-*/
-
-/*SendError::SendError(QString _error)
-	: error(_error)
-{
-}
-
-QDataStream& SendError::operator>>(QDataStream& stream)
-{
-	qDebug() << "SendError read";
-	stream >> error;
-	return stream;
-}
-
-QDataStream& SendError::operator<<(QDataStream& stream) const
-{
-	qDebug() << "SendError written";
-	stream << error;
-	return stream;
-}
-
-void SendError::execute()
-{
-	qDebug() << "execute SendError command";
-}*/
-
-SendMessage::SendMessage(QString _message, bool _error)
+SendMessage::SendMessage(QString _message, bool _error, QString _playerName)
 	: message(_message)
 	, errorFlag(_error)
+	, playerName(_playerName)
 {
 	qDebug() << "SendMessage command created";
 }
@@ -610,14 +517,14 @@ SendMessage::SendMessage(QString _message, bool _error)
 QDataStream& SendMessage::operator>>(QDataStream& stream)
 {
 	qDebug() << "SendMessage read";
-	stream >> message >> errorFlag;
+	stream >> message >> errorFlag >> playerName;
 	return stream;
 }
 
 QDataStream& SendMessage::operator<<(QDataStream& stream) const
 {
 	qDebug() << "SendMessage written";
-	stream << message << errorFlag;
+	stream << message << errorFlag << playerName;
 	return stream;
 }
 

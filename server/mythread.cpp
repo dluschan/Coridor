@@ -105,6 +105,8 @@ void MyThread::sendStart()
 	out << commandType;
 	pCommand->operator<<(out);
 	write(arrBlock);
+
+	qDebug() << "UpdateLobby Command Sent";
 }
 
 void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType)
@@ -119,6 +121,24 @@ void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _g
 	out << commandType;
 	pCommand->operator<<(out);
 	write(arrBlock);
+
+	qDebug() << "SendFirstPlayer Command Sent";
+}
+
+void MyThread::sendQuit(QString _reciever)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendQuit};
+	Command* pCommand = new SendQuit(_reciever);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "SendQuit Command Sent";
 }
 
 void MyThread::coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal)
@@ -229,12 +249,20 @@ void MyThread::switchCmd()
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		for (const auto& i : pDeleteLobby->lobby->connectedPlayers)
+		if (pDeleteLobby->lobby->gameType != WrongGameType)
 		{
-			emit deleteGuestLobbySignal(i);
+			for (const auto& i : pDeleteLobby->lobby->connectedPlayers)
+			{
+				emit deleteGuestLobbySignal(i);
+			}
+			emit deleteLobbySignal(pDeleteLobby->lobby);
+			pLobby = new Lobby();
 		}
-		emit deleteLobbySignal(pDeleteLobby->lobby);
-		pLobby = new Lobby();
+		else
+		{
+			emit deleteLobbySignal(pDeleteLobby->lobby);
+			pLobby = new Lobby();
+		}
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{
@@ -271,9 +299,18 @@ void MyThread::switchCmd()
 		else if (pLobby->status == Ready)
 			pLobby->updateStatus(Unready);
 	}
+	/*else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))
+	{
+		if (pSendMessage->errorFlag)
+			emit sendMessageSignal(pSendMessage->message, pSendMessage->errorFlag, pSendMessage->playerName);
+	}*/
 	else if (SendFirstPlayer* pSendFirstPlayer = dynamic_cast<SendFirstPlayer*>(pCommand))
 	{
 		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest, (GameType)pSendFirstPlayer->gameType);
+	}
+	else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
+	{
+		emit sendQuitSignal(pSendQuit->reciever);
 	}
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{

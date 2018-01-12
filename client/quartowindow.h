@@ -47,6 +47,7 @@ signals:
 
 	void sendQPointSignal(QPoint point, int figureId, QString enemy);
 	void quartoSendCheckWinSignal(QString enemy, bool checkWin);
+	void sendQuitSignal(QString reciever);
 
 private slots:
 	void on_pushButton_clicked();
@@ -56,6 +57,7 @@ private slots:
 
 	void quartoRecieveQPoint(QPoint point, int figureId, QString reciever);
 	void quartoRecieveCheckWin(QString _enemy, bool _checkWin);
+	void recieveQuit();
 
 private:
 	Ui::QuartoWindow* ui;

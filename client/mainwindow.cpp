@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget* parent)
 	connectLayout->addWidget(passwordEdit);
 	connectLayout->addWidget(connectBtn);
 	connect(connectBtn, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
+	connect(this, SIGNAL(sendQuitSignal()), this, SLOT(recieveQuit()));
 }
 
 MainWindow::~MainWindow()
@@ -126,6 +127,23 @@ void MainWindow::sendRdy()
 	qDebug() << "SendRdy Command Sent";
 }
 
+void MainWindow::sendMessage(QString message, bool errorFlag, QString playerName)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendMessage};
+	Command* pCommand = new SendMessage(message, errorFlag, playerName);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "SendMessage Command Sent";
+}
+
 void MainWindow::switchToCoridorWindow(bool hosting)
 {
 	this->close(); // Закрываем основное окно
@@ -194,11 +212,34 @@ void MainWindow::switchToGameLikeHostSlot()
 
 void MainWindow::returnFromGame()
 {
-	// coridorWindow->disconnect();
-	// quartoWindow->disconnect();
+	pLobby->updateGameType(WrongGameType);
 	deleteLobby(pLobby);
 	this->show();
 	switchToMain();
+}
+
+void MainWindow::sendQuit(QString _reciever)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendQuit};
+	Command* pCommand = new SendQuit(_reciever);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "SendQuit Command Sent";
+	pLobby = new Lobby();
+}
+
+void MainWindow::recieveQuit()
+{
+	pLobby->updateGameType(WrongGameType);
+	deleteLobby(pLobby);
 }
 
 void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
@@ -213,6 +254,8 @@ void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 	coridorWindow = new CoridorWindow(_firstPlayer, _secondPlayer, pPlayer->playerName);
 	connect(coridorWindow, SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(coridorSendQPoint(QPoint, bool, QString, bool)));
 	connect(this, SIGNAL(coridorRecieveQPointSignal(QPoint, bool, QString, bool)), coridorWindow, SLOT(coridorRecieveQPoint(QPoint, bool, QString, bool)));
+	connect(coridorWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
+	connect(this, SIGNAL(sendQuitSignal()), coridorWindow, SLOT(recieveQuit()));
 	connect(coridorWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
 }
 
@@ -230,6 +273,8 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 	connect(this, SIGNAL(quartoRecieveQPointSignal(QPoint, int, QString)), quartoWindow, SLOT(quartoRecieveQPoint(QPoint, int, QString)));
 	connect(quartoWindow, SIGNAL(quartoSendCheckWinSignal(QString, bool)), this, SLOT(quartoSendCheckWin(QString, bool)));
 	connect(this, SIGNAL(quartoRecieveCheckWinSignal(QString, bool)), quartoWindow, SLOT(quartoRecieveCheckWin(QString, bool)));
+	// connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString))); HERE
+	// connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit())); HERE
 	connect(quartoWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
 }
 
@@ -468,11 +513,6 @@ void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connec
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "ConnectToLobby Command Sent" << _connectFlag;
-
-	/*if (_connectFlag)
-		pLobby->connect(_player);
-	else
-		pLobby->disconnect(_player);*/
 }
 
 void MainWindow::sendUpdateLobby(int _gameType, int _status)
@@ -490,23 +530,6 @@ void MainWindow::sendUpdateLobby(int _gameType, int _status)
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "ChangeGameType Command Sent";
-}
-
-void MainWindow::sendMessage(QString message)
-{
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::SendMessage};
-	Command* pCommand = new SendMessage(message, false);
-
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
-
-	qDebug() << "SendMessage Command Sent";
 }
 
 void MainWindow::sendChooseFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType)
@@ -657,7 +680,8 @@ void MainWindow::switchCmd()
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		switchToMain();
+		if (pLobby->gameType != WrongGameType)
+			switchToMain();
 		pLobby = new Lobby();
 	}
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
@@ -707,6 +731,10 @@ void MainWindow::switchCmd()
 	{
 		dialogChoosePlayer->close();
 		chooseFirstPlayer(pSendFirstPlayer->firstPlayer, (GameType)pSendFirstPlayer->gameType);
+	}
+	else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
+	{
+		emit sendQuitSignal();
 	}
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{
