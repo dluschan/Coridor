@@ -32,7 +32,7 @@ public:
 private slots:
 	void sockReady();
 	void sockDisc();
-	void createLobby(QString lobbyName, QString hostLogin, int gameType);
+	void sendCreateLobby(QString lobbyName, QString hostLogin, int gameType);
 	void askLobbies();
 	void updateLobby(int _gameType);
 

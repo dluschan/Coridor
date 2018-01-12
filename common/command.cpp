@@ -328,12 +328,14 @@ QDataStream& SendLobbies::operator>>(QDataStream& stream)
 {
 	qDebug() << "SendLobbies read";
 	Lobby* lobbyTmp = new Lobby();
+	Lobby* lobbyTmp2 = new Lobby();
 	int size;
 	stream >> size;
 	for (int i = 0; i < size; i++)
 	{
 		stream >> *lobbyTmp;
-		lobbies.push_back(lobbyTmp);
+		lobbyTmp2 = new Lobby(lobbyTmp->lobbyName, lobbyTmp->host->playerName, lobbyTmp->gameType, lobbyTmp->connectedPlayersNumber);
+		lobbies.push_back(lobbyTmp2);
 	}
 	return stream;
 }

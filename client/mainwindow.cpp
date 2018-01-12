@@ -58,20 +58,16 @@ void MainWindow::connectToTheServer()
 void MainWindow::createLobbyDialog()
 {
 	CreateLobbyDialog* dialog = new CreateLobbyDialog(pPlayer->playerName);
-	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(createLobby(QString, QString, int)));
+	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(sendCreateLobby(QString, QString, int)));
 }
 
 void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
 {
 	// получение connectedPlayersNumber
-	QRegExp rx(".*\\s*(\\d+)\\s*/.*");
-	int pos = 0;
-
-	int connectedPlayersNumber;
-	if ((pos = rx.indexIn(item->text(3), 0)) != -1)
-	{
-		connectedPlayersNumber = rx.cap(1).toInt();
-	}
+	QString tmpString = item->text(3);
+	tmpString.chop(tmpString.size() - tmpString.indexOf("/"));
+	qDebug() << tmpString;
+	int connectedPlayersNumber = tmpString.toInt();
 
 	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
 	pLobby->host->playerName;
@@ -198,6 +194,8 @@ void MainWindow::switchToGameLikeHostSlot()
 
 void MainWindow::returnFromGame()
 {
+	// coridorWindow->disconnect();
+	// quartoWindow->disconnect();
 	deleteLobby(pLobby);
 	this->show();
 	switchToMain();
@@ -307,16 +305,9 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 
 	connectedPlayersList = new QListWidget();
 
-	QListWidgetItem* player1 = new QListWidgetItem("Player1", connectedPlayersList); // pPlayer->playerName
+	QListWidgetItem* player1 = new QListWidgetItem("Player1", connectedPlayersList);
 	player1->setCheckState(Qt::Checked);
 	player1->setFlags(Qt::ItemIsEnabled); // this disables checkable...
-
-	/*QListWidgetItem* player2 = new QListWidgetItem("Player2", connectedPlayersList);
-	if (pLobby->status == Unready)
-		player2->setCheckState(Qt::Unchecked);
-	else if (pLobby->status == Ready)
-		player2->setCheckState(Qt::Checked);
-	player2->setFlags(Qt::ItemIsEnabled); // this disables checkable...*/
 
 	QListWidgetItem* tmpItem;
 
@@ -355,8 +346,6 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 				tmpItem->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 			}
 
-			// player2->setText(connectingPlayer->playerName);
-
 			gameTypeEdit->setEnabled(true);
 
 			startGameBtn = new QPushButton("Start");
@@ -381,13 +370,10 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 				tmpItem->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 			}
 
-			// player2->setText(pPlayer->playerName);
-
 			gameTypeEdit->setEnabled(false);
 
 			startGameBtn = new QPushButton("Ready");
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
-			// connect(startGameBtn, SIGNAL(clicked()), this, SLOT(setRdy())); // maybe will need player index
 			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(sendRdy()));
 		}
 	}
@@ -427,7 +413,7 @@ void MainWindow::sockDisc()
 	switchToLoginIn();
 }
 
-void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
+void MainWindow::sendCreateLobby(QString lobbyName, QString hostLogin, int gameType)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -656,17 +642,18 @@ void MainWindow::switchCmd()
 	{
 		switchToLobbiesList();
 
-		list<QTreeWidgetItem*> lobbyItems;
+		// list<QTreeWidgetItem*> lobbyItems;
+		QTreeWidgetItem* tmpItem;
 		for (const auto& i : pSendLobbies->lobbies)
 		{
-			lobbyItems.push_back(new QTreeWidgetItem(lobbiesList));
-			lobbyItems.back()->setText(0, i->lobbyName);
-			lobbyItems.back()->setText(1, i->host->playerName);
-			lobbyItems.back()->setText(2, i->gameTypeStr);
-			lobbyItems.back()->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
-			lobbyItems.back()->setText(4, i->statusStr);
-			connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(sendConnectToLobbySlot(QTreeWidgetItem*, int)));
+			tmpItem = new QTreeWidgetItem(lobbiesList);
+			tmpItem->setText(0, i->lobbyName);
+			tmpItem->setText(1, i->host->playerName);
+			tmpItem->setText(2, i->gameTypeStr);
+			tmpItem->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
+			tmpItem->setText(4, i->statusStr);
 		}
+		connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(sendConnectToLobbySlot(QTreeWidgetItem*, int)));
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
@@ -683,6 +670,12 @@ void MainWindow::switchCmd()
 			for (const auto& i : pUpdateLobby->connectedPlayers)
 				if (i->playerName == pPlayer->playerName)
 					switchToLobby(i, pLobby, false);
+		}
+		else if (pUpdateLobby->gameType == WrongGameType)
+		{
+			// close current game
+			returnFromGame();
+			QMessageBox::information(this, tr("Error"), "Oponent has left the game");
 		}
 		else
 			switchToGame(false);

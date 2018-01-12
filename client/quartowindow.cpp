@@ -204,8 +204,8 @@ void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 
 void QuartoWindow::on_pushButton_clicked()
 {
-	this->close();		// Закрываем окно
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	this->close();		// Закрываем окно
 }
 
 void QuartoWindow::on_checkWin_clicked()
