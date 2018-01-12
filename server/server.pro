@@ -21,9 +21,7 @@ SOURCES += main.cpp \
         ../common/player.cpp \
         ../common/lobby.cpp \
         ../common/game.cpp \
-        ../common/command.cpp \
-    ../common/coridorlogic.cpp \
-    ../common/quartologic.cpp
+        ../common/command.cpp
 
 HEADERS += \
         myserver.h \
@@ -31,6 +29,4 @@ HEADERS += \
         ../common/player.h \
         ../common/lobby.h \
         ../common/game.h \
-        ../common/command.h \
-    ../common/coridorlogic.h \
-    ../common/quartologic.h
+        ../common/command.h

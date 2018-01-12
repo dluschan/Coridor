@@ -107,14 +107,14 @@ void MyThread::sendStart()
 	write(arrBlock);
 }
 
-void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest)
+void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
 
 	CommandType commandType = {CommandType::Type::SendFirstPlayer};
-	Command* pCommand = new SendFirstPlayer(_firstPlayer, _guest);
+	Command* pCommand = new SendFirstPlayer(_firstPlayer, _guest, _gameType);
 
 	out << commandType;
 	pCommand->operator<<(out);
@@ -136,6 +136,40 @@ void MyThread::coridorSendQPoint(QPoint point, bool move, QString enemy, bool ho
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "CoridorSendQPoint Command Sent";
+}
+
+void MyThread::quartoSendQPoint(QPoint point, int figureId, QString enemy)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::QuartoSendQPoint};
+	Command* pCommand = new QuartoSendQPoint(point, figureId, enemy);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "CoridorSendQPoint Command Sent";
+}
+
+void MyThread::quartoSendCheckWin(QString enemy, bool checkWin)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::QuartoSendCheckWin};
+	Command* pCommand = new QuartoSendCheckWin(enemy, checkWin);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "QuartoSendCheckWin Command Sent";
 }
 
 void MyThread::sendMessage(QString message, bool error)
@@ -239,10 +273,18 @@ void MyThread::switchCmd()
 	}
 	else if (SendFirstPlayer* pSendFirstPlayer = dynamic_cast<SendFirstPlayer*>(pCommand))
 	{
-		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest);
+		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest, (GameType)pSendFirstPlayer->gameType);
 	}
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{
 		emit coridorSendQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);
+	}
+	else if (QuartoSendQPoint* pQuartoSendQPoint = dynamic_cast<QuartoSendQPoint*>(pCommand))
+	{
+		emit quartoSendQPointSignal(pQuartoSendQPoint->point, pQuartoSendQPoint->figureId, pQuartoSendQPoint->enemy);
+	}
+	else if (QuartoSendCheckWin* pQuartoSendCheckWin = dynamic_cast<QuartoSendCheckWin*>(pCommand))
+	{
+		emit quartoSendCheckWinSignal(pQuartoSendCheckWin->enemy, pQuartoSendCheckWin->checkWin);
 	}
 }

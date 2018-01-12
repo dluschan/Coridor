@@ -1,6 +1,6 @@
 #include "dialogchoseplayer.h"
 
-DialogChosePlayer::DialogChosePlayer(bool _hosting, QString host, QString player, QWidget* parent)
+DialogChoosePlayer::DialogChoosePlayer(bool _hosting, QString host, QString player, QWidget* parent)
 	: QDialog(parent)
 {
 	mainLayout = new QGridLayout();
@@ -26,12 +26,12 @@ DialogChosePlayer::DialogChosePlayer(bool _hosting, QString host, QString player
 	this->show();
 }
 
-DialogChosePlayer::~DialogChosePlayer()
+DialogChoosePlayer::~DialogChoosePlayer()
 {
 }
 
-void DialogChosePlayer::startTheGame()
+void DialogChoosePlayer::startTheGame()
 {
 	emit clicked(firstPlayerEdit->currentText());
-	this->hide();
+	this->close();
 }

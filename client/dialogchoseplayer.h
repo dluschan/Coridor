@@ -6,13 +6,13 @@
 #include <QGridLayout>
 #include <QPushButton>
 
-class DialogChosePlayer : public QDialog
+class DialogChoosePlayer : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit DialogChosePlayer(bool _hosting, QString host = "Host", QString player = "guest", QWidget* parent = 0);
-	~DialogChosePlayer();
+	explicit DialogChoosePlayer(bool _hosting, QString host = "Host", QString player = "guest", QWidget* parent = 0);
+	~DialogChoosePlayer();
 
 public slots:
 	void startTheGame();

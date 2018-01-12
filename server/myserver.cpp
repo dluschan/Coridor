@@ -22,20 +22,27 @@ void MyServer::sendString(QString _message, MyThread* _thread)
 	_thread->sendMessage(_message, false);
 }
 
-void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+Lobby* MyServer::findLobby(Lobby* _lobby)
 {
-	Lobby* hostLobby = new Lobby();
-
 	for (const auto& j : lobbies)
 	{
 		qDebug() << j->lobbyName;
 		if (j->lobbyName == _lobby->lobbyName)
-			hostLobby = j;
+			return j;
 	}
+	throw runtime_error("Error: This lobby doesn't exists anymore");
+}
 
-	if (hostLobby->lobbyName == "LobbyName" && hostLobby->host->playerName == "HostName" && hostLobby->gameType == WrongGameType)
+void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+{
+	Lobby* hostLobby = findLobby(_lobby);
+
+	if (_connectFlag)
+		hostLobby->connect(_player);
+	else
 	{
-		throw runtime_error("Error: This lobby doesn't exists anymore");
+		hostLobby->disconnect(_player);
+		hostLobby->updateStatus(Unready);
 	}
 
 	for (const auto& i : threads)
@@ -57,16 +64,14 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 
 			i->pLobby = _lobby;
 			i->pLobby->connect(_player);
-			for (const auto& j : lobbies)
+			// WHERE THIS CONNECTS?
+			/*for (const auto& j : lobbies)
 				if (j->lobbyName == _lobby->lobbyName)
-					j->connect(_player);
+					j->connect(_player);*/
 		}
 
 		if (i->pPlayer->playerName == _lobby->host->playerName)
-			if (_connectFlag)
-				emit i->connectToHostLobbySignal(i, hostLobby, _player, _connectFlag);
-			else
-				emit i->connectToHostLobbySignal(i, _lobby, _player, _connectFlag);
+			emit i->connectToHostLobbySignal(i, hostLobby, _player, _connectFlag);
 	}
 
 	qDebug() << "ConnectToLobby Command Sent";
@@ -81,14 +86,14 @@ void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _playe
 	CommandType commandType = {CommandType::Type::ConnectToLobby};
 	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
 
-	if (!_connectFlag)
+	/*if (!_connectFlag)
 	{
 		i->pLobby = _lobby;
 		i->pLobby->disconnect(_player);
 		for (const auto& j : lobbies)
 			if (j->lobbyName == _lobby->lobbyName)
 				j->disconnect(_player);
-	}
+	}*/
 	// qDebug() << _player->playerName;
 
 	out << commandType;
@@ -112,18 +117,32 @@ void MyServer::sendRdy(Player* _host)
 	}
 }
 
-void MyServer::sendFirstPlayerSlot(QString _firstPlayer, QString _guest)
+void MyServer::sendFirstPlayerSlot(QString _firstPlayer, QString _guest, GameType _gameType)
 {
 	for (const auto& i : threads)
 		if (i->pPlayer->playerName == _guest)
-			i->sendFirstPlayer(_firstPlayer, _guest);
+			i->sendFirstPlayer(_firstPlayer, _guest, _gameType);
 }
 
-void MyServer::coridorSendQPointSlot(QPoint point, bool move, QString enemy, bool horizontal)
+void MyServer::coridorSendQPointSlot(QPoint _point, bool _move, QString _enemy, bool _horizontal)
 {
 	for (const auto& i : threads)
-		if (i->pPlayer->playerName == enemy)
-			i->coridorSendQPoint(point, move, enemy, horizontal);
+		if (i->pPlayer->playerName == _enemy)
+			i->coridorSendQPoint(_point, _move, _enemy, _horizontal);
+}
+
+void MyServer::quartoSendQPointSlot(QPoint _point, int _figureId, QString _enemy)
+{
+	for (const auto& i : threads)
+		if (i->pPlayer->playerName == _enemy)
+			i->quartoSendQPoint(_point, _figureId, _enemy);
+}
+
+void MyServer::quartoSendCheckWinSlot(QString _enemy, bool _checkWin)
+{
+	for (const auto& i : threads)
+		if (i->pPlayer->playerName == _enemy)
+			i->quartoSendCheckWin(_enemy, _checkWin);
 }
 
 /*void MyServer::sendStart(Player* _connectedPlayer)
@@ -196,7 +215,7 @@ void MyServer::changeGameType(MyThread* _thread, int _gameType, int _status)
 	_thread->pSocket->write(arrBlock);
 	_thread->pSocket->waitForBytesWritten();
 
-	qDebug() << "ChangeGameType Command Sent";
+	qDebug() << "UpdateLobby Command Sent";
 
 	// qDebug() << _thread->pLobby->gameTypeStr;
 }
@@ -278,8 +297,10 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(sendFirstPlayerSignal(QString, QString)), this, SLOT(sendFirstPlayerSlot(QString, QString)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(sendFirstPlayerSignal(QString, QString, GameType)), this, SLOT(sendFirstPlayerSlot(QString, QString, GameType)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(coridorSendQPointSlot(QPoint, bool, QString, bool)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(quartoSendQPointSignal(QPoint, int, QString)), this, SLOT(quartoSendQPointSlot(QPoint, int, QString)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(quartoSendCheckWinSignal(QString, bool)), this, SLOT(quartoSendCheckWinSlot(QString, bool)));
 	// connect(threads.back(), SIGNAL(sendStartSignal(Player*)), this, SLOT(sendStart(Player*)), Qt::DirectConnection);
 	threads.back()->start();
 

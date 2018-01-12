@@ -15,6 +15,8 @@ public:
 	std::list<MyThread*> threads;
 	std::list<Lobby*> lobbies;
 
+	Lobby* findLobby(Lobby* _lobby);
+
 private:
 	void sendString(QString _message, MyThread* _thread);
 
@@ -34,8 +36,10 @@ public slots:
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag);
 	void sendRdy(Player* _host);
-	void sendFirstPlayerSlot(QString _firstPlayer, QString _guest);
-	void coridorSendQPointSlot(QPoint point, bool move, QString enemy, bool horizontal);
+	void sendFirstPlayerSlot(QString _firstPlayer, QString _guest, GameType _gameType);
+	void coridorSendQPointSlot(QPoint _point, bool _move, QString _enemy, bool _horizontal);
+	void quartoSendQPointSlot(QPoint _point, int _figureId, QString _enemy);
+	void quartoSendCheckWinSlot(QString _enemy, bool _checkWin);
 	// void sendStart(Player* _connectedPlayer);
 	// void lobbyList(MyThread* thread);
 

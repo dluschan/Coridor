@@ -1,6 +1,7 @@
 #include "command.h"
 #include <QDebug>
 
+// запись и вывод CommandType в/из поток(а)
 QDataStream& operator>>(QDataStream& stream, CommandType& commandType)
 {
 	unsigned int type;
@@ -61,6 +62,21 @@ QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
 	return stream;
 }
 
+// запись и вывод GameType в/из поток(а)
+/*QDataStream& operator>>(QDataStream& stream, GameType& gameType)
+{
+	unsigned int type;
+	stream >> type;
+	gameType = (GameType)type;
+	return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const GameType& gameType)
+{
+	stream << int(GameType);
+	return stream;
+}*/
+
 Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 {
 	CommandType commandType;
@@ -103,6 +119,12 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 		break;
 	case CommandType::Type::CoridorSendQPoint:
 		pCommand = new CoridorSendQPoint();
+		break;
+	case CommandType::Type::QuartoSendQPoint:
+		pCommand = new QuartoSendQPoint();
+		break;
+	case CommandType::Type::QuartoSendCheckWin:
+		pCommand = new QuartoSendCheckWin();
 		break;
 	/*case CommandType::Type::SendStart:
 	{
@@ -382,22 +404,23 @@ void SendRdy::execute()
 	qDebug() << "execute SendRdy command" << host->playerName;
 }
 
-SendFirstPlayer::SendFirstPlayer(QString _firstPlayer, QString _guest)
+SendFirstPlayer::SendFirstPlayer(QString _firstPlayer, QString _guest, int _gameType)
 	: firstPlayer(_firstPlayer)
 	, guest(_guest)
+	, gameType(_gameType)
 {
 	qDebug() << "SendFirstPlayer command created";
 }
 
 QDataStream& SendFirstPlayer::operator>>(QDataStream& stream)
 {
-	stream >> firstPlayer >> guest;
+	stream >> firstPlayer >> guest >> gameType;
 	return stream;
 }
 
 QDataStream& SendFirstPlayer::operator<<(QDataStream& stream) const
 {
-	stream << firstPlayer << guest;
+	stream << firstPlayer << guest << gameType;
 	return stream;
 }
 
@@ -433,6 +456,60 @@ void CoridorSendQPoint::execute()
 {
 	qDebug() << "execute CoridorSendQPoint command";
 }
+
+QuartoSendQPoint::QuartoSendQPoint(QPoint _point, int _figureId, QString _enemy)
+	: point(_point)
+	, figureId(_figureId)
+	, enemy(_enemy)
+{
+	qDebug() << "QuartoSendQPoint command created";
+}
+
+QDataStream& QuartoSendQPoint::operator>>(QDataStream& stream)
+{
+	stream >> point >> figureId >> enemy;
+	qDebug() << "QuartoSendQPoint read" << enemy;
+	return stream;
+}
+
+QDataStream& QuartoSendQPoint::operator<<(QDataStream& stream) const
+{
+	stream << point << figureId << enemy;
+	qDebug() << "QuartoSendQPoint written" << enemy;
+	return stream;
+}
+
+void QuartoSendQPoint::execute()
+{
+	qDebug() << "execute QuartoSendQPoint command";
+}
+
+QuartoSendCheckWin::QuartoSendCheckWin(QString _enemy, bool _checkWin)
+	: enemy(_enemy)
+	, checkWin(_checkWin)
+{
+	qDebug() << "QuartoSendCheckWin command created";
+}
+
+QDataStream& QuartoSendCheckWin::operator>>(QDataStream& stream)
+{
+	stream >> enemy >> checkWin;
+	qDebug() << "QuartoSendCheckWin read" << enemy;
+	return stream;
+}
+
+QDataStream& QuartoSendCheckWin::operator<<(QDataStream& stream) const
+{
+	stream << enemy << checkWin;
+	qDebug() << "QuartoSendCheckWin written" << enemy;
+	return stream;
+}
+
+void QuartoSendCheckWin::execute()
+{
+	qDebug() << "execute QuartoSendCheckWin command";
+}
+
 /*SendStart::SendStart(list<Player*> _players)
 	: players(_players)
 {

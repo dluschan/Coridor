@@ -1,5 +1,7 @@
 #include "quartowindow.h"
 #include "ui_quartowindow.h"
+#include <QDebug>
+#include <QMessageBox>
 
 void Figures::redrawFiguresImage(Images pictures)
 {
@@ -61,11 +63,16 @@ void Figures::mouseMoved(QPoint pos, QPoint point)
 	update(pos);
 }
 
-QuartoWindow::QuartoWindow(QWidget* parent)
+QuartoWindow::QuartoWindow(QString _firstPlayer, QString _secondPlayer, QString _player, QWidget* parent)
 	: QWidget(parent)
 	, ui(new Ui::QuartoWindow)
+	, player(_player)
 {
 	ui->setupUi(this);
+	ui->start->hide();
+	this->setWindowTitle(_player);
+	this->setMinimumWidth(610);
+	this->setMinimumHeight(329);
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 
 	pictures = new Images;
@@ -80,10 +87,11 @@ QuartoWindow::QuartoWindow(QWidget* parent)
 	}
 	figures.figuresImage = new QImage(36 * 5, 36 * 5, QImage::Format_ARGB32);
 
-	game = new QuartoLogic();
+	game = new QuartoLogic(_firstPlayer, _secondPlayer);
 
 	figures.redrawFiguresImage(*pictures);
-	field->redraw2(game->pole);
+	field->redrawQuarto(game->pole);
+	this->show();
 }
 
 QuartoWindow::~QuartoWindow()
@@ -94,19 +102,39 @@ QuartoWindow::~QuartoWindow()
 void QuartoWindow::paintEvent(QPaintEvent* pEvent)
 {
 	QPainter painter(this);
-	field->redraw2(game->pole);
-	if (!game->end)
-		if (game->turnIsDone)
-			status = "End the turn";
-		else
-			status = "Place a figure";
+	field->redrawQuarto(game->pole);
 	ui->status->setText(status);
-	ui->turn->setText("Turn of player " + QString::number(game->player));
+	ui->turn->setText("Turn of  " + game->getPlayerName(game->currentPlayerId));
 	painter.drawImage(field->getX(), field->getY(), field->getImage());
 	figures.redrawFiguresImage(*pictures);
 	painter.drawImage(figures.fX, figures.fY, *figures.figuresImage);
 	if (figures.getSelectedID() != -1)
 		painter.drawImage(figures.sX, figures.sY, figures.selectedFigure);
+}
+
+void QuartoWindow::placeFigure(QPoint point, int figureId)
+{
+	if (game->placeFigure(point.x(), point.y(), figureId))
+		figures.figures[figureId] = true;
+	else
+		figures.figures[figureId] = false;
+	figures.fSelected[figureId] = false;
+	this->update();
+}
+
+void QuartoWindow::checkWin()
+{
+	game->checkWin();
+	status = game->getPlayerName(game->winner) + " wins!";
+	QMessageBox::information(this, tr("End"), status);
+	this->update();
+}
+
+void QuartoWindow::nextTurn()
+{
+	game->nextTurn();
+	status = "Place a figure";
+	this->update();
 }
 
 void QuartoWindow::mousePressEvent(QMouseEvent* mEvent)
@@ -121,7 +149,7 @@ void QuartoWindow::mousePressEvent(QMouseEvent* mEvent)
 void QuartoWindow::mouseMoveEvent(QMouseEvent* mEvent)
 {
 	QPoint pos = mEvent->pos();
-	QPoint point = field->getCoord2(pos.x(), pos.y());
+	QPoint point = field->getCoordQuarto(pos.x(), pos.y());
 	figures.mouseMoved(pos, point);
 
 	this->update();
@@ -129,17 +157,49 @@ void QuartoWindow::mouseMoveEvent(QMouseEvent* mEvent)
 
 void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 {
-	QPoint pos = mEvent->pos();
-	QPoint point = field->getCoord2(pos.x(), pos.y());
-
-	if (figures.getSelectedID() != -1)
+	if (!game->end)
 	{
-		if (game->placeFigure(point.x(), point.y(), figures.getSelectedID()))
-			figures.figures[figures.getSelectedID()] = true;
-		figures.fSelected[figures.getSelectedID()] = false;
-	}
+		QPoint pos = mEvent->pos();
+		QPoint point = field->getCoordQuarto(pos.x(), pos.y());
 
-	this->update();
+		// can this be oprimised??
+		if (checkPoint(point))
+		{
+			if (figures.getSelectedID() != -1)
+			{
+				if (game->checkTurn(player))
+				{
+					emit sendQPointSignal(point, figures.getSelectedID(), game->getPlayerName((game->currentPlayerId + 1) % 2));
+					placeFigure(point, figures.getSelectedID());
+				}
+				else
+				{
+					figures.figures[figures.getSelectedID()] = true;
+					figures.fSelected[figures.getSelectedID()] = false;
+					status = "Its not your turn";
+				}
+			}
+			else
+			{
+				if (game->checkTurn(player))
+				{
+					status = "Grab a figure first";
+				}
+			}
+		}
+		else
+		{
+			if (figures.getSelectedID() != -1)
+			{
+				figures.figures[figures.getSelectedID()] = true;
+				figures.fSelected[figures.getSelectedID()] = false;
+			}
+		}
+
+		this->update();
+	}
+	else
+		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 void QuartoWindow::on_pushButton_clicked()
@@ -150,28 +210,47 @@ void QuartoWindow::on_pushButton_clicked()
 
 void QuartoWindow::on_checkWin_clicked()
 {
-	game->checkWin();
-	status = "Player" + QString::number(game->winner) + " wins!";
-
-	this->update();
+	emit quartoSendCheckWinSignal(game->getPlayerName((game->currentPlayerId + 1) % 2), true); // true
+	checkWin();
 }
 
 void QuartoWindow::on_start_clicked()
 {
-	field = new Field(pictures, 0, 0, 36 * 5, 36 * 5);
+	// field = new Field(pictures, 0, 0, 36 * 5, 36 * 5);
 
-	for (int i = 0; i < 16; i++)
+	/*for (int i = 0; i < 16; i++)
 	{
 		figures.figures[i] = true;
 		figures.fSelected[i] = false;
-	}
+	}*/
 
-	game = new QuartoLogic();
+	// game = new QuartoLogic();
 
 	this->update();
 }
 
 void QuartoWindow::on_nextTurn_clicked()
 {
-	game->nextTurn();
+	emit quartoSendCheckWinSignal(game->getPlayerName((game->currentPlayerId + 1) % 2), false); // false
+	nextTurn();
+	status = "Waiting for another player";
+	this->update();
+}
+
+void QuartoWindow::quartoRecieveQPoint(QPoint point, int figureId, QString reciever)
+{
+	placeFigure(point, figureId);
+}
+
+void QuartoWindow::quartoRecieveCheckWin(QString _enemy, bool _checkWin)
+{
+	if (_checkWin)
+		checkWin();
+	else
+		nextTurn();
+}
+
+bool QuartoWindow::checkPoint(QPoint point)
+{
+	return point.x() >= 0 && point.x() <= 3 && point.y() >= 0 && point.y() <= 3;
 }

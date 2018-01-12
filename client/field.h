@@ -13,10 +13,10 @@ public:
 	Field(Images* images, int _left, int _top, int _width, int _height);
 	~Field();
 	const QImage& getImage() const;
-	void redraw(int pole[17][17]);
-	void redraw2(int pole[4][4]);
-	QPoint getCoord(int x, int y);
-	QPoint getCoord2(int x, int y);
+	void redrawCoridor(int pole[17][17]);
+	void redrawQuarto(int pole[4][4]);
+	QPoint getCoordCoridor(int x, int y);
+	QPoint getCoordQuarto(int x, int y);
 	int getX();
 	int getY();
 
