@@ -273,8 +273,8 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 	connect(this, SIGNAL(quartoRecieveQPointSignal(QPoint, int, QString)), quartoWindow, SLOT(quartoRecieveQPoint(QPoint, int, QString)));
 	connect(quartoWindow, SIGNAL(quartoSendCheckWinSignal(QString, bool)), this, SLOT(quartoSendCheckWin(QString, bool)));
 	connect(this, SIGNAL(quartoRecieveCheckWinSignal(QString, bool)), quartoWindow, SLOT(quartoRecieveCheckWin(QString, bool)));
-	// connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString))); HERE
-	// connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit())); HERE
+	connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
+	connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit()));
 	connect(quartoWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
 }
 
