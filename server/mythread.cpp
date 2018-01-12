@@ -242,7 +242,7 @@ void MyThread::switchCmd()
 	}
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{
-		// emit changeGameTypeSignal(this, pChangeGameType->gameType, pChangeGameType->status);
+		// emit changeGameTypeSignal(this, pUpdateLobby->gameType, pUpdateLobby->status);
 		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
 		for (const auto& i : pUpdateLobby->connectedPlayers)
 			emit sendGameTypesSignal(i, pUpdateLobby->gameType, pUpdateLobby->status);

@@ -105,6 +105,14 @@ void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _playe
 
 void MyServer::sendRdy(Player* _host)
 {
+	/*for (const auto& j : lobbies)
+	{
+		if (i->host->playerName == _host->playerNam)
+			if (j->status == Unready)
+				j->updateStatus(Ready);
+			else if (j->status == Ready)
+				j->updateStatus(Unready);
+	}*/
 	for (const auto& i : threads)
 	{
 		if (i->pPlayer->playerName == _host->playerName)
@@ -208,7 +216,9 @@ void MyServer::sendGameTypes(Player* _player, int _gameType, int _status)
 {
 	for (const auto& i : threads)
 		if (i->pPlayer->playerName == _player->playerName)
+		{
 			emit i->changeGameTypeSignal(i, _gameType, _status);
+		}
 }
 
 void MyServer::changeGameType(MyThread* _thread, int _gameType, int _status)
@@ -302,8 +312,6 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(finished()), threads.back(), SLOT(deleteLater()));
 	// connect(players.back(), SIGNAL(sendPlayerList(MyThread*)), this, SLOT(playerList(MyThread*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)), Qt::DirectConnection);
-	// connect(threads.back(), SIGNAL(changeGameTypeSignal(MyThread*, int)), this, SLOT(changeGameType(MyThread*, int)), Qt::DirectConnection);
-	// qRegisterMetaType(std::list<Player*>);
 	connect(threads.back(), SIGNAL(sendGameTypesSignal(Player*, int, int)), this, SLOT(sendGameTypes(Player*, int, int)));
 	connect(threads.back(), SIGNAL(changeGameTypeSignal(MyThread*, int, int)), this, SLOT(changeGameType(MyThread*, int, int)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(deleteLobbySignal(Lobby*)), this, SLOT(deleteLobby(Lobby*)), Qt::DirectConnection);

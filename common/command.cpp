@@ -304,6 +304,7 @@ QDataStream& SendLobbies::operator>>(QDataStream& stream)
 	{
 		stream >> *lobbyTmp;
 		lobbyTmp2 = new Lobby(lobbyTmp->lobbyName, lobbyTmp->host->playerName, lobbyTmp->gameType, lobbyTmp->connectedPlayersNumber);
+		lobbyTmp2->updateStatus(lobbyTmp->status);
 		lobbies.push_back(lobbyTmp2);
 	}
 	return stream;
