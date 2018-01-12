@@ -1,7 +1,6 @@
 #ifndef CORIDORWINDOW_H
 #define CORIDORWINDOW_H
 
-#include "../common/command.h"
 #include "coridorlogic.h"
 #include "dialogchoseplayer.h"
 #include "field.h"

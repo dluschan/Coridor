@@ -18,7 +18,6 @@ SOURCES += \
         mainwindow.cpp \
         ../common/command.cpp \
         ../common/lobby.cpp \
-        ../common/game.cpp \
         ../common/player.cpp \
         dialog.cpp \
     coridorwindow.cpp \
@@ -33,7 +32,6 @@ HEADERS  += \
         mainwindow.h \
         ../common/command.h \
         ../common/lobby.h \
-        ../common/game.h \
         ../common/player.h \
         dialog.h \
     coridorwindow.h \

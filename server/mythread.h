@@ -1,9 +1,7 @@
 #ifndef MYTHREAD_H
 #define MYTHREAD_H
 
-//#include "../common/CoridorLogic.h"
 #include "../common/command.h"
-//#include "../common/quartologic.h"
 #include <QDebug>
 #include <QTcpSocket>
 #include <QThread>
@@ -18,7 +16,6 @@ class MyThread : public QThread
 public:
 	explicit MyThread(int ID, QObject* parent = 0);
 	QTcpSocket* pSocket;
-	// int socketDescriptor;
 	Player* pPlayer;
 	Lobby* pLobby = new Lobby();
 	void run();
@@ -33,7 +30,6 @@ public:
 	void coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoSendQPoint(QPoint point, int figureId, QString enemy);
 	void quartoSendCheckWin(QString enemy, bool checkWin);
-	// Player* createPlayer(QString playerName);
 
 signals:
 	void deletePlayerSignal(MyThread* thread);
@@ -55,7 +51,6 @@ signals:
 	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoSendQPointSignal(QPoint point, int figureId, QString enemy);
 	void quartoSendCheckWinSignal(QString enemy, bool checkWin);
-	// void sendStartSignal(Player* connectedPlayer);
 
 public slots:
 	void readyRead();
@@ -63,17 +58,11 @@ public slots:
 	void changeGameType(int _gameType);
 
 private:
-	// QTcpSocket* pSocket;
 	int socketDescriptor;
 	Command* pCommand;
-	// CoridorLogic* gameCoridor;
-	// QuartoLogic* gameQuarto;
-	// Player* player;
 
 	void login(QString login);
 	void switchCmd();
-	// void playerList();
-	// void sendString(QString message);
 };
 
 #endif // MYTHREAD_H

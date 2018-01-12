@@ -39,12 +39,8 @@ public:
 	bool isPlayer(int new_x, int new_y);
 	int move(int pole[17][17], int player_id, int new_x, int new_y);
 	int placeWall(int player_id, int x, int y, char dir);
-	/*int turn(int pole[17][17], int player_id);
-	bool different_dir(char a, char b);
-	void jump(int& x, int& y, int pole[17][17], char ans);*/
 	bool isWall(int x0, int x1, int y0, int y1);
 	bool aZvezda(int x, int y, int p);
-	// void end();
 	int nextTurn(int res);
 	bool checkDistanse(int x, int new_y, int player_id);
 	bool jumpCheck(int new_x, int new_y, int player_id);

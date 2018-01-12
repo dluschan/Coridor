@@ -36,27 +36,6 @@ void MyThread::readyRead()
 	// emit sendPlayerListSignal(this);
 }
 
-/*
-void MyThread::login(QString login)
-{
-	player = new Player(login, socketDescriptor);
-	sendString("Hello, " + login + "! Type -help to ask for available CommandTypes");
-	c = CommandType::Help;
-}
-
-void MyThread::help()
-{
-	sendString("-help: ask for available CommandTypes\n-players list: ask for player list\n-create lobby 'LobbyName': ask for creating a lobby\n-lobbies list: ask for lobbies list\n");
-}
-
-void MyThread::playerList()
-{
-	while (!players.empty())
-		sendString(players.back()->name + '/n');
-	players.pop_back();
-	sendString("only uuuuuuuuuuuuuuuuu");
-}*/
-
 void MyThread::disconnected()
 {
 	emit deleteLobbySignal(pLobby);
@@ -299,6 +278,7 @@ void MyThread::switchCmd()
 		else if (pLobby->status == Ready)
 			pLobby->updateStatus(Unready);
 	}
+	// dont need it now
 	/*else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))
 	{
 		if (pSendMessage->errorFlag)

@@ -1,11 +1,15 @@
 #ifndef LOBBY_H
 #define LOBBY_H
 
-#include "game.h"
 #include "player.h"
 #include <QObject>
-//#include <QString>
-//#include "player.h"
+
+enum GameType
+{
+	Coridor,
+	Quarto,
+	WrongGameType
+};
 
 enum Status
 {

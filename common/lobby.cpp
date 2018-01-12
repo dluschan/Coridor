@@ -55,12 +55,11 @@ void Lobby::update(int _gameType, int _status)
 
 int Lobby::getGameType(QString _gameTypeStr)
 {
-	// qDebug() << int(gameType);
 	if (_gameTypeStr == "Coridor")
 		return 0;
 	else if (_gameTypeStr == "Quarto")
 		return 1;
-	// return int(gameType);
+	return 2;
 }
 
 void Lobby::connect(Player* connectingPlayer)

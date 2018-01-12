@@ -62,21 +62,6 @@ QDataStream& operator<<(QDataStream& stream, const Lobby& lobby)
 	return stream;
 }
 
-// запись и вывод GameType в/из поток(а)
-/*QDataStream& operator>>(QDataStream& stream, GameType& gameType)
-{
-	unsigned int type;
-	stream >> type;
-	gameType = (GameType)type;
-	return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const GameType& gameType)
-{
-	stream << int(GameType);
-	return stream;
-}*/
-
 Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 {
 	CommandType commandType;
