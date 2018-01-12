@@ -127,14 +127,12 @@ void QuartoWindow::checkWin()
 	game->checkWin();
 	status = game->getPlayerName(game->winner) + " wins!";
 	QMessageBox::information(this, tr("End"), status);
-	this->update();
 }
 
 void QuartoWindow::nextTurn()
 {
 	game->nextTurn();
 	status = "Place a figure";
-	this->update();
 }
 
 void QuartoWindow::mousePressEvent(QMouseEvent* mEvent)
@@ -195,7 +193,6 @@ void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 				figures.fSelected[figures.getSelectedID()] = false;
 			}
 		}
-
 		this->update();
 	}
 	else
@@ -212,8 +209,19 @@ void QuartoWindow::on_pushButton_clicked()
 
 void QuartoWindow::on_checkWin_clicked()
 {
-	emit quartoSendCheckWinSignal(game->getPlayerName((game->currentPlayerId + 1) % 2), true); // true
-	checkWin();
+	if (!game->end)
+	{
+		if (game->checkTurn(player))
+		{
+			emit quartoSendCheckWinSignal(game->getPlayerName((game->currentPlayerId + 1) % 2), true); // true
+			checkWin();
+		}
+		else
+			status = "Its not your turn";
+		this->update();
+	}
+	else
+		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 void QuartoWindow::on_start_clicked()
@@ -233,10 +241,20 @@ void QuartoWindow::on_start_clicked()
 
 void QuartoWindow::on_nextTurn_clicked()
 {
-	emit quartoSendCheckWinSignal(game->getPlayerName((game->currentPlayerId + 1) % 2), false); // false
-	nextTurn();
-	status = "Waiting for another player";
-	this->update();
+	if (!game->end)
+	{
+		if (game->checkTurn(player))
+		{
+			emit quartoSendCheckWinSignal(game->getPlayerName((game->currentPlayerId + 1) % 2), false); // false
+			nextTurn();
+			status = "Waiting for another player";
+		}
+		else
+			status = "Its not your turn";
+		this->update();
+	}
+	else
+		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 void QuartoWindow::quartoRecieveQPoint(QPoint point, int figureId, QString reciever)
