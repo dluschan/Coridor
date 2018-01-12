@@ -246,7 +246,9 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 void CoridorWindow::exitBtn_clicked()
 {
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
-	this->close();		// Закрываем окно
+	this->disconnect();
+	this->close(); // Закрываем окно
+	this->deleteLater();
 }
 
 void CoridorWindow::start_pushButton_clicked()
