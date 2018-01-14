@@ -9,21 +9,12 @@ MainWindow::MainWindow(QWidget* parent)
 	setMinimumHeight(300);
 	setWindowTitle("Client");
 
-	centralWidget = new QWidget(this);
-	setCentralWidget(centralWidget);
-
 	pSocket = new QTcpSocket(this);
 	connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
 	connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
 
-	connectLayout = new QGridLayout(centralWidget);
-	connectBtn = new QPushButton("Connect to server");
-	loginEdit = new QLineEdit();
-	passwordEdit = new QLineEdit();
-	connectLayout->addWidget(loginEdit);
-	connectLayout->addWidget(passwordEdit);
-	connectLayout->addWidget(connectBtn);
-	connect(connectBtn, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
+	switchToLoginIn();
+
 	connect(this, SIGNAL(sendQuitSignal()), this, SLOT(recieveQuit()));
 }
 
@@ -34,7 +25,10 @@ MainWindow::~MainWindow()
 void MainWindow::connectToTheServer()
 {
 	pSocket->connectToHost("127.0.0.1", 5555);
+}
 
+void MainWindow::sendLogin()
+{
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_5_9);
@@ -42,7 +36,7 @@ void MainWindow::connectToTheServer()
 	CommandType commandType = {CommandType::Type::AskLogin};
 	Command* pCommand = new Login(loginEdit->text());
 
-	pPlayer = new Player(loginEdit->text());
+	// pPlayer = new Player(loginEdit->text());
 	// qDebug() << int(pSocket->socketDescriptor());
 	// player->setID(int(pSocket->socketDescriptor()));
 
@@ -52,8 +46,6 @@ void MainWindow::connectToTheServer()
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "Login Command Sent";
-
-	switchToMain();
 }
 
 void MainWindow::createLobbyDialog()
@@ -313,12 +305,15 @@ void MainWindow::switchToLoginIn()
 
 	connectLayout = new QGridLayout(centralWidget);
 	connectBtn = new QPushButton("Connect to server");
+	loginBtn = new QPushButton("Login in");
 	loginEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
 	connectLayout->addWidget(loginEdit);
 	connectLayout->addWidget(passwordEdit);
 	connectLayout->addWidget(connectBtn);
+	connectLayout->addWidget(loginBtn);
 	connect(connectBtn, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
+	connect(loginBtn, SIGNAL(clicked(bool)), this, SLOT(sendLogin()));
 }
 
 void MainWindow::switchToMain()
@@ -473,10 +468,6 @@ void MainWindow::sendCreateLobby(QString lobbyName, QString hostLogin, int gameT
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "CreateLobby Command Sent";
-
-	pLobby = new Lobby(lobbyName, hostLogin, gameType);
-
-	switchToLobby(new Player(), pLobby, true);
 }
 
 void MainWindow::deleteLobby(Lobby* lobby)
@@ -661,7 +652,17 @@ void MainWindow::sockReady()
 
 void MainWindow::switchCmd()
 {
-	if (SendLobbies* pSendLobbies = dynamic_cast<SendLobbies*>(pCommand))
+	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
+	{
+		pPlayer = pLogin->player;
+		switchToMain();
+	}
+	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
+	{
+		pLobby = pCreateLobby->lobby;
+		switchToLobby(new Player(), pLobby, true);
+	}
+	else if (SendLobbies* pSendLobbies = dynamic_cast<SendLobbies*>(pCommand))
 	{
 		switchToLobbiesList();
 

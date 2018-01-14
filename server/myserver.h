@@ -22,6 +22,7 @@ private:
 signals:
 
 public slots:
+	void createPlayer(Player* _player, MyThread* _thread);
 	void deletePlayer(MyThread* _thread);
 	void createLobby(Lobby* _lobby);
 	void changeGameType(MyThread* _thread, int _gameType, int _status);

@@ -10,6 +10,7 @@ void MyThread::run()
 {
 	qDebug() << socketDescriptor << "Starting thread";
 	pSocket = new QTcpSocket();
+	pPlayer = new Player();
 	if (!pSocket->setSocketDescriptor(this->socketDescriptor))
 	{
 		emit errorSignal(pSocket->error());
@@ -22,6 +23,23 @@ void MyThread::run()
 	qDebug() << socketDescriptor << "Client Connected";
 
 	exec();
+}
+
+void MyThread::sendCreatePlayer(Player* _player)
+{
+	pPlayer = _player;
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::AskLogin};
+	Command* pCommand = new Login(_player->playerName);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "Login Command Sent";
 }
 
 void MyThread::readyRead()
@@ -190,6 +208,23 @@ Lobby* MyThread::createLobby(QString lobbyName, int gameType)
 	return new Lobby(lobbyName, pPlayer->playerName, gameType);
 }
 
+void MyThread::sendCreateLobby(Lobby* _lobby)
+{
+	pLobby = _lobby;
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::CreateLobby};
+	Command* pCommand = new CreateLobby(pLobby);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "CreateLobby Command Sent";
+}
+
 void* MyThread::deleteGuestLobby(Lobby* lobby)
 {
 	QByteArray arrBlock;
@@ -211,13 +246,13 @@ void MyThread::switchCmd()
 {
 	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
 	{
-		pPlayer = pLogin->player;
+		emit createPlayerSignal(pLogin->player, this);
+		// pPlayer = pLogin->player;
 		// pPlayer->setID(socketDescriptor);
 	}
 	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
 	{
 		emit createLobbySignal(pCreateLobby->lobby);
-		pLobby = pCreateLobby->lobby;
 	}
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{

@@ -22,6 +22,17 @@ void MyServer::sendString(QString _message, MyThread* _thread)
 	_thread->sendMessage(_message, false);
 }
 
+void MyServer::createPlayer(Player* _player, MyThread* _thread)
+{
+	for (const auto& i : threads)
+		if (i->pPlayer->playerName == _player->playerName)
+		{
+			_thread->sendMessage("Error: Player with that name already logged in", true);
+			return;
+		}
+	_thread->sendCreatePlayer(_player);
+}
+
 Lobby* MyServer::findLobby(Lobby* _lobby)
 {
 	for (const auto& j : lobbies)
@@ -191,6 +202,17 @@ void MyServer::deletePlayer(MyThread* _thread)
 
 void MyServer::createLobby(Lobby* _lobby)
 {
+	for (const auto& i : lobbies)
+		if (i->lobbyName == _lobby->lobbyName)
+		{
+			for (const auto& j : threads)
+				if (j->pPlayer->playerName == _lobby->host->playerName)
+					j->sendMessage("Error: Lobby with that name already exists", true);
+			return;
+		}
+	for (const auto& j : threads)
+		if (j->pPlayer->playerName == _lobby->host->playerName)
+			j->sendCreateLobby(_lobby);
 	lobbies.push_back(_lobby);
 }
 
@@ -263,6 +285,7 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	qDebug() << socketDescriptor << "Connecting...";
 	threads.push_back(new MyThread(socketDescriptor, this));
 	connect(threads.back(), SIGNAL(finished()), threads.back(), SLOT(deleteLater()));
+	connect(threads.back(), SIGNAL(createPlayerSignal(Player*, MyThread*)), this, SLOT(createPlayer(Player*, MyThread*)));
 	connect(threads.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendGameTypesSignal(Player*, int, int)), this, SLOT(sendGameTypes(Player*, int, int)));
 	connect(threads.back(), SIGNAL(changeGameTypeSignal(MyThread*, int, int)), this, SLOT(changeGameType(MyThread*, int, int)), Qt::DirectConnection);

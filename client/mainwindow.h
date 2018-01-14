@@ -37,6 +37,7 @@ private slots:
 	void updateLobby(int _gameType);
 
 	void connectToTheServer();
+	void sendLogin();
 	void createLobbyDialog();
 	void sendConnectToLobbySlot(QTreeWidgetItem* item, int column);
 	void leaveLobby();
@@ -78,6 +79,7 @@ private:
 
 	QGridLayout* connectLayout;
 	QPushButton* connectBtn;
+	QPushButton* loginBtn;
 	QLineEdit* loginEdit;
 	QLineEdit* passwordEdit;
 

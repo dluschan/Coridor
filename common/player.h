@@ -7,7 +7,7 @@
 class Player
 {
 public:
-	Player(QString login = "Login");
+	Player(QString login = "");
 
 	QString playerName;
 	int ID, wins, loses;

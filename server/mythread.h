@@ -19,8 +19,10 @@ public:
 	Player* pPlayer;
 	Lobby* pLobby = new Lobby();
 	void run();
+	void sendCreatePlayer(Player* _player);
 	void sendMessage(QString message, bool error);
 	Lobby* createLobby(QString lobbyName, int gameType);
+	void sendCreateLobby(Lobby* _lobby);
 	void* deleteGuestLobby(Lobby* lobby);
 	void write(QByteArray buffer);
 	void sendRdy();
@@ -32,6 +34,7 @@ public:
 	void quartoSendCheckWin(QString enemy, bool checkWin);
 
 signals:
+	void createPlayerSignal(Player* player, MyThread* thread);
 	void deletePlayerSignal(MyThread* thread);
 	void errorSignal(QTcpSocket::SocketError socketError);
 	void sendPlayerListSignal(MyThread* thread);
