@@ -2,6 +2,7 @@
 *.bat
 *.qm
 client/debug/
+client/release/
 html/
 latex/
 # macos files
