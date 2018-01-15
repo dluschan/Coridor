@@ -128,10 +128,11 @@ void MyServer::sendRdy(Player* _host)
 	{
 		if (i->pPlayer->playerName == _host->playerName)
 			for (const auto& j : lobbies)
-				if (j->status == Unready)
-					j->updateStatus(Ready);
-				else if (j->status == Ready)
-					j->updateStatus(Unready);
+				if (j->host->playerName == _host->playerName)
+					if (j->status == Unready)
+						j->updateStatus(Ready);
+					else if (j->status == Ready)
+						j->updateStatus(Unready);
 		if (i->pLobby->host->playerName == _host->playerName)
 			i->sendRdy();
 	}
