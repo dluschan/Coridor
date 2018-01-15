@@ -9,9 +9,9 @@ MainWindow::MainWindow(QWidget* parent)
 	setMinimumHeight(300);
 	setWindowTitle("Client");
 
-	pSocket = new QTcpSocket(this);
+	/*pSocket = new QTcpSocket(this);
 	connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
-	connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
+	connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));*/
 
 	switchToLoginIn();
 
@@ -20,32 +20,48 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+	sockDisc();
 }
 
 void MainWindow::connectToTheServer()
 {
-	pSocket->connectToHost("127.0.0.1", 5555);
+	if (pSocket->state() != QAbstractSocket::ConnectedState)
+	{
+		pSocket = new QTcpSocket(this);
+		connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
+		connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
+		connect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(sockDisc()));
+		pSocket->connectToHost("127.0.0.1", 5555);
+	}
+	else
+		QMessageBox::information(this, tr("Error"), "You are already connected, please Log in");
+	// pSocket->deleteLater();
 }
 
 void MainWindow::sendLogin()
 {
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	if (pSocket->isOpen() && pSocket->state() == QAbstractSocket::ConnectedState)
+	{
+		QByteArray arrBlock;
+		QDataStream out(&arrBlock, QIODevice::WriteOnly);
+		out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {CommandType::Type::AskLogin};
-	Command* pCommand = new Login(loginEdit->text());
+		CommandType commandType = {CommandType::Type::AskLogin};
+		Command* pCommand = new Login(loginEdit->text());
 
-	// pPlayer = new Player(loginEdit->text());
-	// qDebug() << int(pSocket->socketDescriptor());
-	// player->setID(int(pSocket->socketDescriptor()));
+		// pPlayer = new Player(loginEdit->text());
+		// qDebug() << int(pSocket->socketDescriptor());
+		// player->setID(int(pSocket->socketDescriptor()));
 
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
+		out << commandType;
+		pCommand->operator<<(out);
+		pSocket->write(arrBlock);
+		pSocket->waitForBytesWritten();
 
-	qDebug() << "Login Command Sent";
+		qDebug() << "Login Command Sent";
+	}
+	else
+		QMessageBox::information(this, "Error", "You must connect first");
 }
 
 void MainWindow::createLobbyDialog()
@@ -449,6 +465,7 @@ void MainWindow::switchToLobbiesList()
 
 void MainWindow::sockDisc()
 {
+	qDebug() << "sockDisconnected";
 	pSocket->deleteLater();
 	switchToLoginIn();
 }

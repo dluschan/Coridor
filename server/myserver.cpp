@@ -285,9 +285,10 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	qDebug() << socketDescriptor << "Connecting...";
 	threads.push_back(new MyThread(socketDescriptor, this));
 	connect(threads.back(), SIGNAL(finished()), threads.back(), SLOT(deleteLater()));
-	connect(threads.back(), SIGNAL(createPlayerSignal(Player*, MyThread*)), this, SLOT(createPlayer(Player*, MyThread*)));
+	connect(threads.back(), SIGNAL(createPlayerSignal(Player*, MyThread*)), this, SLOT(createPlayer(Player*, MyThread*)), Qt::DirectConnection);
+	connect(threads.back(), SIGNAL(deletePlayerSignal(MyThread*)), this, SLOT(deletePlayer(MyThread*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(sendGameTypesSignal(Player*, int, int)), this, SLOT(sendGameTypes(Player*, int, int)));
+	connect(threads.back(), SIGNAL(sendGameTypesSignal(Player*, int, int)), this, SLOT(sendGameTypes(Player*, int, int)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(changeGameTypeSignal(MyThread*, int, int)), this, SLOT(changeGameType(MyThread*, int, int)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(deleteLobbySignal(Lobby*)), this, SLOT(deleteLobby(Lobby*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(deleteGuestLobbySignal(Player*)), this, SLOT(deleteGuestLobby(Player*)), Qt::DirectConnection);
