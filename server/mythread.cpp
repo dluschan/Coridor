@@ -225,7 +225,22 @@ void MyThread::sendCreateLobby(Lobby* _lobby)
 	qDebug() << "CreateLobby Command Sent";
 }
 
-void* MyThread::deleteGuestLobby(Lobby* lobby)
+void MyThread::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::ConnectToLobby};
+	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+	qDebug() << "ConnectToLobby Command Sent" << pPlayer->playerName;
+}
+
+void MyThread::deleteGuestLobby(Lobby* lobby)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -286,18 +301,15 @@ void MyThread::switchCmd()
 	{
 		if (pConnectToLobby->connectFlag)
 		{
-			if (pConnectToLobby->lobby->connectedPlayersNumber < pConnectToLobby->lobby->maxPlayers)
-				try
-				{
-					emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
-				}
-				catch (const exception& e)
-				{
-					emit sendMessage(tr(e.what()), true);
-					qDebug() << tr(e.what());
-				}
-			else
-				sendMessage("Error: Too much players", true);
+			try
+			{
+				emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
+			}
+			catch (const exception& e)
+			{
+				emit sendMessage(tr(e.what()), true);
+				qDebug() << tr(e.what());
+			}
 		}
 		else
 		{

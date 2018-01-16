@@ -48,6 +48,9 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 {
 	Lobby* hostLobby = findLobby(_lobby);
 
+	if (hostLobby->connectedPlayersNumber >= hostLobby->maxPlayers && _connectFlag)
+		throw runtime_error("Error: Too much players");
+
 	if (_connectFlag)
 		hostLobby->connect(_player);
 	else
@@ -61,21 +64,11 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 	{
 		if (i->pPlayer->playerName == _player->playerName && _connectFlag)
 		{
-			QByteArray arrBlock;
-			QDataStream out(&arrBlock, QIODevice::WriteOnly);
-			out.setVersion(QDataStream::Qt_5_9);
-
-			CommandType commandType = {CommandType::Type::ConnectToLobby};
-			qDebug() << hostLobby->host->playerName;
-			Command* pCommand = new ConnectToLobby(hostLobby, _player, _connectFlag);
-
-			out << commandType;
-			pCommand->operator<<(out);
-			i->pSocket->write(arrBlock);
-			i->pSocket->waitForBytesWritten();
+			i->sendConnectToLobby(hostLobby, _player, _connectFlag);
 
 			i->pLobby = _lobby;
 			i->pLobby->connect(_player);
+
 			// WHERE THIS CONNECTS?
 			/*for (const auto& j : lobbies)
 				if (j->lobbyName == _lobby->lobbyName)
@@ -83,35 +76,8 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 		}
 
 		if (i->pPlayer->playerName == _lobby->host->playerName)
-			emit i->connectToHostLobbySignal(i, hostLobby, _player, _connectFlag);
+			i->sendConnectToLobby(hostLobby, _player, _connectFlag);
 	}
-
-	qDebug() << "ConnectToLobby Command Sent";
-}
-
-void MyServer::sendConnectToLobbyHost(MyThread* i, Lobby* _lobby, Player* _player, bool _connectFlag)
-{
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::ConnectToLobby};
-	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
-
-	/*if (!_connectFlag)
-	{
-		i->pLobby = _lobby;
-		i->pLobby->disconnect(_player);
-		for (const auto& j : lobbies)
-			if (j->lobbyName == _lobby->lobbyName)
-				j->disconnect(_player);
-	}*/
-	// qDebug() << _player->playerName;
-
-	out << commandType;
-	pCommand->operator<<(out);
-	i->pSocket->write(arrBlock);
-	i->pSocket->waitForBytesWritten();
 }
 
 void MyServer::sendRdy(Player* _host)
@@ -295,7 +261,6 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(deleteGuestLobbySignal(Player*)), this, SLOT(deleteGuestLobby(Player*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendLobbiesListSignal(MyThread*)), this, SLOT(lobbiesList(MyThread*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(connectToLobbySignal(Lobby*, Player*, bool)), this, SLOT(sendConnectToLobby(Lobby*, Player*, bool)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(connectToHostLobbySignal(MyThread*, Lobby*, Player*, bool)), this, SLOT(sendConnectToLobbyHost(MyThread*, Lobby*, Player*, bool)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendRdySignal(Player*)), this, SLOT(sendRdy(Player*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendMessageSignal(QString, bool, QString)), this, SLOT(sendMessageSlot(QString, bool, QString)));
 	connect(threads.back(), SIGNAL(sendFirstPlayerSignal(QString, QString, GameType)), this, SLOT(sendFirstPlayerSlot(QString, QString, GameType)), Qt::DirectConnection);

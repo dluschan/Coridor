@@ -72,15 +72,7 @@ void MainWindow::createLobbyDialog()
 
 void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
 {
-	// получение connectedPlayersNumber
-	QString tmpString = item->text(3);
-	tmpString.chop(tmpString.size() - tmpString.indexOf("/"));
-	qDebug() << tmpString;
-	int connectedPlayersNumber = tmpString.toInt();
-
-	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
-	pLobby->host->playerName;
-	sendConnectToLobby(pLobby, pPlayer, true);
+	sendConnectToLobby(new Lobby(item->text(0)), pPlayer, true);
 }
 
 void MainWindow::leaveLobby()
