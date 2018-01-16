@@ -68,6 +68,7 @@ void MainWindow::createLobbyDialog()
 {
 	CreateLobbyDialog* dialog = new CreateLobbyDialog(pPlayer->playerName);
 	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(sendCreateLobby(QString, QString, int)));
+	connect(this, SIGNAL(closeGame()), dialog, SLOT(closeSlot()));
 }
 
 void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
@@ -154,6 +155,7 @@ void MainWindow::switchToCoridorWindow(bool hosting)
 			dialogChoosePlayer = new DialogChoosePlayer(hosting, pLobby->host->playerName, pLobby->connectedPlayers.back()->playerName);
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(chooseFirstPlayerCoridor(QString)));
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(sendFirstPlayerCoridorSlot(QString)));
+			connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 		}
 		else
 			qDebug() << "EROR THAT SHOULDN'T HAPPEN!!!!";
@@ -161,6 +163,7 @@ void MainWindow::switchToCoridorWindow(bool hosting)
 	else
 	{
 		dialogChoosePlayer = new DialogChoosePlayer(hosting);
+		connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 	}
 }
 
@@ -174,6 +177,7 @@ void MainWindow::switchToQuartoWindow(bool hosting)
 			dialogChoosePlayer = new DialogChoosePlayer(hosting, pLobby->host->playerName, pLobby->connectedPlayers.back()->playerName);
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(chooseFirstPlayerQuarto(QString)));
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(sendFirstPlayerQuartoSlot(QString)));
+			connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 		}
 		else
 			qDebug() << "EROR THAT SHOULDN'T HAPPEN!!!!";
@@ -181,6 +185,7 @@ void MainWindow::switchToQuartoWindow(bool hosting)
 	else
 	{
 		dialogChoosePlayer = new DialogChoosePlayer(hosting);
+		connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 	}
 }
 
@@ -257,6 +262,7 @@ void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 	connect(coridorWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
 	connect(this, SIGNAL(sendQuitSignal()), coridorWindow, SLOT(recieveQuit()));
 	connect(coridorWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
+	connect(this, SIGNAL(closeGame()), coridorWindow, SLOT(closeGameSlot()));
 }
 
 void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
@@ -276,6 +282,7 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 	connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
 	connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit()));
 	connect(quartoWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
+	connect(this, SIGNAL(closeGame()), quartoWindow, SLOT(closeGameSlot()));
 }
 
 void MainWindow::chooseFirstPlayer(QString _firstPlayer, GameType _gameType)
@@ -459,6 +466,8 @@ void MainWindow::sockDisc()
 {
 	qDebug() << "sockDisconnected";
 	pSocket->deleteLater();
+	emit closeGame();
+	this->show();
 	switchToLoginIn();
 }
 
@@ -619,8 +628,8 @@ void MainWindow::askLobbies()
 
 void MainWindow::updateLobby(int _gameType)
 {
-	pLobby->updateGameType(_gameType);
-	sendUpdateLobby(_gameType, pLobby->status);
+	// pLobby->update(_gameType, Unready);
+	sendUpdateLobby(_gameType, Unready);
 }
 
 void MainWindow::sockReady()
@@ -690,6 +699,8 @@ void MainWindow::switchCmd()
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
+		if (pLobby->status == InGame)
+			pLobby->updateGameType(WrongGameType);
 		if (pLobby->gameType != WrongGameType)
 			switchToMain();
 		pLobby = new Lobby();
@@ -697,11 +708,10 @@ void MainWindow::switchCmd()
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{
 		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
-		if (pLobby->connectedPlayers.empty())
-			qDebug() << "UpdateLobby ERROR";
+		switchToLobby(new Player(), pLobby, false);
 		if (pUpdateLobby->status != InGame)
 		{
-			for (const auto& i : pUpdateLobby->connectedPlayers)
+			for (const auto& i : pLobby->connectedPlayers)
 				if (i->playerName == pPlayer->playerName)
 					switchToLobby(i, pLobby, false);
 		}
@@ -713,7 +723,6 @@ void MainWindow::switchCmd()
 		}
 		else
 			switchToGame(false);
-		// switchToLobby(pPlayer, pLobby, false);
 	}
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
@@ -728,8 +737,6 @@ void MainWindow::switchCmd()
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
-		if (pLobby->connectedPlayers.empty())
-			qDebug() << "SendRdy ERROR";
 		setRdy();
 	}
 	else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))

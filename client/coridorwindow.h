@@ -53,6 +53,7 @@ private slots:
 
 	void coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal);
 	void recieveQuit();
+	void closeGameSlot();
 
 private:
 	Ui::CoridorWindow* ui;
@@ -61,7 +62,7 @@ private:
 	Field* field;
 	Walls walls;
 	CoridorLogic* game;
-	QString status = "Move or place a wall";
+	QString status;
 	QString player;
 
 	void placeWall(QPoint point, bool horizontal);

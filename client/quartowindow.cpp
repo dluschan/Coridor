@@ -70,9 +70,9 @@ QuartoWindow::QuartoWindow(QString _firstPlayer, QString _secondPlayer, QString 
 {
 	ui->setupUi(this);
 	ui->start->hide();
-	this->setWindowTitle(_player);
-	this->setMinimumWidth(610);
-	this->setMinimumHeight(329);
+	setWindowTitle("Quarto - " + _player);
+	setMinimumWidth(610);
+	setMinimumHeight(329);
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 
 	pictures = new Images;
@@ -89,9 +89,14 @@ QuartoWindow::QuartoWindow(QString _firstPlayer, QString _secondPlayer, QString 
 
 	game = new QuartoLogic(_firstPlayer, _secondPlayer);
 
+	if (_player == _firstPlayer)
+		status = "Place a figure";
+	else
+		status = "Waiting for another player";
+
 	figures.redrawFiguresImage(*pictures);
 	field->redrawQuarto(game->pole);
-	this->show();
+	show();
 }
 
 QuartoWindow::~QuartoWindow()
@@ -119,13 +124,14 @@ void QuartoWindow::placeFigure(QPoint point, int figureId)
 	else
 		figures.figures[figureId] = false;
 	figures.fSelected[figureId] = false;
-	this->update();
+	update();
 }
 
 void QuartoWindow::checkWin()
 {
 	game->checkWin();
 	status = game->getPlayerName(game->winner) + " wins!";
+	update();
 	QMessageBox::information(this, tr("End"), status);
 }
 
@@ -141,7 +147,7 @@ void QuartoWindow::mousePressEvent(QMouseEvent* mEvent)
 	if (!game->end)
 		figures.mousePressed(pos);
 
-	this->update();
+	update();
 }
 
 void QuartoWindow::mouseMoveEvent(QMouseEvent* mEvent)
@@ -150,7 +156,7 @@ void QuartoWindow::mouseMoveEvent(QMouseEvent* mEvent)
 	QPoint point = field->getCoordQuarto(pos.x(), pos.y());
 	figures.mouseMoved(pos, point);
 
-	this->update();
+	update();
 }
 
 void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
@@ -193,7 +199,7 @@ void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 				figures.fSelected[figures.getSelectedID()] = false;
 			}
 		}
-		this->update();
+		update();
 	}
 	else
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
@@ -207,9 +213,9 @@ void QuartoWindow::on_pushButton_clicked()
 		else
 			emit sendQuitSignal(game->player1.name);
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
-	this->disconnect();
-	this->close(); // Закрываем окно
-	this->deleteLater();
+	disconnect();
+	close(); // Закрываем окно
+	deleteLater();
 }
 
 void QuartoWindow::on_checkWin_clicked()
@@ -223,7 +229,7 @@ void QuartoWindow::on_checkWin_clicked()
 		}
 		else
 			status = "Its not your turn";
-		this->update();
+		update();
 	}
 	else
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
@@ -241,7 +247,7 @@ void QuartoWindow::on_start_clicked()
 
 	// game = new QuartoLogic();
 
-	this->update();
+	update();
 }
 
 void QuartoWindow::on_nextTurn_clicked()
@@ -256,7 +262,7 @@ void QuartoWindow::on_nextTurn_clicked()
 		}
 		else
 			status = "Its not your turn";
-		this->update();
+		update();
 	}
 	else
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
@@ -273,14 +279,21 @@ void QuartoWindow::quartoRecieveCheckWin(QString _enemy, bool _checkWin)
 		checkWin();
 	else
 		nextTurn();
+	update();
 }
 
 void QuartoWindow::recieveQuit()
 {
 	game->end = true;
 	status = "Your opponet has left the game";
-	this->update();
+	update();
 	QMessageBox::information(this, tr("End"), status + " you can leave now");
+}
+
+void QuartoWindow::closeGameSlot()
+{
+	close();
+	deleteLater();
 }
 
 bool QuartoWindow::checkPoint(QPoint point)

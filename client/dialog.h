@@ -19,6 +19,7 @@ public:
 
 public slots:
 	void createLobby();
+	void closeSlot();
 
 signals:
 	void clicked(QString ln, QString hl, int gt);

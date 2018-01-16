@@ -225,6 +225,39 @@ void MyThread::sendCreateLobby(Lobby* _lobby)
 	qDebug() << "CreateLobby Command Sent";
 }
 
+void MyThread::sendUpdateLobby(int _gameType, int _status)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::UpdateLobby};
+	std::list<Player*> emptyList; // Client doesn't use it anyway
+	Command* pCommand = new UpdateLobby(_gameType, _status, emptyList);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "UpdateLobby Command Sent";
+}
+
+/*void MyThread::sendDeleteLobby(Lobby* _lobby)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::DeleteLobby};
+	Command* pCommand = new DeleteLobby(_lobby);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "DeleteLobby Command Sent";
+}*/
+
 void MyThread::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
 {
 	QByteArray arrBlock;
@@ -240,7 +273,7 @@ void MyThread::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 	qDebug() << "ConnectToLobby Command Sent" << pPlayer->playerName;
 }
 
-void MyThread::deleteGuestLobby(Lobby* lobby)
+void MyThread::sendDeleteLobby(Lobby* lobby)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -273,6 +306,8 @@ void MyThread::switchCmd()
 	{
 		// emit changeGameTypeSignal(this, pUpdateLobby->gameType, pUpdateLobby->status);
 		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
+		if (pUpdateLobby->status != InGame)
+			sendUpdateLobby(pUpdateLobby->gameType, pUpdateLobby->status);
 		for (const auto& i : pUpdateLobby->connectedPlayers)
 			emit sendGameTypesSignal(i, pUpdateLobby->gameType, pUpdateLobby->status);
 	}
@@ -292,6 +327,7 @@ void MyThread::switchCmd()
 			emit deleteLobbySignal(pDeleteLobby->lobby);
 			pLobby = new Lobby();
 		}
+		// sendDeleteLobby(pDeleteLobby->lobby);
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{
@@ -320,10 +356,10 @@ void MyThread::switchCmd()
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
 		emit sendRdySignal(pSendRdy->host);
-		if (pLobby->status == Unready)
+		/*if (pLobby->status == Unready)
 			pLobby->updateStatus(Ready);
 		else if (pLobby->status == Ready)
-			pLobby->updateStatus(Unready);
+			pLobby->updateStatus(Unready);*/
 	}
 	// dont need it now
 	/*else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))

@@ -89,18 +89,16 @@ void MyServer::sendRdy(Player* _host)
 			else if (j->status == Ready)
 				j->updateStatus(Unready);
 	}*/
+	for (const auto& j : lobbies)
+		if (j->host->playerName == _host->playerName)
+			if (j->status == Unready)
+				j->updateStatus(Ready);
+			else if (j->status == Ready)
+				j->updateStatus(Unready);
+
 	for (const auto& i : threads)
-	{
-		if (i->pPlayer->playerName == _host->playerName)
-			for (const auto& j : lobbies)
-				if (j->host->playerName == _host->playerName)
-					if (j->status == Unready)
-						j->updateStatus(Ready);
-					else if (j->status == Ready)
-						j->updateStatus(Unready);
 		if (i->pLobby->host->playerName == _host->playerName)
 			i->sendRdy();
-	}
 }
 
 void MyServer::sendMessageSlot(QString _message, bool _errorFlag, QString _playerName)
@@ -187,30 +185,12 @@ void MyServer::sendGameTypes(Player* _player, int _gameType, int _status)
 	for (const auto& i : threads)
 		if (i->pPlayer->playerName == _player->playerName)
 		{
-			emit i->changeGameTypeSignal(i, _gameType, _status);
+			i->pLobby->update(_gameType, _status);
+			for (const auto& j : lobbies)
+				if (j->lobbyName == i->pLobby->lobbyName)
+					j->update(_gameType, _status); // again?
+			i->sendUpdateLobby(_gameType, _status);
 		}
-}
-
-void MyServer::changeGameType(MyThread* _thread, int _gameType, int _status)
-{
-	_thread->pLobby->update(_gameType, _status);
-	for (const auto& i : lobbies)
-		if (i->lobbyName == _thread->pLobby->lobbyName)
-			i->update(_gameType, _status); // again?
-
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::UpdateLobby};
-	Command* pCommand = new UpdateLobby(_gameType, _status, _thread->pLobby->connectedPlayers);
-
-	out << commandType;
-	pCommand->operator<<(out);
-	_thread->pSocket->write(arrBlock);
-	_thread->pSocket->waitForBytesWritten();
-
-	qDebug() << "UpdateLobby Command Sent";
 }
 
 void MyServer::deleteLobby(Lobby* _lobby)
@@ -226,8 +206,8 @@ void MyServer::deleteGuestLobby(Player* _player)
 	{
 		if (i->pPlayer->playerName == _player->playerName)
 		{
-			i->deleteGuestLobby(i->pLobby);
-			i->pLobby = new Lobby();
+			i->sendDeleteLobby(i->pLobby);
+			qDebug() << "WTF::::::::::" << _player->playerName;
 		}
 	}
 }
@@ -255,7 +235,6 @@ void MyServer::incomingConnection(qintptr socketDescriptor)
 	connect(threads.back(), SIGNAL(deletePlayerSignal(MyThread*)), this, SLOT(deletePlayer(MyThread*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(createLobbySignal(Lobby*)), this, SLOT(createLobby(Lobby*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendGameTypesSignal(Player*, int, int)), this, SLOT(sendGameTypes(Player*, int, int)), Qt::DirectConnection);
-	connect(threads.back(), SIGNAL(changeGameTypeSignal(MyThread*, int, int)), this, SLOT(changeGameType(MyThread*, int, int)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(deleteLobbySignal(Lobby*)), this, SLOT(deleteLobby(Lobby*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(deleteGuestLobbySignal(Player*)), this, SLOT(deleteGuestLobby(Player*)), Qt::DirectConnection);
 	connect(threads.back(), SIGNAL(sendLobbiesListSignal(MyThread*)), this, SLOT(lobbiesList(MyThread*)), Qt::DirectConnection);

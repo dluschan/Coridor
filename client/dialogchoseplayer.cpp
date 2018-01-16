@@ -10,8 +10,8 @@ DialogChoosePlayer::DialogChoosePlayer(bool _hosting, QString host, QString play
 	{
 		this->setWindowTitle("Choose first player");
 		firstPlayerEdit = new QComboBox;
-		firstPlayerEdit->addItem(player);
 		firstPlayerEdit->addItem(host);
+		firstPlayerEdit->addItem(player);
 		chooseFirstPlayerBtn = new QPushButton("Ok");
 		connect(chooseFirstPlayerBtn, SIGNAL(clicked()), this, SLOT(startTheGame()));
 
@@ -34,4 +34,10 @@ void DialogChoosePlayer::startTheGame()
 {
 	emit clicked(firstPlayerEdit->currentText());
 	this->close();
+}
+
+void DialogChoosePlayer::closeSlot()
+{
+	close();
+	deleteLater();
 }

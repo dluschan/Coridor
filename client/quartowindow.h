@@ -58,6 +58,7 @@ private slots:
 	void quartoRecieveQPoint(QPoint point, int figureId, QString reciever);
 	void quartoRecieveCheckWin(QString _enemy, bool _checkWin);
 	void recieveQuit();
+	void closeGameSlot();
 
 private:
 	Ui::QuartoWindow* ui;
@@ -66,7 +67,7 @@ private:
 	Field* field;
 	QuartoLogic* game;
 	Figures figures;
-	QString status = "Place a figure";
+	QString status;
 	QString player;
 
 	void placeFigure(QPoint point, int figureId);

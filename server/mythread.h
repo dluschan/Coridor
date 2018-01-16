@@ -23,8 +23,9 @@ public:
 	void sendMessage(QString message, bool error);
 	Lobby* createLobby(QString lobbyName, int gameType);
 	void sendCreateLobby(Lobby* _lobby);
+	void sendUpdateLobby(int _gameType, int _status);
 	void sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag);
-	void deleteGuestLobby(Lobby* lobby);
+	void sendDeleteLobby(Lobby* lobby);
 	void write(QByteArray buffer);
 	void sendRdy();
 	void sendStart();

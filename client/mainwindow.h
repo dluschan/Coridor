@@ -67,6 +67,7 @@ signals:
 	void coridorRecieveQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoRecieveQPointSignal(QPoint point, int figureId, QString enemy);
 	void quartoRecieveCheckWinSignal(QString enemy, bool checkWin);
+	void closeGame();
 
 private:
 	Player* pPlayer;
