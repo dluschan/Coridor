@@ -66,8 +66,7 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 		{
 			i->sendConnectToLobby(hostLobby, _player, _connectFlag);
 
-			i->pLobby = _lobby;
-			i->pLobby->connect(_player);
+			i->pLobby = hostLobby;
 
 			// WHERE THIS CONNECTS?
 			/*for (const auto& j : lobbies)
@@ -75,7 +74,7 @@ void MyServer::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectF
 					j->connect(_player);*/
 		}
 
-		if (i->pPlayer->playerName == _lobby->host->playerName)
+		if (i->pPlayer->playerName == hostLobby->host->playerName)
 			i->sendConnectToLobby(hostLobby, _player, _connectFlag);
 	}
 }
