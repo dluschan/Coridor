@@ -30,7 +30,7 @@ public:
 	void sendRdy();
 	void sendStart();
 	void sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType);
-	void sendQuit(QString _reciever);
+	// void sendQuit(QString _reciever);
 	void coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoSendQPoint(QPoint point, int figureId, QString enemy);
 	void quartoSendCheckWin(QString enemy, bool checkWin);
@@ -51,7 +51,7 @@ signals:
 	void sendRdySignal(Player* host);
 	void sendMessageSignal(QString message, bool errorFlag, QString playerName);
 	void sendFirstPlayerSignal(QString firstPlayer, QString guest, GameType gameType);
-	void sendQuitSignal(QString reciever);
+	// void sendQuitSignal(QString reciever);
 	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoSendQPointSignal(QPoint point, int figureId, QString enemy);
 	void quartoSendCheckWinSignal(QString enemy, bool checkWin);

@@ -22,7 +22,7 @@ struct CommandType
 		ConnectToLobby,
 		SendRdy,
 		SendFirstPlayer,
-		SendQuit,
+		// SendQuit,
 		CoridorSendQPoint,
 		QuartoSendQPoint,
 		QuartoSendCheckWin,
@@ -170,7 +170,7 @@ public:
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
-class SendQuit : public Command
+/*class SendQuit : public Command
 {
 public:
 	SendQuit(QString _reciever = QString());
@@ -180,7 +180,7 @@ public:
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
-};
+};*/
 
 class CoridorSendQPoint : public Command
 {

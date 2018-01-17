@@ -102,9 +102,9 @@ Command* CommandFactory::create(QDataStream& stream) throw(std::logic_error)
 	case CommandType::Type::SendFirstPlayer:
 		pCommand = new SendFirstPlayer();
 		break;
-	case CommandType::Type::SendQuit:
+	/*case CommandType::Type::SendQuit:
 		pCommand = new SendQuit();
-		break;
+		break;*/
 	case CommandType::Type::CoridorSendQPoint:
 		pCommand = new CoridorSendQPoint();
 		break;
@@ -385,7 +385,7 @@ void SendFirstPlayer::execute()
 	qDebug() << "execute SendFirstPlayer command";
 }
 
-SendQuit::SendQuit(QString _reciever)
+/*SendQuit::SendQuit(QString _reciever)
 	: reciever(_reciever)
 {
 	qDebug() << "SendQuit command created";
@@ -408,7 +408,7 @@ QDataStream& SendQuit::operator<<(QDataStream& stream) const
 void SendQuit::execute()
 {
 	qDebug() << "execute SendQuit command";
-}
+}*/
 
 CoridorSendQPoint::CoridorSendQPoint(QPoint _point, bool _move, QString _enemy, bool _horizontal)
 	: point(_point)

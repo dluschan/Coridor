@@ -122,7 +122,7 @@ void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _g
 	qDebug() << "SendFirstPlayer Command Sent";
 }
 
-void MyThread::sendQuit(QString _reciever)
+/*void MyThread::sendQuit(QString _reciever)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -136,7 +136,7 @@ void MyThread::sendQuit(QString _reciever)
 	write(arrBlock);
 
 	qDebug() << "SendQuit Command Sent";
-}
+}*/
 
 void MyThread::coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal)
 {
