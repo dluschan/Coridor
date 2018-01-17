@@ -224,9 +224,6 @@ void UpdateLobby::execute()
 DeleteLobby::DeleteLobby(Lobby* _lobby)
 	: lobby(_lobby)
 {
-	for (const auto& i : _lobby->connectedPlayers)
-		// lobby->connectedPlayers.push_back(i);
-		qDebug() << i->playerName;
 	qDebug() << "DeleteLobby command created" << lobby->lobbyName;
 }
 
@@ -372,12 +369,14 @@ SendFirstPlayer::SendFirstPlayer(QString _firstPlayer, QString _guest, int _game
 QDataStream& SendFirstPlayer::operator>>(QDataStream& stream)
 {
 	stream >> firstPlayer >> guest >> gameType;
+	qDebug() << "SendFirstPlayer command read";
 	return stream;
 }
 
 QDataStream& SendFirstPlayer::operator<<(QDataStream& stream) const
 {
 	stream << firstPlayer << guest << gameType;
+	qDebug() << "SendFirstPlayer command written";
 	return stream;
 }
 

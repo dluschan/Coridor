@@ -41,6 +41,7 @@ protected:
 	void mousePressEvent(QMouseEvent* mEvent);
 	void mouseMoveEvent(QMouseEvent* mEvent);
 	void mouseReleaseEvent(QMouseEvent* mEvent);
+	void closeEvent(QCloseEvent* event);
 
 signals:
 	void firstWindow(); // Сигнал для первого окна на открытие

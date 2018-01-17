@@ -56,7 +56,7 @@ void MyThread::readyRead()
 
 void MyThread::disconnected()
 {
-	emit deleteLobbySignal(pLobby);
+	emit deleteLobbyFromListSignal(pLobby);
 	emit deletePlayerSignal(this);
 	qDebug() << socketDescriptor << "Client Disconnected";
 	pSocket->deleteLater();
@@ -315,16 +315,17 @@ void MyThread::switchCmd()
 	{
 		if (pDeleteLobby->lobby->gameType != WrongGameType)
 		{
+			emit sendDeleteLobbySignal(pDeleteLobby->lobby->host);
 			for (const auto& i : pDeleteLobby->lobby->connectedPlayers)
 			{
-				emit deleteGuestLobbySignal(i);
+				emit sendDeleteLobbySignal(i);
 			}
-			emit deleteLobbySignal(pDeleteLobby->lobby);
+			emit deleteLobbyFromListSignal(pDeleteLobby->lobby);
 			pLobby = new Lobby();
 		}
 		else
 		{
-			emit deleteLobbySignal(pDeleteLobby->lobby);
+			// emit sendDeleteLobbySignal(pPlayer);
 			pLobby = new Lobby();
 		}
 		// sendDeleteLobby(pDeleteLobby->lobby);

@@ -205,6 +205,21 @@ void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
+void QuartoWindow::closeEvent(QCloseEvent* event)
+{
+	if (!game->end)
+		if (player == game->player1.name)
+			emit sendQuitSignal(game->player2.name);
+		else
+			emit sendQuitSignal(game->player1.name);
+	else
+		emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	disconnect();
+	// close(); // Закрываем окно
+	deleteLater();
+	event->accept();
+}
+
 void QuartoWindow::on_pushButton_clicked()
 {
 	if (!game->end)
@@ -212,7 +227,8 @@ void QuartoWindow::on_pushButton_clicked()
 			emit sendQuitSignal(game->player2.name);
 		else
 			emit sendQuitSignal(game->player1.name);
-	emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	else
+		emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	disconnect();
 	close(); // Закрываем окно
 	deleteLater();

@@ -44,8 +44,8 @@ signals:
 	// void changeGameTypeSignal(MyThread* thread, int gameType);
 	void changeGameTypeSignal(MyThread* thread, int gameType, int _status);
 	void sendGameTypesSignal(Player* player, int gameType, int _status);
-	void deleteLobbySignal(Lobby* pLobby);
-	void deleteGuestLobbySignal(Player* pPlayer);
+	void deleteLobbyFromListSignal(Lobby* pLobby);
+	void sendDeleteLobbySignal(Player* pPlayer);
 	void connectToLobbySignal(Lobby* pLobby, Player* player, bool connectFlag);
 	void sendLobbiesListSignal(MyThread* thread);
 	void sendRdySignal(Player* host);

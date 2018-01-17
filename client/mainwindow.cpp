@@ -88,7 +88,7 @@ void MainWindow::deleteLobbySlot()
 {
 	if (pLobby->gameType != WrongGameType)
 		deleteLobby(pLobby);
-	switchToMain();
+	// switchToMain();
 }
 
 void MainWindow::leaveLobbiesList()
@@ -217,7 +217,6 @@ void MainWindow::switchToGameLikeHostSlot()
 
 void MainWindow::returnFromGame()
 {
-	pLobby->updateGameType(WrongGameType);
 	deleteLobby(pLobby);
 	this->show();
 	switchToMain();
@@ -238,20 +237,21 @@ void MainWindow::sendQuit(QString _reciever)
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "SendQuit Command Sent";
+	this->show();
+	switchToMain();
 	pLobby = new Lobby();
 }
 
 void MainWindow::recieveQuit()
 {
-	pLobby->updateGameType(WrongGameType);
-	deleteLobby(pLobby);
+	// deleteLobby(pLobby);
 }
 
 void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 {
 	QString _secondPlayer;
 	if (_firstPlayer == pLobby->host->playerName)
-		_secondPlayer = pLobby->connectedPlayers.back()->playerName; // CRASHES HERE CAUSE THERE IS NO connectedPlayers in pLobby
+		_secondPlayer = pLobby->connectedPlayers.back()->playerName;
 	else
 		_secondPlayer = pLobby->host->playerName;
 
@@ -269,7 +269,7 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 {
 	QString _secondPlayer;
 	if (_firstPlayer == pLobby->host->playerName)
-		_secondPlayer = pLobby->connectedPlayers.back()->playerName; // CRASHES HERE CAUSE THERE IS NO connectedPlayers in pLobby
+		_secondPlayer = pLobby->connectedPlayers.back()->playerName;
 	else
 		_secondPlayer = pLobby->host->playerName;
 
@@ -503,7 +503,7 @@ void MainWindow::deleteLobby(Lobby* lobby)
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "DeleteLobby Command Sent";
-	pLobby = new Lobby();
+	// pLobby = new Lobby();
 }
 
 void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
@@ -699,8 +699,6 @@ void MainWindow::switchCmd()
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		if (pLobby->status == InGame)
-			pLobby->updateGameType(WrongGameType);
 		if (pLobby->gameType != WrongGameType)
 			switchToMain();
 		pLobby = new Lobby();

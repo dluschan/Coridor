@@ -247,6 +247,21 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
+void CoridorWindow::closeEvent(QCloseEvent* event)
+{
+	if (game->endValue == 0)
+		if (player == game->player1.name)
+			emit sendQuitSignal(game->player2.name);
+		else
+			emit sendQuitSignal(game->player1.name);
+	else
+		emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	disconnect();
+	// close(); // Закрываем окно
+	deleteLater();
+	event->accept();
+}
+
 void CoridorWindow::exitBtn_clicked()
 {
 	if (game->endValue == 0)
@@ -254,9 +269,11 @@ void CoridorWindow::exitBtn_clicked()
 			emit sendQuitSignal(game->player2.name);
 		else
 			emit sendQuitSignal(game->player1.name);
-	emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	else
+		emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	disconnect();
 	close(); // Закрываем окно
+	deleteLater();
 }
 
 void CoridorWindow::start_pushButton_clicked()

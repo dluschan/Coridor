@@ -21,7 +21,7 @@ enum Status
 class Lobby
 {
 public:
-	Lobby(QString _name = "LobbyName", QString _host = "HostName", int _gameType = 2, int _connectedPlayersNumber = 1);
+	Lobby(QString _name = "", QString _host = "HostName", int _gameType = 2, int _connectedPlayersNumber = 1);
 	QString lobbyName;
 	Player* host;
 	int connectedPlayersNumber = 1, maxPlayers = 2;
