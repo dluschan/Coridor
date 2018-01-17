@@ -23,6 +23,22 @@ MainWindow::~MainWindow()
 	sockDisc();
 }
 
+/*void MainWindow::closeEvent(QCloseEvent* event)
+{
+	if (pLobby->gameType != WrongGameType)
+	{
+		if (pLobby->host->playerName == pPlayer->playerName)
+		{
+			deleteLobbySlot();
+		}
+		else
+		{
+			leaveLobby();
+		}
+	}
+	event->accept();
+}*/
+
 void MainWindow::connectToTheServer()
 {
 	if (pSocket->state() != QAbstractSocket::ConnectedState)
@@ -31,7 +47,7 @@ void MainWindow::connectToTheServer()
 		connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
 		connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
 		connect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(sockDisc()));
-		pSocket->connectToHost("localhost", 5555);
+		pSocket->connectToHost(passwordEdit->text(), 5555);
 	}
 	else
 		QMessageBox::information(this, tr("Error"), "You are already connected, please Log in");
