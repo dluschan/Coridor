@@ -10,6 +10,7 @@ void MyThread::run()
 {
 	qDebug() << socketDescriptor << "Starting thread";
 	pSocket = new QTcpSocket();
+	pPlayer = new Player();
 	if (!pSocket->setSocketDescriptor(this->socketDescriptor))
 	{
 		emit errorSignal(pSocket->error());
@@ -24,6 +25,23 @@ void MyThread::run()
 	exec();
 }
 
+void MyThread::sendCreatePlayer(Player* _player)
+{
+	pPlayer = _player;
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::AskLogin};
+	Command* pCommand = new Login(_player->playerName);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "Login Command Sent";
+}
+
 void MyThread::readyRead()
 {
 	CommandFactory factory;
@@ -36,30 +54,9 @@ void MyThread::readyRead()
 	// emit sendPlayerListSignal(this);
 }
 
-/*
-void MyThread::login(QString login)
-{
-	player = new Player(login, socketDescriptor);
-	sendString("Hello, " + login + "! Type -help to ask for available CommandTypes");
-	c = CommandType::Help;
-}
-
-void MyThread::help()
-{
-	sendString("-help: ask for available CommandTypes\n-players list: ask for player list\n-create lobby 'LobbyName': ask for creating a lobby\n-lobbies list: ask for lobbies list\n");
-}
-
-void MyThread::playerList()
-{
-	while (!players.empty())
-		sendString(players.back()->name + '/n');
-	players.pop_back();
-	sendString("only uuuuuuuuuuuuuuuuu");
-}*/
-
 void MyThread::disconnected()
 {
-	emit deleteLobbySignal(pLobby);
+	emit deleteLobbyFromListSignal(pLobby);
 	emit deletePlayerSignal(this);
 	qDebug() << socketDescriptor << "Client Disconnected";
 	pSocket->deleteLater();
@@ -105,6 +102,8 @@ void MyThread::sendStart()
 	out << commandType;
 	pCommand->operator<<(out);
 	write(arrBlock);
+
+	qDebug() << "UpdateLobby Command Sent";
 }
 
 void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType)
@@ -119,7 +118,25 @@ void MyThread::sendFirstPlayer(QString _firstPlayer, QString _guest, GameType _g
 	out << commandType;
 	pCommand->operator<<(out);
 	write(arrBlock);
+
+	qDebug() << "SendFirstPlayer Command Sent";
 }
+
+/*void MyThread::sendQuit(QString _reciever)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendQuit};
+	Command* pCommand = new SendQuit(_reciever);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "SendQuit Command Sent";
+}*/
 
 void MyThread::coridorSendQPoint(QPoint point, bool move, QString enemy, bool horizontal)
 {
@@ -191,7 +208,72 @@ Lobby* MyThread::createLobby(QString lobbyName, int gameType)
 	return new Lobby(lobbyName, pPlayer->playerName, gameType);
 }
 
-void* MyThread::deleteGuestLobby(Lobby* lobby)
+void MyThread::sendCreateLobby(Lobby* _lobby)
+{
+	pLobby = _lobby;
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::CreateLobby};
+	Command* pCommand = new CreateLobby(pLobby);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "CreateLobby Command Sent";
+}
+
+void MyThread::sendUpdateLobby(int _gameType, int _status)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::UpdateLobby};
+	std::list<Player*> emptyList; // Client doesn't use it anyway
+	Command* pCommand = new UpdateLobby(_gameType, _status, emptyList);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "UpdateLobby Command Sent";
+}
+
+/*void MyThread::sendDeleteLobby(Lobby* _lobby)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::DeleteLobby};
+	Command* pCommand = new DeleteLobby(_lobby);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+
+	qDebug() << "DeleteLobby Command Sent";
+}*/
+
+void MyThread::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::ConnectToLobby};
+	Command* pCommand = new ConnectToLobby(_lobby, _player, _connectFlag);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	write(arrBlock);
+	qDebug() << "ConnectToLobby Command Sent" << pPlayer->playerName;
+}
+
+void MyThread::sendDeleteLobby(Lobby* lobby)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -212,29 +294,41 @@ void MyThread::switchCmd()
 {
 	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
 	{
-		pPlayer = pLogin->player;
+		emit createPlayerSignal(pLogin->player, this);
+		// pPlayer = pLogin->player;
 		// pPlayer->setID(socketDescriptor);
 	}
 	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
 	{
 		emit createLobbySignal(pCreateLobby->lobby);
-		pLobby = pCreateLobby->lobby;
 	}
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{
-		// emit changeGameTypeSignal(this, pChangeGameType->gameType, pChangeGameType->status);
+		// emit changeGameTypeSignal(this, pUpdateLobby->gameType, pUpdateLobby->status);
 		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
+		if (pUpdateLobby->status != InGame)
+			sendUpdateLobby(pUpdateLobby->gameType, pUpdateLobby->status);
 		for (const auto& i : pUpdateLobby->connectedPlayers)
 			emit sendGameTypesSignal(i, pUpdateLobby->gameType, pUpdateLobby->status);
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		for (const auto& i : pDeleteLobby->lobby->connectedPlayers)
+		if (pDeleteLobby->lobby->gameType != WrongGameType)
 		{
-			emit deleteGuestLobbySignal(i);
+			emit sendDeleteLobbySignal(pDeleteLobby->lobby->host);
+			for (const auto& i : pDeleteLobby->lobby->connectedPlayers)
+			{
+				emit sendDeleteLobbySignal(i);
+			}
+			emit deleteLobbyFromListSignal(pDeleteLobby->lobby);
+			pLobby = new Lobby();
 		}
-		emit deleteLobbySignal(pDeleteLobby->lobby);
-		pLobby = new Lobby();
+		else
+		{
+			// emit sendDeleteLobbySignal(pPlayer);
+			pLobby = new Lobby();
+		}
+		// sendDeleteLobby(pDeleteLobby->lobby);
 	}
 	else if (AskLobbies* pAskLobbies = dynamic_cast<AskLobbies*>(pCommand))
 	{
@@ -244,18 +338,15 @@ void MyThread::switchCmd()
 	{
 		if (pConnectToLobby->connectFlag)
 		{
-			if (pConnectToLobby->lobby->connectedPlayersNumber < pConnectToLobby->lobby->maxPlayers)
-				try
-				{
-					emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
-				}
-				catch (const exception& e)
-				{
-					emit sendMessage(tr(e.what()), true);
-					qDebug() << tr(e.what());
-				}
-			else
-				sendMessage("Error: Too much players", true);
+			try
+			{
+				emit connectToLobbySignal(pConnectToLobby->lobby, pConnectToLobby->player, true);
+			}
+			catch (const exception& e)
+			{
+				emit sendMessage(tr(e.what()), true);
+				qDebug() << tr(e.what());
+			}
 		}
 		else
 		{
@@ -266,15 +357,25 @@ void MyThread::switchCmd()
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
 		emit sendRdySignal(pSendRdy->host);
-		if (pLobby->status == Unready)
+		/*if (pLobby->status == Unready)
 			pLobby->updateStatus(Ready);
 		else if (pLobby->status == Ready)
-			pLobby->updateStatus(Unready);
+			pLobby->updateStatus(Unready);*/
 	}
+	// dont need it now
+	/*else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))
+	{
+		if (pSendMessage->errorFlag)
+			emit sendMessageSignal(pSendMessage->message, pSendMessage->errorFlag, pSendMessage->playerName);
+	}*/
 	else if (SendFirstPlayer* pSendFirstPlayer = dynamic_cast<SendFirstPlayer*>(pCommand))
 	{
 		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest, (GameType)pSendFirstPlayer->gameType);
 	}
+	/*else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
+	{
+		emit sendQuitSignal(pSendQuit->reciever);
+	}*/
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{
 		emit coridorSendQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);

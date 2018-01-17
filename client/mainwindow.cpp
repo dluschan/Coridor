@@ -9,73 +9,71 @@ MainWindow::MainWindow(QWidget* parent)
 	setMinimumHeight(300);
 	setWindowTitle("Client");
 
-	centralWidget = new QWidget(this);
-	setCentralWidget(centralWidget);
-
-	pSocket = new QTcpSocket(this);
+	/*pSocket = new QTcpSocket(this);
 	connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
-	connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
+	connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));*/
 
-	connectLayout = new QGridLayout(centralWidget);
-	connectBtn = new QPushButton("Connect to server");
-	loginEdit = new QLineEdit();
-	passwordEdit = new QLineEdit();
-	connectLayout->addWidget(loginEdit);
-	connectLayout->addWidget(passwordEdit);
-	connectLayout->addWidget(connectBtn);
-	connect(connectBtn, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
+	switchToLoginIn();
+
+	// connect(this, SIGNAL(sendQuitSignal()), this, SLOT(recieveQuit()));
 }
 
 MainWindow::~MainWindow()
 {
+	sockDisc();
 }
 
 void MainWindow::connectToTheServer()
 {
-	pSocket->connectToHost("localhost", 5555);
+	if (pSocket->state() != QAbstractSocket::ConnectedState)
+	{
+		pSocket = new QTcpSocket(this);
+		connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
+		connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
+		connect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(sockDisc()));
+		pSocket->connectToHost("127.0.0.1", 5555);
+	}
+	else
+		QMessageBox::information(this, tr("Error"), "You are already connected, please Log in");
+	// pSocket->deleteLater();
+}
 
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+void MainWindow::sendLogin()
+{
+	if (pSocket->isOpen() && pSocket->state() == QAbstractSocket::ConnectedState)
+	{
+		QByteArray arrBlock;
+		QDataStream out(&arrBlock, QIODevice::WriteOnly);
+		out.setVersion(QDataStream::Qt_5_9);
 
-	CommandType commandType = {CommandType::Type::AskLogin};
-	Command* pCommand = new Login(loginEdit->text());
+		CommandType commandType = {CommandType::Type::AskLogin};
+		Command* pCommand = new Login(loginEdit->text());
 
-	pPlayer = new Player(loginEdit->text());
-	// qDebug() << int(pSocket->socketDescriptor());
-	// player->setID(int(pSocket->socketDescriptor()));
+		// pPlayer = new Player(loginEdit->text());
+		// qDebug() << int(pSocket->socketDescriptor());
+		// player->setID(int(pSocket->socketDescriptor()));
 
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
+		out << commandType;
+		pCommand->operator<<(out);
+		pSocket->write(arrBlock);
+		pSocket->waitForBytesWritten();
 
-	qDebug() << "Login Command Sent";
-
-	switchToMain();
+		qDebug() << "Login Command Sent";
+	}
+	else
+		QMessageBox::information(this, "Error", "You must connect first");
 }
 
 void MainWindow::createLobbyDialog()
 {
 	CreateLobbyDialog* dialog = new CreateLobbyDialog(pPlayer->playerName);
-	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(createLobby(QString, QString, int)));
+	connect(dialog, SIGNAL(clicked(QString, QString, int)), this, SLOT(sendCreateLobby(QString, QString, int)));
+	connect(this, SIGNAL(closeGame()), dialog, SLOT(closeSlot()));
 }
 
 void MainWindow::sendConnectToLobbySlot(QTreeWidgetItem* item, int column)
 {
-	// получение connectedPlayersNumber
-	QRegExp rx(".*\\s*(\\d+)\\s*/.*");
-	int pos = 0;
-
-	int connectedPlayersNumber;
-	if ((pos = rx.indexIn(item->text(3), 0)) != -1)
-	{
-		connectedPlayersNumber = rx.cap(1).toInt();
-	}
-
-	pLobby = new Lobby(item->text(0), item->text(1), pLobby->getGameType(item->text(2)), connectedPlayersNumber);
-	pLobby->host->playerName;
-	sendConnectToLobby(pLobby, pPlayer, true);
+	sendConnectToLobby(new Lobby(item->text(0)), pPlayer, true);
 }
 
 void MainWindow::leaveLobby()
@@ -90,7 +88,7 @@ void MainWindow::deleteLobbySlot()
 {
 	if (pLobby->gameType != WrongGameType)
 		deleteLobby(pLobby);
-	switchToMain();
+	// switchToMain();
 }
 
 void MainWindow::leaveLobbiesList()
@@ -130,6 +128,23 @@ void MainWindow::sendRdy()
 	qDebug() << "SendRdy Command Sent";
 }
 
+void MainWindow::sendMessage(QString message, bool errorFlag, QString playerName)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendMessage};
+	Command* pCommand = new SendMessage(message, errorFlag, playerName);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "SendMessage Command Sent";
+}
+
 void MainWindow::switchToCoridorWindow(bool hosting)
 {
 	this->close(); // Закрываем основное окно
@@ -140,6 +155,7 @@ void MainWindow::switchToCoridorWindow(bool hosting)
 			dialogChoosePlayer = new DialogChoosePlayer(hosting, pLobby->host->playerName, pLobby->connectedPlayers.back()->playerName);
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(chooseFirstPlayerCoridor(QString)));
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(sendFirstPlayerCoridorSlot(QString)));
+			connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 		}
 		else
 			qDebug() << "EROR THAT SHOULDN'T HAPPEN!!!!";
@@ -147,6 +163,7 @@ void MainWindow::switchToCoridorWindow(bool hosting)
 	else
 	{
 		dialogChoosePlayer = new DialogChoosePlayer(hosting);
+		connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 	}
 }
 
@@ -160,6 +177,7 @@ void MainWindow::switchToQuartoWindow(bool hosting)
 			dialogChoosePlayer = new DialogChoosePlayer(hosting, pLobby->host->playerName, pLobby->connectedPlayers.back()->playerName);
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(chooseFirstPlayerQuarto(QString)));
 			connect(dialogChoosePlayer, SIGNAL(clicked(QString)), this, SLOT(sendFirstPlayerQuartoSlot(QString)));
+			connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 		}
 		else
 			qDebug() << "EROR THAT SHOULDN'T HAPPEN!!!!";
@@ -167,6 +185,7 @@ void MainWindow::switchToQuartoWindow(bool hosting)
 	else
 	{
 		dialogChoosePlayer = new DialogChoosePlayer(hosting);
+		connect(this, SIGNAL(closeGame()), dialogChoosePlayer, SLOT(closeSlot()));
 	}
 }
 
@@ -198,16 +217,41 @@ void MainWindow::switchToGameLikeHostSlot()
 
 void MainWindow::returnFromGame()
 {
-	deleteLobby(pLobby);
+	// deleteLobby(pLobby);
 	this->show();
 	switchToMain();
 }
+
+/*void MainWindow::sendQuit(QString _reciever)
+{
+	QByteArray arrBlock;
+	QDataStream out(&arrBlock, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_5_9);
+
+	CommandType commandType = {CommandType::Type::SendQuit};
+	Command* pCommand = new SendQuit(_reciever);
+
+	out << commandType;
+	pCommand->operator<<(out);
+	pSocket->write(arrBlock);
+	pSocket->waitForBytesWritten();
+
+	qDebug() << "SendQuit Command Sent";
+	this->show();
+	switchToMain();
+	pLobby = new Lobby();
+}*/
+
+/*void MainWindow::recieveQuit()
+{
+	// deleteLobby(pLobby);
+}*/
 
 void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 {
 	QString _secondPlayer;
 	if (_firstPlayer == pLobby->host->playerName)
-		_secondPlayer = pLobby->connectedPlayers.back()->playerName; // CRASHES HERE CAUSE THERE IS NO connectedPlayers in pLobby
+		_secondPlayer = pLobby->connectedPlayers.back()->playerName;
 	else
 		_secondPlayer = pLobby->host->playerName;
 
@@ -215,14 +259,19 @@ void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 	coridorWindow = new CoridorWindow(_firstPlayer, _secondPlayer, pPlayer->playerName);
 	connect(coridorWindow, SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(coridorSendQPoint(QPoint, bool, QString, bool)));
 	connect(this, SIGNAL(coridorRecieveQPointSignal(QPoint, bool, QString, bool)), coridorWindow, SLOT(coridorRecieveQPoint(QPoint, bool, QString, bool)));
+	// connect(coridorWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
+	// connect(this, SIGNAL(sendQuitSignal()), coridorWindow, SLOT(recieveQuit()));
 	connect(coridorWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
+	connect(this, SIGNAL(closeGame()), coridorWindow, SLOT(closeGameSlot()));
+	connect(coridorWindow, SIGNAL(sendGameEndSignal()), this, SLOT(deleteLobbySlot()));
+	connect(this, SIGNAL(gameEndSignal()), coridorWindow, SLOT(gameEnd()));
 }
 
 void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 {
 	QString _secondPlayer;
 	if (_firstPlayer == pLobby->host->playerName)
-		_secondPlayer = pLobby->connectedPlayers.back()->playerName; // CRASHES HERE CAUSE THERE IS NO connectedPlayers in pLobby
+		_secondPlayer = pLobby->connectedPlayers.back()->playerName;
 	else
 		_secondPlayer = pLobby->host->playerName;
 
@@ -232,7 +281,12 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 	connect(this, SIGNAL(quartoRecieveQPointSignal(QPoint, int, QString)), quartoWindow, SLOT(quartoRecieveQPoint(QPoint, int, QString)));
 	connect(quartoWindow, SIGNAL(quartoSendCheckWinSignal(QString, bool)), this, SLOT(quartoSendCheckWin(QString, bool)));
 	connect(this, SIGNAL(quartoRecieveCheckWinSignal(QString, bool)), quartoWindow, SLOT(quartoRecieveCheckWin(QString, bool)));
+	// connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
+	// connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit()));
 	connect(quartoWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
+	connect(this, SIGNAL(closeGame()), quartoWindow, SLOT(closeGameSlot()));
+	connect(quartoWindow, SIGNAL(sendGameEndSignal()), this, SLOT(deleteLobbySlot()));
+	connect(this, SIGNAL(gameEndSignal()), quartoWindow, SLOT(gameEnd()));
 }
 
 void MainWindow::chooseFirstPlayer(QString _firstPlayer, GameType _gameType)
@@ -270,12 +324,15 @@ void MainWindow::switchToLoginIn()
 
 	connectLayout = new QGridLayout(centralWidget);
 	connectBtn = new QPushButton("Connect to server");
+	loginBtn = new QPushButton("Login in");
 	loginEdit = new QLineEdit();
 	passwordEdit = new QLineEdit();
 	connectLayout->addWidget(loginEdit);
 	connectLayout->addWidget(passwordEdit);
 	connectLayout->addWidget(connectBtn);
+	connectLayout->addWidget(loginBtn);
 	connect(connectBtn, SIGNAL(clicked()), this, SLOT(connectToTheServer()));
+	connect(loginBtn, SIGNAL(clicked(bool)), this, SLOT(sendLogin()));
 }
 
 void MainWindow::switchToMain()
@@ -307,16 +364,9 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 
 	connectedPlayersList = new QListWidget();
 
-	QListWidgetItem* player1 = new QListWidgetItem("Player1", connectedPlayersList); // pPlayer->playerName
+	QListWidgetItem* player1 = new QListWidgetItem("Player1", connectedPlayersList);
 	player1->setCheckState(Qt::Checked);
 	player1->setFlags(Qt::ItemIsEnabled); // this disables checkable...
-
-	/*QListWidgetItem* player2 = new QListWidgetItem("Player2", connectedPlayersList);
-	if (pLobby->status == Unready)
-		player2->setCheckState(Qt::Unchecked);
-	else if (pLobby->status == Ready)
-		player2->setCheckState(Qt::Checked);
-	player2->setFlags(Qt::ItemIsEnabled); // this disables checkable...*/
 
 	QListWidgetItem* tmpItem;
 
@@ -355,8 +405,6 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 				tmpItem->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 			}
 
-			// player2->setText(connectingPlayer->playerName);
-
 			gameTypeEdit->setEnabled(true);
 
 			startGameBtn = new QPushButton("Start");
@@ -381,13 +429,10 @@ void MainWindow::switchToLobby(Player* connectingPlayer, Lobby* _lobby, bool fla
 				tmpItem->setFlags(Qt::ItemIsEnabled); // this disables checkable...
 			}
 
-			// player2->setText(pPlayer->playerName);
-
 			gameTypeEdit->setEnabled(false);
 
 			startGameBtn = new QPushButton("Ready");
 			connect(exitLobbyBtn, SIGNAL(clicked()), this, SLOT(leaveLobby()));
-			// connect(startGameBtn, SIGNAL(clicked()), this, SLOT(setRdy())); // maybe will need player index
 			connect(startGameBtn, SIGNAL(clicked()), this, SLOT(sendRdy()));
 		}
 	}
@@ -423,11 +468,14 @@ void MainWindow::switchToLobbiesList()
 
 void MainWindow::sockDisc()
 {
+	qDebug() << "sockDisconnected";
 	pSocket->deleteLater();
+	emit closeGame();
+	this->show();
 	switchToLoginIn();
 }
 
-void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
+void MainWindow::sendCreateLobby(QString lobbyName, QString hostLogin, int gameType)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -442,10 +490,6 @@ void MainWindow::createLobby(QString lobbyName, QString hostLogin, int gameType)
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "CreateLobby Command Sent";
-
-	pLobby = new Lobby(lobbyName, hostLogin, gameType);
-
-	switchToLobby(new Player(), pLobby, true);
 }
 
 void MainWindow::deleteLobby(Lobby* lobby)
@@ -463,7 +507,7 @@ void MainWindow::deleteLobby(Lobby* lobby)
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "DeleteLobby Command Sent";
-	pLobby = new Lobby();
+	// pLobby = new Lobby();
 }
 
 void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connectFlag)
@@ -482,11 +526,6 @@ void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connec
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "ConnectToLobby Command Sent" << _connectFlag;
-
-	/*if (_connectFlag)
-		pLobby->connect(_player);
-	else
-		pLobby->disconnect(_player);*/
 }
 
 void MainWindow::sendUpdateLobby(int _gameType, int _status)
@@ -504,23 +543,6 @@ void MainWindow::sendUpdateLobby(int _gameType, int _status)
 	pSocket->waitForBytesWritten();
 
 	qDebug() << "ChangeGameType Command Sent";
-}
-
-void MainWindow::sendMessage(QString message)
-{
-	QByteArray arrBlock;
-	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
-
-	CommandType commandType = {CommandType::Type::SendMessage};
-	Command* pCommand = new SendMessage(message, false);
-
-	out << commandType;
-	pCommand->operator<<(out);
-	pSocket->write(arrBlock);
-	pSocket->waitForBytesWritten();
-
-	qDebug() << "SendMessage Command Sent";
 }
 
 void MainWindow::sendChooseFirstPlayer(QString _firstPlayer, QString _guest, GameType _gameType)
@@ -610,8 +632,8 @@ void MainWindow::askLobbies()
 
 void MainWindow::updateLobby(int _gameType)
 {
-	pLobby->updateGameType(_gameType);
-	sendUpdateLobby(_gameType, pLobby->status);
+	// pLobby->update(_gameType, Unready);
+	sendUpdateLobby(_gameType, Unready);
 }
 
 void MainWindow::sockReady()
@@ -652,41 +674,58 @@ void MainWindow::sockReady()
 
 void MainWindow::switchCmd()
 {
-	if (SendLobbies* pSendLobbies = dynamic_cast<SendLobbies*>(pCommand))
+	if (Login* pLogin = dynamic_cast<Login*>(pCommand))
+	{
+		pPlayer = pLogin->player;
+		switchToMain();
+	}
+	else if (CreateLobby* pCreateLobby = dynamic_cast<CreateLobby*>(pCommand))
+	{
+		pLobby = pCreateLobby->lobby;
+		switchToLobby(new Player(), pLobby, true);
+	}
+	else if (SendLobbies* pSendLobbies = dynamic_cast<SendLobbies*>(pCommand))
 	{
 		switchToLobbiesList();
 
-		list<QTreeWidgetItem*> lobbyItems;
+		// list<QTreeWidgetItem*> lobbyItems;
+		QTreeWidgetItem* tmpItem;
 		for (const auto& i : pSendLobbies->lobbies)
 		{
-			lobbyItems.push_back(new QTreeWidgetItem(lobbiesList));
-			lobbyItems.back()->setText(0, i->lobbyName);
-			lobbyItems.back()->setText(1, i->host->playerName);
-			lobbyItems.back()->setText(2, i->gameTypeStr);
-			lobbyItems.back()->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
-			lobbyItems.back()->setText(4, i->statusStr);
-			connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(sendConnectToLobbySlot(QTreeWidgetItem*, int)));
+			tmpItem = new QTreeWidgetItem(lobbiesList);
+			tmpItem->setText(0, i->lobbyName);
+			tmpItem->setText(1, i->host->playerName);
+			tmpItem->setText(2, i->gameTypeStr);
+			tmpItem->setText(3, QString::number(i->connectedPlayersNumber) + "/" + QString::number(i->maxPlayers));
+			tmpItem->setText(4, i->statusStr);
 		}
+		connect(lobbiesList, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(sendConnectToLobbySlot(QTreeWidgetItem*, int)));
 	}
 	else if (DeleteLobby* pDeleteLobby = dynamic_cast<DeleteLobby*>(pCommand))
 	{
-		switchToMain();
+		if (pLobby->gameType != WrongGameType)
+			switchToMain();
+		emit gameEndSignal();
 		pLobby = new Lobby();
 	}
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
 	{
 		pLobby->update(pUpdateLobby->gameType, pUpdateLobby->status);
-		if (pLobby->connectedPlayers.empty())
-			qDebug() << "UpdateLobby ERROR";
+		switchToLobby(new Player(), pLobby, false);
 		if (pUpdateLobby->status != InGame)
 		{
-			for (const auto& i : pUpdateLobby->connectedPlayers)
+			for (const auto& i : pLobby->connectedPlayers)
 				if (i->playerName == pPlayer->playerName)
 					switchToLobby(i, pLobby, false);
 		}
+		else if (pUpdateLobby->gameType == WrongGameType)
+		{
+			// close current game
+			returnFromGame();
+			QMessageBox::information(this, tr("Error"), "Oponent has left the game");
+		}
 		else
 			switchToGame(false);
-		// switchToLobby(pPlayer, pLobby, false);
 	}
 	else if (ConnectToLobby* pConnectToLobby = dynamic_cast<ConnectToLobby*>(pCommand))
 	{
@@ -701,8 +740,6 @@ void MainWindow::switchCmd()
 	}
 	else if (SendRdy* pSendRdy = dynamic_cast<SendRdy*>(pCommand))
 	{
-		if (pLobby->connectedPlayers.empty())
-			qDebug() << "SendRdy ERROR";
 		setRdy();
 	}
 	else if (SendMessage* pSendMessage = dynamic_cast<SendMessage*>(pCommand))
@@ -715,6 +752,10 @@ void MainWindow::switchCmd()
 		dialogChoosePlayer->close();
 		chooseFirstPlayer(pSendFirstPlayer->firstPlayer, (GameType)pSendFirstPlayer->gameType);
 	}
+	/*else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
+	{
+		// emit sendQuitSignal();
+	}*/
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{
 		emit coridorRecieveQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);

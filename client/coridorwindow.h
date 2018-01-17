@@ -1,7 +1,6 @@
 #ifndef CORIDORWINDOW_H
 #define CORIDORWINDOW_H
 
-#include "../common/command.h"
 #include "coridorlogic.h"
 #include "dialogchoseplayer.h"
 #include "field.h"
@@ -40,11 +39,14 @@ protected:
 	void mousePressEvent(QMouseEvent* mEvent);
 	void mouseMoveEvent(QMouseEvent* mEvent);
 	void mouseReleaseEvent(QMouseEvent* mEvent);
+	void closeEvent(QCloseEvent* event);
 
 signals:
 	void firstWindow(); // Сигнал для первого окна на открытие
 	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoSendQPointSignal(QPoint point, int figureId, QString enemy);
+	// void sendQuitSignal(QString reciever);
+	void sendGameEndSignal();
 
 private slots:
 	// Слот-обработчик нажатия кнопки
@@ -52,6 +54,9 @@ private slots:
 	void start_pushButton_clicked();
 
 	void coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal);
+	// void recieveQuit();
+	void closeGameSlot();
+	void gameEnd();
 
 private:
 	Ui::CoridorWindow* ui;
@@ -60,7 +65,7 @@ private:
 	Field* field;
 	Walls walls;
 	CoridorLogic* game;
-	QString status = "Move or place a wall";
+	QString status;
 	QString player;
 
 	void placeWall(QPoint point, bool horizontal);

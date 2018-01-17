@@ -20,7 +20,6 @@ SOURCES += main.cpp \
         mythread.cpp \
         ../common/player.cpp \
         ../common/lobby.cpp \
-        ../common/game.cpp \
         ../common/command.cpp
 
 HEADERS += \
@@ -28,5 +27,4 @@ HEADERS += \
         mythread.h \
         ../common/player.h \
         ../common/lobby.h \
-        ../common/game.h \
         ../common/command.h

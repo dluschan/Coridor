@@ -1,11 +1,15 @@
 #ifndef LOBBY_H
 #define LOBBY_H
 
-#include "game.h"
 #include "player.h"
 #include <QObject>
-//#include <QString>
-//#include "player.h"
+
+enum GameType
+{
+	Coridor,
+	Quarto,
+	WrongGameType
+};
 
 enum Status
 {
@@ -17,7 +21,7 @@ enum Status
 class Lobby
 {
 public:
-	Lobby(QString _name = "LobbyName", QString _host = "HostName", int _gameType = 2, int _connectedPlayersNumber = 1);
+	Lobby(QString _name = "", QString _host = "HostName", int _gameType = 2, int _connectedPlayersNumber = 1);
 	QString lobbyName;
 	Player* host;
 	int connectedPlayersNumber = 1, maxPlayers = 2;

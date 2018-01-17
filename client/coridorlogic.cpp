@@ -223,78 +223,6 @@ int CoridorLogic::placeWall(int player_id, int x, int y, char dir)
 	return 0;
 }
 
-/*int GameLogic::turn(int pole[17][17], int player_id)
-{
-	int number = player_id + 1;
-
-	try
-	{
-		cout << "Turn of Player" << number << ", chose move or place a wall (m/w): ";
-		char ans;
-		cin >> ans;
-		cout << endl;
-		switch (ans)
-		{
-		case 'm':
-			// return move(pole, player_id);
-		case 'w':
-
-			// return placeWall(pole, player_id);
-
-		case 'p':
-			return 0;
-		default:
-			throw runtime_error("Error: wrong char!");
-		}
-	}
-	catch (const exception& e)
-	{
-		cout << e.what() << endl;
-		return turn(pole, player_id);
-	}
-}
-
-bool GameLogic::different_dir(char a, char b)
-{
-	return (((a == 'l' || a == 'r') && (b == 'u' || b == 'd')) || ((a == 'u' || a == 'd') && (b == 'l' || b == 'r')));
-}
-
-void GameLogic::jump(int& x, int& y, int pole[17][17], char dir)
-{
-	pair<int, int> coords = step(x, y, dir, 2);
-	int other_x = coords.first;
-	int other_y = coords.second;
-
-	coords = step(other_x, other_y, dir, 2);
-	int new_x = coords.first;
-	int new_y = coords.second;
-	if (!isWall(other_x, other_y, new_x, new_y, pole))
-	{
-		swap(pole[new_x][new_y], pole[x][y]);
-		x = new_x;
-		y = new_y;
-		return;
-	}
-
-	const char* choise_dir = (dir == 'l' || dir == 'r') ? "down or up (d/u)" : "left or right (l/r)";
-	cout << "Chose direction - " << choise_dir << ": ";
-	char ans;
-	cin >> ans;
-	cout << endl;
-	if (!different_dir(dir, ans))
-		throw runtime_error("Error: wrong char!");
-
-	coords = step(other_x, other_y, ans, 2);
-	new_x = coords.first;
-	new_y = coords.second;
-	if (!isWall(other_x, other_y, new_x, new_y, pole))
-	{
-		swap(pole[new_x][new_y], pole[x][y]);
-		x = new_x;
-		y = new_y;
-	}
-}*/
-
 bool CoridorLogic::isWall(int x0, int y0, int x1, int y1)
 {
 	return pole[(x0 + x1) / 2][(y0 + y1) / 2] == w;
@@ -371,20 +299,6 @@ bool CoridorLogic::aZvezda(int x, int y, int p)
 	}
 	return false;
 }
-
-/*void CoridorLogic::end()
-{
-	switch (endValue)
-	{
-	case 1:
-		std::cout << "Player" << winner + 1 << " wins!" << std::endl;
-		break;
-	case 2:
-		std::cout << "Player" << winner + 1 << " wins!" << std::endl;
-		// cout << "Ops, Player" << number << " closed himself!" << endl;
-		break;
-	}
-}*/
 
 int CoridorLogic::nextTurn(int res)
 {

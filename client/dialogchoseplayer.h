@@ -16,6 +16,7 @@ public:
 
 public slots:
 	void startTheGame();
+	void closeSlot();
 
 signals:
 	void clicked(QString firstPl);

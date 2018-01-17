@@ -20,15 +20,12 @@ struct CommandType
 		AskLobbies,
 		SendLobbies,
 		ConnectToLobby,
-		// SendConnect,
 		SendRdy,
 		SendFirstPlayer,
+		// SendQuit,
 		CoridorSendQPoint,
 		QuartoSendQPoint,
 		QuartoSendCheckWin,
-		// SendStart,
-		// SendError,
-		// SendString,
 		SendMessage,
 		WrongCommand
 	};
@@ -86,23 +83,6 @@ private:
 	int gameType;
 };
 
-/*class CreateLobby : public Command
-{
-public:
-	CreateLobby(QString _lobbyName = QString("Lobby Name"), QString _hostLogin = QString(), int _gameType = 1);
-
-	Lobby* lobby;
-
-	virtual void execute();
-	virtual QDataStream& operator>>(QDataStream& stream);
-	virtual QDataStream& operator<<(QDataStream& stream) const;
-
-private:
-	QString lobbyName;
-	QString hostLogin;
-	int gameType;
-};*/
-
 class UpdateLobby : public Command
 {
 public:
@@ -144,7 +124,6 @@ public:
 	SendLobbies(list<Lobby*> _lobbies);
 
 	std::list<Lobby*> lobbies;
-	// Lobby* lobbyTmp;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);
@@ -191,6 +170,18 @@ public:
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
 
+/*class SendQuit : public Command
+{
+public:
+	SendQuit(QString _reciever = QString());
+
+	QString reciever;
+
+	virtual void execute();
+	virtual QDataStream& operator>>(QDataStream& stream);
+	virtual QDataStream& operator<<(QDataStream& stream) const;
+};*/
+
 class CoridorSendQPoint : public Command
 {
 public:
@@ -232,50 +223,15 @@ public:
 	virtual QDataStream& operator>>(QDataStream& stream);
 	virtual QDataStream& operator<<(QDataStream& stream) const;
 };
-/*class SendStart : public Command
-{
-public:
-	SendStart(list<Player*> _players);
-
-	std::list<Player*> players;
-
-	virtual void execute();
-	virtual QDataStream& operator>>(QDataStream& stream);
-	virtual QDataStream& operator<<(QDataStream& stream) const;
-};*/
-
-/*class SendConnect : public Command
-{
-public:
-	SendConnect(Lobby* _lobby = new Lobby(), Player* _player = new Player());
-
-	Lobby* lobby;
-	Player* player;
-
-	virtual void execute();
-	virtual QDataStream& operator>>(QDataStream& stream);
-	virtual QDataStream& operator<<(QDataStream& stream) const;
-};*/
-
-/*class SendError : public Command
-{
-public:
-	SendError(QString _error = QString());
-
-	QString error;
-
-	virtual void execute();
-	virtual QDataStream& operator>>(QDataStream& stream);
-	virtual QDataStream& operator<<(QDataStream& stream) const;
-};*/
 
 class SendMessage : public Command
 {
 public:
-	SendMessage(QString _message = QString(), bool _error = false);
+	SendMessage(QString _message = QString(), bool _error = false, QString _playerName = QString());
 
 	QString message;
 	bool errorFlag;
+	QString playerName;
 
 	virtual void execute();
 	virtual QDataStream& operator>>(QDataStream& stream);

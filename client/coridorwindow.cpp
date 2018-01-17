@@ -63,9 +63,9 @@ CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QStrin
 	, player(_player)
 {
 	ui->setupUi(this);
-	this->setWindowTitle(_player);
-	this->setMinimumWidth(784);
-	this->setMinimumHeight(660);
+	setWindowTitle("Coridor - " + _player);
+	setMinimumWidth(784);
+	setMinimumHeight(660);
 	ui->restartBtn->hide();
 	// connect(ui->pushButton_2, SIGNAL(pressed()), this, SLOT(start_pushButton_clicked()));
 	connect(ui->exitBtn, SIGNAL(clicked()), this, SLOT(exitBtn_clicked()));
@@ -75,9 +75,13 @@ CoridorWindow::CoridorWindow(QString _firstPlayer, QString _secondPlayer, QStrin
 
 	field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
 	game = new CoridorLogic(_firstPlayer, _secondPlayer);
+	if (_player == _firstPlayer)
+		status = "Move or place a wall";
+	else
+		status = "Waiting for another player";
 
 	field->redrawCoridor(game->pole);
-	this->show();
+	show();
 }
 
 CoridorWindow::~CoridorWindow()
@@ -192,7 +196,7 @@ void CoridorWindow::mousePressEvent(QMouseEvent* mEvent)
 		walls.mousePressed(pos);
 
 		// SelectPlayer(point);
-		this->update();
+		update();
 	}
 }
 
@@ -203,7 +207,7 @@ void CoridorWindow::mouseMoveEvent(QMouseEvent* mEvent)
 		QPoint pos = mEvent->pos();
 		QPoint point = field->getCoordCoridor(pos.x(), pos.y());
 		walls.mouseMoved(pos, point);
-		this->update();
+		update();
 	}
 }
 
@@ -235,25 +239,43 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		else
 			status = "Its not your turn";
 		walls.mouseReleased(pos);
-		this->update();
+		update();
 		if (game->endValue != 0)
-			QMessageBox::information(this, tr("End"), status + " you can leave now");
+		{
+			emit sendGameEndSignal();
+			// QMessageBox::information(this, tr("End"), status + " you can leave now");
+		}
 	}
 	else
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
+void CoridorWindow::closeEvent(QCloseEvent* event)
+{
+	if (game->endValue == 0)
+		emit sendGameEndSignal();
+	emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	disconnect();
+	// close(); // Закрываем окно
+	deleteLater();
+	event->accept();
+}
+
 void CoridorWindow::exitBtn_clicked()
 {
-	this->close();		// Закрываем окно
+	if (game->endValue == 0)
+		emit sendGameEndSignal();
 	emit firstWindow(); // И вызываем сигнал на открытие главного окна
+	disconnect();
+	close(); // Закрываем окно
+	deleteLater();
 }
 
 void CoridorWindow::start_pushButton_clicked()
 {
 	// field = new Field(pictures, 0, 0, 36 * 18, 36 * 18);
 	// game = new CoridorLogic();
-	this->update();
+	update();
 }
 
 void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal)
@@ -262,9 +284,37 @@ void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciev
 		movePlayer(point);
 	else // if (checkPoint(point))
 		placeWall(point, horizontal);
-	this->update();
-	if (game->endValue != 0)
+	update();
+	/*if (game->endValue != 0)
+	{
+		// emit sendDeleteLobbySignal();
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
+	}*/
+}
+
+void CoridorWindow::gameEnd()
+{
+	if (game->endValue == 0)
+	{
+		game->endValue = 3;
+		status = "Your opponet has left the game";
+	}
+	update();
+	QMessageBox::information(this, tr("End"), status + " you can leave now");
+}
+
+/*void CoridorWindow::recieveQuit()
+{
+	game->endValue = 3;
+	status = "Your opponet has left the game";
+	update();
+	QMessageBox::information(this, tr("End"), status + " you can leave now");
+}*/
+
+void CoridorWindow::closeGameSlot()
+{
+	close();
+	deleteLater();
 }
 
 bool CoridorWindow::checkPoint(QPoint point)

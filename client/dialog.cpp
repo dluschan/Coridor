@@ -34,3 +34,9 @@ void CreateLobbyDialog::createLobby()
 	emit clicked(lobbyNameEdit->text(), host, gameTypeEdit->currentIndex());
 	this->close();
 }
+
+void CreateLobbyDialog::closeSlot()
+{
+	close();
+	deleteLater();
+}
