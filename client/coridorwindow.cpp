@@ -241,7 +241,10 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 		walls.mouseReleased(pos);
 		update();
 		if (game->endValue != 0)
-			QMessageBox::information(this, tr("End"), status + " you can leave now");
+		{
+			emit sendGameEndSignal();
+			// QMessageBox::information(this, tr("End"), status + " you can leave now");
+		}
 	}
 	else
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
@@ -250,12 +253,8 @@ void CoridorWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 void CoridorWindow::closeEvent(QCloseEvent* event)
 {
 	if (game->endValue == 0)
-		if (player == game->player1.name)
-			emit sendQuitSignal(game->player2.name);
-		else
-			emit sendQuitSignal(game->player1.name);
-	else
-		emit firstWindow(); // И вызываем сигнал на открытие главного окна
+		emit sendGameEndSignal();
+	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	disconnect();
 	// close(); // Закрываем окно
 	deleteLater();
@@ -265,12 +264,8 @@ void CoridorWindow::closeEvent(QCloseEvent* event)
 void CoridorWindow::exitBtn_clicked()
 {
 	if (game->endValue == 0)
-		if (player == game->player1.name)
-			emit sendQuitSignal(game->player2.name);
-		else
-			emit sendQuitSignal(game->player1.name);
-	else
-		emit firstWindow(); // И вызываем сигнал на открытие главного окна
+		emit sendGameEndSignal();
+	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	disconnect();
 	close(); // Закрываем окно
 	deleteLater();
@@ -290,20 +285,31 @@ void CoridorWindow::coridorRecieveQPoint(QPoint point, bool move, QString reciev
 	else // if (checkPoint(point))
 		placeWall(point, horizontal);
 	update();
-	if (game->endValue != 0)
+	/*if (game->endValue != 0)
 	{
-		update();
+		// emit sendDeleteLobbySignal();
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
-	}
+	}*/
 }
 
-void CoridorWindow::recieveQuit()
+void CoridorWindow::gameEnd()
+{
+	if (game->endValue == 0)
+	{
+		game->endValue = 3;
+		status = "Your opponet has left the game";
+	}
+	update();
+	QMessageBox::information(this, tr("End"), status + " you can leave now");
+}
+
+/*void CoridorWindow::recieveQuit()
 {
 	game->endValue = 3;
 	status = "Your opponet has left the game";
 	update();
 	QMessageBox::information(this, tr("End"), status + " you can leave now");
-}
+}*/
 
 void CoridorWindow::closeGameSlot()
 {

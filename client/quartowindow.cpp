@@ -131,8 +131,6 @@ void QuartoWindow::checkWin()
 {
 	game->checkWin();
 	status = game->getPlayerName(game->winner) + " wins!";
-	update();
-	QMessageBox::information(this, tr("End"), status);
 }
 
 void QuartoWindow::nextTurn()
@@ -208,12 +206,8 @@ void QuartoWindow::mouseReleaseEvent(QMouseEvent* mEvent)
 void QuartoWindow::closeEvent(QCloseEvent* event)
 {
 	if (!game->end)
-		if (player == game->player1.name)
-			emit sendQuitSignal(game->player2.name);
-		else
-			emit sendQuitSignal(game->player1.name);
-	else
-		emit firstWindow(); // И вызываем сигнал на открытие главного окна
+		emit sendGameEndSignal();
+	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	disconnect();
 	// close(); // Закрываем окно
 	deleteLater();
@@ -223,12 +217,8 @@ void QuartoWindow::closeEvent(QCloseEvent* event)
 void QuartoWindow::on_pushButton_clicked()
 {
 	if (!game->end)
-		if (player == game->player1.name)
-			emit sendQuitSignal(game->player2.name);
-		else
-			emit sendQuitSignal(game->player1.name);
-	else
-		emit firstWindow(); // И вызываем сигнал на открытие главного окна
+		emit sendGameEndSignal();
+	emit firstWindow(); // И вызываем сигнал на открытие главного окна
 	disconnect();
 	close(); // Закрываем окно
 	deleteLater();
@@ -246,6 +236,11 @@ void QuartoWindow::on_checkWin_clicked()
 		else
 			status = "Its not your turn";
 		update();
+		if (game->end)
+		{
+			emit sendGameEndSignal();
+			// QMessageBox::information(this, tr("End"), status + " you can leave now");
+		}
 	}
 	else
 		QMessageBox::information(this, tr("End"), status + " you can leave now");
@@ -298,18 +293,29 @@ void QuartoWindow::quartoRecieveCheckWin(QString _enemy, bool _checkWin)
 	update();
 }
 
-void QuartoWindow::recieveQuit()
+/*void QuartoWindow::recieveQuit()
 {
 	game->end = true;
 	status = "Your opponet has left the game";
 	update();
 	QMessageBox::information(this, tr("End"), status + " you can leave now");
-}
+}*/
 
 void QuartoWindow::closeGameSlot()
 {
 	close();
 	deleteLater();
+}
+
+void QuartoWindow::gameEnd()
+{
+	if (!game->end)
+	{
+		game->end = true;
+		status = "Your opponet has left the game";
+	}
+	update();
+	QMessageBox::information(this, tr("End"), status + " you can leave now");
 }
 
 bool QuartoWindow::checkPoint(QPoint point)

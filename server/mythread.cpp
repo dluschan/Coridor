@@ -372,10 +372,10 @@ void MyThread::switchCmd()
 	{
 		emit sendFirstPlayerSignal(pSendFirstPlayer->firstPlayer, pSendFirstPlayer->guest, (GameType)pSendFirstPlayer->gameType);
 	}
-	else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
+	/*else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
 	{
 		emit sendQuitSignal(pSendQuit->reciever);
-	}
+	}*/
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{
 		emit coridorSendQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);

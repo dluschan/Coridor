@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget* parent)
 
 	switchToLoginIn();
 
-	connect(this, SIGNAL(sendQuitSignal()), this, SLOT(recieveQuit()));
+	// connect(this, SIGNAL(sendQuitSignal()), this, SLOT(recieveQuit()));
 }
 
 MainWindow::~MainWindow()
@@ -217,12 +217,12 @@ void MainWindow::switchToGameLikeHostSlot()
 
 void MainWindow::returnFromGame()
 {
-	deleteLobby(pLobby);
+	// deleteLobby(pLobby);
 	this->show();
 	switchToMain();
 }
 
-void MainWindow::sendQuit(QString _reciever)
+/*void MainWindow::sendQuit(QString _reciever)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
@@ -240,12 +240,12 @@ void MainWindow::sendQuit(QString _reciever)
 	this->show();
 	switchToMain();
 	pLobby = new Lobby();
-}
+}*/
 
-void MainWindow::recieveQuit()
+/*void MainWindow::recieveQuit()
 {
 	// deleteLobby(pLobby);
-}
+}*/
 
 void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 {
@@ -259,10 +259,12 @@ void MainWindow::chooseFirstPlayerCoridor(QString _firstPlayer)
 	coridorWindow = new CoridorWindow(_firstPlayer, _secondPlayer, pPlayer->playerName);
 	connect(coridorWindow, SIGNAL(coridorSendQPointSignal(QPoint, bool, QString, bool)), this, SLOT(coridorSendQPoint(QPoint, bool, QString, bool)));
 	connect(this, SIGNAL(coridorRecieveQPointSignal(QPoint, bool, QString, bool)), coridorWindow, SLOT(coridorRecieveQPoint(QPoint, bool, QString, bool)));
-	connect(coridorWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
-	connect(this, SIGNAL(sendQuitSignal()), coridorWindow, SLOT(recieveQuit()));
+	// connect(coridorWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
+	// connect(this, SIGNAL(sendQuitSignal()), coridorWindow, SLOT(recieveQuit()));
 	connect(coridorWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
 	connect(this, SIGNAL(closeGame()), coridorWindow, SLOT(closeGameSlot()));
+	connect(coridorWindow, SIGNAL(sendGameEndSignal()), this, SLOT(deleteLobbySlot()));
+	connect(this, SIGNAL(gameEndSignal()), coridorWindow, SLOT(gameEnd()));
 }
 
 void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
@@ -279,10 +281,12 @@ void MainWindow::chooseFirstPlayerQuarto(QString _firstPlayer)
 	connect(this, SIGNAL(quartoRecieveQPointSignal(QPoint, int, QString)), quartoWindow, SLOT(quartoRecieveQPoint(QPoint, int, QString)));
 	connect(quartoWindow, SIGNAL(quartoSendCheckWinSignal(QString, bool)), this, SLOT(quartoSendCheckWin(QString, bool)));
 	connect(this, SIGNAL(quartoRecieveCheckWinSignal(QString, bool)), quartoWindow, SLOT(quartoRecieveCheckWin(QString, bool)));
-	connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
-	connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit()));
+	// connect(quartoWindow, SIGNAL(sendQuitSignal(QString)), this, SLOT(sendQuit(QString)));
+	// connect(this, SIGNAL(sendQuitSignal()), quartoWindow, SLOT(recieveQuit()));
 	connect(quartoWindow, SIGNAL(firstWindow()), this, SLOT(returnFromGame()));
 	connect(this, SIGNAL(closeGame()), quartoWindow, SLOT(closeGameSlot()));
+	connect(quartoWindow, SIGNAL(sendGameEndSignal()), this, SLOT(deleteLobbySlot()));
+	connect(this, SIGNAL(gameEndSignal()), quartoWindow, SLOT(gameEnd()));
 }
 
 void MainWindow::chooseFirstPlayer(QString _firstPlayer, GameType _gameType)
@@ -701,6 +705,7 @@ void MainWindow::switchCmd()
 	{
 		if (pLobby->gameType != WrongGameType)
 			switchToMain();
+		emit gameEndSignal();
 		pLobby = new Lobby();
 	}
 	else if (UpdateLobby* pUpdateLobby = dynamic_cast<UpdateLobby*>(pCommand))
@@ -747,10 +752,10 @@ void MainWindow::switchCmd()
 		dialogChoosePlayer->close();
 		chooseFirstPlayer(pSendFirstPlayer->firstPlayer, (GameType)pSendFirstPlayer->gameType);
 	}
-	else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
+	/*else if (SendQuit* pSendQuit = dynamic_cast<SendQuit*>(pCommand))
 	{
-		emit sendQuitSignal();
-	}
+		// emit sendQuitSignal();
+	}*/
 	else if (CoridorSendQPoint* pCoridorSendQPoint = dynamic_cast<CoridorSendQPoint*>(pCommand))
 	{
 		emit coridorRecieveQPointSignal(pCoridorSendQPoint->point, pCoridorSendQPoint->move, pCoridorSendQPoint->enemy, pCoridorSendQPoint->horizontal);

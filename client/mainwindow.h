@@ -50,8 +50,8 @@ private slots:
 	void switchToQuartoWindow(bool hosting);
 	void switchToGameLikeHostSlot();
 	void returnFromGame();
-	void sendQuit(QString _reciever);
-	void recieveQuit();
+	// void sendQuit(QString _reciever);
+	// void recieveQuit();
 	void chooseFirstPlayerCoridor(QString _firstPlayer);
 	void chooseFirstPlayerQuarto(QString _firstPlayer);
 	void chooseFirstPlayer(QString _firstPlayer, GameType _gameType);
@@ -63,10 +63,11 @@ private slots:
 
 signals:
 	// void choseFirstPlayerSignal();
-	void sendQuitSignal();
+	// void sendQuitSignal();
 	void coridorRecieveQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoRecieveQPointSignal(QPoint point, int figureId, QString enemy);
 	void quartoRecieveCheckWinSignal(QString enemy, bool checkWin);
+	void gameEndSignal();
 	void closeGame();
 
 private:

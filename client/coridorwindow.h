@@ -45,7 +45,8 @@ signals:
 	void firstWindow(); // Сигнал для первого окна на открытие
 	void coridorSendQPointSignal(QPoint point, bool move, QString enemy, bool horizontal);
 	void quartoSendQPointSignal(QPoint point, int figureId, QString enemy);
-	void sendQuitSignal(QString reciever);
+	// void sendQuitSignal(QString reciever);
+	void sendGameEndSignal();
 
 private slots:
 	// Слот-обработчик нажатия кнопки
@@ -53,8 +54,9 @@ private slots:
 	void start_pushButton_clicked();
 
 	void coridorRecieveQPoint(QPoint point, bool move, QString reciever, bool horizontal);
-	void recieveQuit();
+	// void recieveQuit();
 	void closeGameSlot();
+	void gameEnd();
 
 private:
 	Ui::CoridorWindow* ui;
