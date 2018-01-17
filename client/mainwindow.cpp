@@ -31,7 +31,7 @@ void MainWindow::connectToTheServer()
 		connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
 		connect(pSocket, SIGNAL(disconnected()), this, SLOT(sockDisc()));
 		connect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(sockDisc()));
-		pSocket->connectToHost("127.0.0.1", 5555);
+		pSocket->connectToHost("localhost", 5555);
 	}
 	else
 		QMessageBox::information(this, tr("Error"), "You are already connected, please Log in");
