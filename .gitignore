@@ -1,6 +1,7 @@
 *.qmake.stash
 *.bat
 *.qm
+server/debug/
 client/debug/
 client/release/
 html/
