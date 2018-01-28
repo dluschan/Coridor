@@ -56,7 +56,7 @@ void MyThread::readyRead()
 
 void MyThread::disconnected()
 {
-	emit deleteLobbyFromListSignal(pLobby);
+	// emit deleteLobbyFromListSignal(pLobby);
 	emit deletePlayerSignal(this);
 	qDebug() << socketDescriptor << "Client Disconnected";
 	pSocket->deleteLater();

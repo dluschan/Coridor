@@ -29,8 +29,8 @@ public:
 	QTcpSocket* pSocket;
 	QByteArray data;
 
-	/*protected:
-		void closeEvent(QCloseEvent* event);*/
+protected:
+	void closeEvent(QCloseEvent* event);
 
 private slots:
 	void sockReady();

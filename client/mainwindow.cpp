@@ -23,7 +23,7 @@ MainWindow::~MainWindow()
 	sockDisc();
 }
 
-/*void MainWindow::closeEvent(QCloseEvent* event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
 	if (pLobby->gameType != WrongGameType)
 	{
@@ -37,11 +37,11 @@ MainWindow::~MainWindow()
 		}
 	}
 	event->accept();
-}*/
+}
 
 void MainWindow::connectToTheServer()
 {
-	if (pSocket->state() != QAbstractSocket::ConnectedState)
+	if (!pSocket || pSocket->state() != QAbstractSocket::ConnectedState)
 	{
 		pSocket = new QTcpSocket(this);
 		connect(pSocket, SIGNAL(readyRead()), this, SLOT(sockReady()));
@@ -163,7 +163,7 @@ void MainWindow::sendMessage(QString message, bool errorFlag, QString playerName
 
 void MainWindow::switchToCoridorWindow(bool hosting)
 {
-	this->close(); // Закрываем основное окно
+	this->hide(); // Закрываем основное окно
 	if (hosting)
 	{
 		if (!pLobby->connectedPlayers.empty())
@@ -185,7 +185,7 @@ void MainWindow::switchToCoridorWindow(bool hosting)
 
 void MainWindow::switchToQuartoWindow(bool hosting)
 {
-	this->close(); // Закрываем основное окно
+	this->hide(); // Закрываем основное окно
 	if (hosting)
 	{
 		if (!pLobby->connectedPlayers.empty())
