@@ -29,6 +29,9 @@ public:
 	QTcpSocket* pSocket;
 	QByteArray data;
 
+	/*protected:
+		void closeEvent(QCloseEvent* event);*/
+
 private slots:
 	void sockReady();
 	void sockDisc();
@@ -71,8 +74,8 @@ signals:
 	void closeGame();
 
 private:
-	Player* pPlayer;
-	Lobby* pLobby;
+	Player* pPlayer = new Player();
+	Lobby* pLobby = new Lobby();
 	Command* pCommand;
 	CoridorWindow* coridorWindow;
 	QuartoWindow* quartoWindow;
