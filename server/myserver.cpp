@@ -222,7 +222,7 @@ void MyServer::lobbiesList(MyThread* _thread)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::SendLobbies};
 	Command* pCommand = new SendLobbies(lobbies);

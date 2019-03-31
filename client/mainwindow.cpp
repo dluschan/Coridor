@@ -60,7 +60,7 @@ void MainWindow::sendLogin()
 	{
 		QByteArray arrBlock;
 		QDataStream out(&arrBlock, QIODevice::WriteOnly);
-		out.setVersion(QDataStream::Qt_5_9);
+		out.setVersion(QDataStream::Qt_5_7);
 
 		CommandType commandType = {CommandType::Type::AskLogin};
 		Command* pCommand = new Login(loginEdit->text());
@@ -131,7 +131,7 @@ void MainWindow::sendRdy()
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::SendRdy};
 	Command* pCommand = new SendRdy(pLobby->host);
@@ -148,7 +148,7 @@ void MainWindow::sendMessage(QString message, bool errorFlag, QString playerName
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::SendMessage};
 	Command* pCommand = new SendMessage(message, errorFlag, playerName);
@@ -242,7 +242,7 @@ void MainWindow::returnFromGame()
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::SendQuit};
 	Command* pCommand = new SendQuit(_reciever);
@@ -495,7 +495,7 @@ void MainWindow::sendCreateLobby(QString lobbyName, QString hostLogin, int gameT
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::CreateLobby};
 	Command* pCommand = new CreateLobby(new Lobby(lobbyName, hostLogin, gameType));
@@ -512,7 +512,7 @@ void MainWindow::deleteLobby(Lobby* lobby)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::DeleteLobby};
 	Command* pCommand = new DeleteLobby(lobby);
@@ -530,7 +530,7 @@ void MainWindow::sendConnectToLobby(Lobby* _lobby, Player* _player, bool _connec
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::ConnectToLobby};
 
@@ -548,7 +548,7 @@ void MainWindow::sendUpdateLobby(int _gameType, int _status)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::UpdateLobby};
 	Command* pCommand = new UpdateLobby(_gameType, _status, pLobby->connectedPlayers);
@@ -565,7 +565,7 @@ void MainWindow::sendChooseFirstPlayer(QString _firstPlayer, QString _guest, Gam
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::SendFirstPlayer};
 	Command* pCommand = new SendFirstPlayer(_firstPlayer, _guest, _gameType);
@@ -582,7 +582,7 @@ void MainWindow::coridorSendQPoint(QPoint point, bool move, QString enemy, bool 
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::CoridorSendQPoint};
 	Command* pCommand = new CoridorSendQPoint(point, move, enemy, horizontal);
@@ -599,7 +599,7 @@ void MainWindow::quartoSendQPoint(QPoint point, int figureId, QString enemy)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::QuartoSendQPoint};
 	Command* pCommand = new QuartoSendQPoint(point, figureId, enemy);
@@ -616,7 +616,7 @@ void MainWindow::quartoSendCheckWin(QString enemy, bool checkWin)
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::QuartoSendCheckWin};
 	Command* pCommand = new QuartoSendCheckWin(enemy, checkWin);
@@ -633,7 +633,7 @@ void MainWindow::askLobbies()
 {
 	QByteArray arrBlock;
 	QDataStream out(&arrBlock, QIODevice::WriteOnly);
-	out.setVersion(QDataStream::Qt_5_9);
+	out.setVersion(QDataStream::Qt_5_7);
 
 	CommandType commandType = {CommandType::Type::AskLobbies};
 	Command* pCommand = new AskLobbies();
@@ -659,7 +659,7 @@ void MainWindow::sockReady()
 
 	CommandFactory factory;
 	QDataStream in(pSocket);
-	in.setVersion(QDataStream::Qt_5_9);
+	in.setVersion(QDataStream::Qt_5_7);
 	pCommand = factory.create(in);
 	pCommand->execute();
 	switchCmd();
