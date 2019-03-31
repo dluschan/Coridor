@@ -21,14 +21,14 @@ public:
 
 	int** coords;
 
-        int endValue = 0;
+	int endValue = 0;
 	int player = 0; // 0 - "первый", 1 - "второй"
 	int winner = 0; // 0 - "первый", 1 - "второй"
 
 	void output(int pole[17][17]);
 	bool inPole(int x, int y);
 	pair<int, int> inPole(pair<int, int> p);
-        pair<int, int> step(int x, int y, char ch);
+	pair<int, int> step(int x, int y, char ch);
 	bool isPlayer(int new_x, int new_y);
 	int move(int pole[17][17], int player_id, int new_x, int new_y);
 	int placeWall(int player_id, int x, int y, char dir);
@@ -37,8 +37,8 @@ public:
 	void jump(int& x, int& y, int pole[17][17], char ans);*/
 	bool isWall(int x0, int x1, int y0, int y1);
 	bool aZvezda(int x, int y, int p);
-        //void end();
-        int nextTurn(int res);
+	// void end();
+	int nextTurn(int res);
 	bool checkDistanse(int x, int new_y, int player_id);
 	bool jumpCheck(int new_x, int new_y, int player_id);
 };

@@ -313,126 +313,126 @@ bool isWall(int x0, int y0, int x1, int y1, int pole[17][17])
 
 bool aZvezda(int x, int y, int pole[17][17], int p)
 {
-    bool field[9][9];
+	bool field[9][9];
 
-    for (int i = 0; i < 9; i++)
-    {
-        for (int j = 0; j < 9; j++)
-        {
-            field[i][j] = false;
-        }
-    }
+	for (int i = 0; i < 9; i++)
+	{
+		for (int j = 0; j < 9; j++)
+		{
+			field[i][j] = false;
+		}
+	}
 
-    queue<pair<int, int>> frontier;
-    frontier.push(make_pair(x / 2, y / 2));
-    field[x / 2][y / 2] = true;
-    pair<int, int> current;
-    pair<int, int> next;
+	queue<pair<int, int>> frontier;
+	frontier.push(make_pair(x / 2, y / 2));
+	field[x / 2][y / 2] = true;
+	pair<int, int> current;
+	pair<int, int> next;
 
-    while (!frontier.empty())
-    {
-        current = frontier.front();
+	while (!frontier.empty())
+	{
+		current = frontier.front();
 
-        x = current.first;
-        y = current.second;
+		x = current.first;
+		y = current.second;
 
-        char dir;
-        for (int i = 0; i < 4; ++i)
-        {
-            switch (i)
-            {
-            case (0):
-                dir = 'l';
-                break;
-            case (1):
-                dir = 'u';
-                break;
-            case (2):
-                dir = 'r';
-                break;
-            case (3):
-                dir = 'd';
-                break;
-            default:
-                assert(false);
-                break;
-            }
-            try
-            {
-                next = step(x * 2, y * 2, dir, 2);
-                if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.first >= 0)
-                {
-                    frontier.push(make_pair(next.first / 2, next.second / 2));
-                    field[next.first / 2][next.second / 2] = true;
-                }
-            }
-            catch (exception e)
-            {
-                // Do nothing
-            }
-        }
+		char dir;
+		for (int i = 0; i < 4; ++i)
+		{
+			switch (i)
+			{
+			case (0):
+				dir = 'l';
+				break;
+			case (1):
+				dir = 'u';
+				break;
+			case (2):
+				dir = 'r';
+				break;
+			case (3):
+				dir = 'd';
+				break;
+			default:
+				assert(false);
+				break;
+			}
+			try
+			{
+				next = step(x * 2, y * 2, dir, 2);
+				if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.first >= 0)
+				{
+					frontier.push(make_pair(next.first / 2, next.second / 2));
+					field[next.first / 2][next.second / 2] = true;
+				}
+			}
+			catch (exception e)
+			{
+				// Do nothing
+			}
+		}
 
-        /*if (inPole(x * 2 - 2, y * 2))
-            next = step(x * 2, y * 2, 'l', 2);
-        if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.first >= 0)
-        {
-            frontier.push(make_pair(next.first / 2, next.second / 2));
-            field[next.first / 2][next.second / 2] = true;
-        }
+		/*if (inPole(x * 2 - 2, y * 2))
+			next = step(x * 2, y * 2, 'l', 2);
+		if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.first >= 0)
+		{
+			frontier.push(make_pair(next.first / 2, next.second / 2));
+			field[next.first / 2][next.second / 2] = true;
+		}
 
-        if (inPole(x * 2, y * 2 - 2))
-            next = step(x * 2, y * 2, 'u', 2);
-        if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.second >= 0)
-        {
-            frontier.push(make_pair(next.first / 2, next.second / 2));
-            field[next.first / 2][next.second / 2] = true;
-        }
+		if (inPole(x * 2, y * 2 - 2))
+			next = step(x * 2, y * 2, 'u', 2);
+		if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.second >= 0)
+		{
+			frontier.push(make_pair(next.first / 2, next.second / 2));
+			field[next.first / 2][next.second / 2] = true;
+		}
 
-        if (inPole(x * 2 + 2, y * 2))
-            next = step(x * 2, y * 2, 'r', 2);
-        if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.first <= 16)
-        {
-            frontier.push(make_pair(next.first / 2, next.second / 2));
-            field[next.first / 2][next.second / 2] = true;
-        }
+		if (inPole(x * 2 + 2, y * 2))
+			next = step(x * 2, y * 2, 'r', 2);
+		if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.first <= 16)
+		{
+			frontier.push(make_pair(next.first / 2, next.second / 2));
+			field[next.first / 2][next.second / 2] = true;
+		}
 
-        if (inPole(x * 2 + 2, y * 2 + 2))
-            next = step(x * 2, y * 2, 'd', 2);
-        if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.second <= 16)
-        {
-            frontier.push(make_pair(next.first / 2, next.second / 2));
-            field[next.first / 2][next.second / 2] = true;
-        }*/
+		if (inPole(x * 2 + 2, y * 2 + 2))
+			next = step(x * 2, y * 2, 'd', 2);
+		if (!field[next.first / 2][next.second / 2] && !isWall(x * 2, y * 2, next.first, next.second, pole) && next.second <= 16)
+		{
+			frontier.push(make_pair(next.first / 2, next.second / 2));
+			field[next.first / 2][next.second / 2] = true;
+		}*/
 
-        /*int pol[9][9];
-        for (int i = 0; i < 9; i++)
-        {
-            for (int j = 0; j < 9; j++)
-            {
-                if (field[i][j])
-                    pol[i][j] = p + 1;
-                else
-                    pol[i][j] = 0;
-            }
-        }
-        for (int i = 0; i < 9; i++)
-        {
-            for (int j = 0; j < 9; j++)
-            {
-                cout << pol[j][i] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;*/
+		/*int pol[9][9];
+		for (int i = 0; i < 9; i++)
+		{
+			for (int j = 0; j < 9; j++)
+			{
+				if (field[i][j])
+					pol[i][j] = p + 1;
+				else
+					pol[i][j] = 0;
+			}
+		}
+		for (int i = 0; i < 9; i++)
+		{
+			for (int j = 0; j < 9; j++)
+			{
+				cout << pol[j][i] << " ";
+			}
+			cout << endl;
+		}
+		cout << endl;*/
 
-        frontier.pop();
+		frontier.pop();
 
-        for (int j = 0; j < 9; j++)
-            if (field[8 - 8 * p][j])
-            {
-                // cout << "ok" << endl;
-                return true;
-            }
-    }
-    return false;
+		for (int j = 0; j < 9; j++)
+			if (field[8 - 8 * p][j])
+			{
+				// cout << "ok" << endl;
+				return true;
+			}
+	}
+	return false;
 }
