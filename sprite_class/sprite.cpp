@@ -84,7 +84,7 @@ void Sprite::move()
 		y += 0.2 * time * (u - y) / distance;
 	}
 	setPos(x, y);
-	if (abs(t - x) < 0.1 && abs(u - y) < 0.1)
+	if (std::abs(t - x) < 0.1 && std::abs(u - y) < 0.1)
 	{
 		x = t;
 		y = u;
