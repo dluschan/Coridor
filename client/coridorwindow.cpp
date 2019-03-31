@@ -1,5 +1,5 @@
 #include "coridorwindow.h"
-#include "ui_CoridorWindow.h"
+#include "ui_coridorwindow.h"
 #include <QMessageBox>
 
 void Walls::update(QPoint pos)

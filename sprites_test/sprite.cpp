@@ -1,6 +1,6 @@
 #include "sprite.h"
 #include <QMouseEvent>
-#include <qDebug>
+#include <QDebug>
 
 Sprite::Sprite(QObject* parent)
     : QObject(parent)
